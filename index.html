@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>90</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;800;900&family=Noto+Sans+Runic&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0809;--card:#181113;--line:#30242a;--ink:#f3ebe6;--mute:#a1908a;--in:#0f0b0c;--btn:#21181b;--gold:#e8b339;--gt:#e8b339;--bad:#d62839;--glow:#7a1220;--hd:#2a0a10}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+button,.dot{-webkit-user-select:none;user-select:none;outline:none}
+input,textarea{outline:none}
+.hide{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Vazirmatn,Tahoma,"Segoe UI",sans-serif;line-height:1.8;transition:background .8s,color .8s}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(60% 38% at 50% 0,color-mix(in srgb,var(--glow) 40%,transparent),transparent);pointer-events:none;z-index:-1;transition:.8s}
+h1,h3,.lab,.stats b,.rc b,.ib h2,.dbar b,.dtrio,.quote,.ii i{font-family:Lalezar,Vazirmatn,Tahoma,sans-serif;font-weight:400}
+.top{padding:24px 16px 26px;text-align:center;background:linear-gradient(180deg,var(--hd),transparent);border-bottom:1px solid var(--line);transition:.8s}
+.top h1{margin:0;font-size:1.8rem;color:var(--gt);letter-spacing:.3px}
+.tl{color:var(--mute);font-size:.86rem;min-height:1.6em}
+.hring{position:relative;width:108px;height:108px;margin:12px auto 4px}
+.hring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.hring circle{fill:none;stroke-width:3}
+.hring .rt{stroke:var(--line)}
+.hring .rp{stroke:var(--gold);stroke-linecap:round;stroke-dasharray:326.7;stroke-dashoffset:326.7;transition:stroke-dashoffset 1.2s ease}
+.rc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
+.rc b{font-size:2.2rem;color:var(--gt)}.rc span{font-size:.7rem;color:var(--mute)}
+.wrap{max-width:720px;margin:0 auto;padding:16px 14px 50px}
+.card{background:color-mix(in srgb,var(--card) 84%,transparent);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px;backdrop-filter:blur(8px);transition:background .8s,border-color .8s;animation:up .5s ease backwards}
+@keyframes up{from{opacity:0;transform:translateY(10px)}}
+h3,.lab{margin:0 0 12px;font-size:1rem;color:var(--gt);letter-spacing:.4px;display:flex;align-items:center;gap:10px}
+h3::after,.lab::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.note{font-size:.84rem;color:var(--mute)}
+input,textarea{font:inherit;color:inherit}
+textarea,input[type=text]{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--in);color:var(--ink)}
+textarea{min-height:110px;resize:vertical}
+textarea:focus,input[type=text]:focus,input[type=password]:focus{border-color:var(--gold)}
+input[type=password]{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--in);color:var(--ink);font:inherit}
+button{font:600 .92rem Vazirmatn,Tahoma,sans-serif;cursor:pointer;border:1px solid var(--line);background:var(--btn);color:var(--ink);border-radius:10px;padding:9px 16px;transition:.15s}
+button:hover{border-color:var(--gold)}button:active{transform:scale(.97)}
+button.p{background:var(--bad);color:#fff;border-color:var(--bad)}
+button.g{background:var(--gold);color:#1a1204;border-color:var(--gold)}
+button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
+.row{display:flex;gap:10px;align-items:center}.row>div{flex:1}
+.dtrio{display:flex;align-items:center;justify-content:center;gap:6px;direction:rtl;font-size:1.9rem;color:var(--gt)}
+.dtrio span{color:var(--mute)}
+.di{background:transparent;border:0;border-bottom:1px dashed color-mix(in srgb,var(--gold) 55%,transparent);color:inherit;font:inherit;text-align:center;padding:0;border-radius:0;width:2.5ch}
+.di:focus{border-bottom-style:solid;border-color:var(--gold)}
+#mY,#sY,#hY{width:4.3ch}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);text-align:center;padding:14px 4px}
+.stats>div+div{border-right:1px solid var(--line)}
+.stats b{display:block;font-size:1.9rem;color:var(--gt);line-height:1.3}
+.stats span{font-size:.72rem;color:var(--mute)}
+.meter{position:relative;height:4px;border-radius:4px;background:linear-gradient(90deg,#5a0b0b,#2a0b10 30%,#4a3414 52%,#c9922a 78%,#fbe9b5)}
+.meter i{position:absolute;top:50%;width:13px;height:13px;margin:-6.5px 0 0 -6.5px;transform:rotate(45deg);border-radius:3px;background:var(--bg);border:2px solid var(--gold);box-shadow:0 0 12px var(--gold);transition:left .7s cubic-bezier(.3,1.4,.5,1)}
+.ml{display:flex;justify-content:space-between;direction:ltr;font-size:.74rem;color:var(--mute);margin-top:12px}
+.grid{display:grid;grid-template-columns:repeat(10,1fr);gap:8px}
+.dot{aspect-ratio:1;border-radius:50%;border:1px solid var(--line);background:transparent;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15;color:var(--ink);transition:transform .15s,box-shadow .2s}
+.dot b{font-size:.98rem;font-weight:600}
+.dot small{font-size:.55rem;opacity:.6;direction:ltr}
+.dot.clean{background:var(--gold);border-color:var(--gold);color:#1a1204;box-shadow:inset 0 0 0 2px rgba(0,0,0,.12)}
+.dot.fail{background:var(--bad);border-color:var(--bad);color:#fff;box-shadow:inset 0 0 0 2px rgba(0,0,0,.18)}
+.dot.future{opacity:.45}
+.dot.today{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--ink)}
+.dot:hover{transform:scale(1.07)}
+.dot:active{transform:scale(.93)}
+.dot.in{animation:pop .45s cubic-bezier(.3,1.5,.5,1) backwards;animation-delay:calc(var(--i)*9ms)}
+@keyframes pop{from{opacity:0;transform:scale(.2)}}
+@media(max-width:560px){.grid{grid-template-columns:repeat(6,1fr)}.stats b{font-size:1.6rem}}
+.legend{display:flex;gap:16px;font-size:.78rem;color:var(--mute);margin-top:14px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-left:6px;border:1px solid var(--line)}
+.pr{display:flex;align-items:center;gap:10px;margin:8px 0}
+.pr span{min-width:110px;font-size:.88rem}
+.pr div{flex:1;height:4px;border-radius:4px;background:var(--line);overflow:hidden}
+.pr i{display:block;height:100%;background:linear-gradient(90deg,var(--bad),var(--gold))}
+.pr em{font-style:normal;color:var(--mute);font-size:.82rem}
+.acts{display:flex;gap:8px;flex-wrap:wrap}.acts button{font-size:.8rem;padding:7px 12px;color:var(--mute)}.acts button.g{color:#1a1204}
+.day{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;z-index:9;transition:background .8s}
+.day.on{display:flex}
+.dbar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--card) 90%,transparent)}
+.dbar b{flex:1;font-size:1.08rem}
+.dbody{flex:1;overflow:auto;padding:14px}
+.dbody>div{max-width:640px;margin:0 auto}
+.dfoot{padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:color-mix(in srgb,var(--card) 90%,transparent)}
+.dfoot button{width:100%;max-width:640px;display:block;margin:0 auto;padding:13px;font-size:1rem}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:transparent;padding:16px 8px;font-size:1.05rem}
+.seg button+button{border-right:1px solid var(--line)}
+.seg .c.on{background:var(--gold);color:#1a1204}.seg .f.on{background:var(--bad);color:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chip{border-radius:999px;padding:4px 13px;font-size:.84rem;background:transparent;color:var(--mute)}
+.chip.on{background:var(--bad);color:#fff;border-color:var(--bad)}
+.reason{border-color:var(--bad);animation:slide .4s ease}
+@keyframes slide{from{opacity:0;transform:translateY(-10px)}}
+.task{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)}
+.task span{flex:1}
+.task .tb{width:38px;height:38px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--mute);flex:none}
+.task .tb svg{width:17px;height:17px}
+.task .tb.on.y{background:var(--gold);border-color:var(--gold);color:#1a1204}
+.task .tb.on.n{background:var(--bad);border-color:var(--bad);color:#fff}
+.task .dl{width:30px;height:30px;padding:0;border:0;background:transparent;color:var(--mute);font-size:1.2rem}
+.task.y span{color:var(--gt)}.task.n span{color:var(--mute);text-decoration:line-through}
+.zbar{position:relative;height:5px;border-radius:5px;background:var(--line);margin:14px 0 6px;direction:ltr}
+.zbar::after{content:"";position:absolute;left:50%;top:-4px;bottom:-4px;width:1px;background:var(--mute)}
+.zbar i{position:absolute;top:0;bottom:0;width:0;transition:width .35s}
+#zp{left:50%;background:linear-gradient(90deg,var(--gold),var(--gt))}
+#zn{right:50%;background:var(--bad)}
+.quote{font-size:1.15rem;color:var(--gt);padding:2px 12px;border-right:2px solid var(--gold);margin-bottom:12px;line-height:1.9}
+.sum{border-color:color-mix(in srgb,var(--bad) 60%,var(--line))}
+#toast{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--gold);color:var(--ink);padding:9px 18px;border-radius:10px;z-index:60;display:none;max-width:90%;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+#flash{position:fixed;inset:0;pointer-events:none;z-index:25;opacity:0}
+#flash.go{animation:fl .9s ease-out}
+@keyframes fl{0%{opacity:1}100%{opacity:0}}
+#intro{position:fixed;inset:0;z-index:30;background:var(--bg);display:none;flex-direction:column}
+#intro.on{display:flex}
+.ib{flex:1;overflow:auto;padding:26px 16px}
+.ib>div{max-width:620px;margin:0 auto}
+.ib h2{margin:0 0 4px;font-size:1.8rem;color:var(--gt)}
+.ib .lead{color:var(--mute);margin-bottom:14px}
+.ii{display:flex;gap:14px;padding:13px 0;border-bottom:1px solid var(--line)}
+.ii i{font-style:normal;font-size:1.15rem;color:var(--gold);width:30px;flex:none}
+.ii b{font-weight:600}
+.ii p{margin:0;color:var(--mute);font-size:.88rem}
+#splash{position:fixed;inset:0;z-index:40;background:radial-gradient(circle at 50% 45%,#4a0f18 0,#0a0507 68%);display:none;align-items:center;justify-content:center;perspective:700px;overflow:hidden}
+#splash.on{display:flex;animation:spOut .25s ease .75s forwards}
+.sp3d{position:relative;transform-style:preserve-3d;text-align:center;direction:ltr;animation:spIn .8s cubic-bezier(.2,.9,.25,1.15) both}
+.by{font:600 .9rem Arial,sans-serif;letter-spacing:.55em;text-transform:uppercase;color:#e9c46a;margin-bottom:8px;padding-left:.55em}
+.lg{font:900 5.6rem/1 "Segoe UI",Arial,sans-serif;letter-spacing:.04em;color:#f8d98a;transform-style:preserve-3d;animation:spTilt 1s ease-in-out both;text-shadow:1px 1px 0 #d4a02c,2px 2px 0 #bd8a22,3px 3px 0 #a87a1c,4px 4px 0 #946c17,5px 5px 0 #805e13,6px 6px 0 #6c500f,7px 7px 0 #58420b,8px 8px 0 #443408,0 0 28px rgba(214,40,57,.85),0 0 70px rgba(214,40,57,.5)}
+.rg{position:absolute;left:50%;top:50%;width:270px;height:270px;margin:-135px 0 0 -135px;border:2px solid rgba(232,179,57,.75);border-radius:50%;box-shadow:0 0 30px rgba(214,40,57,.7),inset 0 0 30px rgba(214,40,57,.5);animation:spRing 1s linear both}
+.rg+.rg{width:200px;height:200px;margin:-100px 0 0 -100px;border-color:rgba(214,40,57,.8);animation-direction:reverse}
+@keyframes spIn{0%{transform:rotateY(-160deg) rotateX(60deg) scale(.2) translateZ(-300px);opacity:0}55%{opacity:1}100%{transform:rotateY(0) rotateX(0) scale(1);opacity:1}}
+@keyframes spTilt{0%{transform:rotateY(-14deg)}100%{transform:rotateY(14deg)}}
+@keyframes spRing{from{transform:rotateX(72deg) rotateZ(0) scale(.4)}to{transform:rotateX(72deg) rotateZ(360deg) scale(1.35)}}
+@keyframes spOut{to{opacity:0;transform:scale(1.15)}}
+/* صفحه‌ی اول */
+#setup{position:fixed;inset:0;z-index:25;background:#06040a;color:#f6efe8;display:none;flex-direction:column;overflow:hidden}
+#setup.on{display:flex}
+.stop{padding:calc(14px + env(safe-area-inset-top,0px)) 14px 0;text-align:center;position:relative;z-index:2}
+.stop .dtrio{font-size:2.3rem;color:#f6cc60;text-shadow:0 0 24px rgba(214,40,66,.6)}
+.stop .dtrio span{color:#8d7a78}
+.scap{font-size:.84rem;color:#cdb9b0}
+#sky{flex:1;min-height:0;width:100%;direction:ltr;margin-top:-6px}
+.shint{text-align:center;font-size:.8rem;color:#a99691;padding:0 14px 8px}
+.sbot{padding:0 14px calc(12px + env(safe-area-inset-bottom,0px))}
+.sbot button{width:100%;padding:14px;font-size:1.02rem}
+#sky text{font-family:Lalezar,Vazirmatn,Tahoma,sans-serif}
+#sky .rune{font-family:"Noto Sans Runic","Segoe UI Historic","Segoe UI Symbol",sans-serif;letter-spacing:.14em}
+#sys,#pl{transition:opacity .8s ease,transform .8s cubic-bezier(.3,1.1,.5,1)}
+#sys{transform-origin:180px 205px}
+#sys.off{opacity:0;transform:scale(.5);pointer-events:none}
+#pl.off{opacity:0;transform:scale(.1);pointer-events:none}
+.orb{fill:none;stroke:rgba(255,255,255,.3);stroke-width:.7;stroke-dasharray:1 4;transition:stroke .4s}
+.orb.sel{stroke:rgba(246,204,96,.85);stroke-dasharray:none;stroke-width:.9}
+.pn{cursor:pointer}.pn>g.bd{transition:transform .35s}
+.pn.sel>g.bd{transform:scale(1.5)}
+.sh{fill:none;stroke:#fff3d0;stroke-width:.8;stroke-dasharray:6 90;animation:sh 3s linear infinite}
+@keyframes sh{to{stroke-dashoffset:-96}}
+.wave{fill:none;stroke:#f6cc60;stroke-width:2;opacity:0;transform-box:fill-box;transform-origin:center}
+.wave.go{animation:wv 1.1s ease-out}
+@keyframes wv{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(10)}}
+.tw{animation:tw 4s ease-in-out infinite}
+@keyframes tw{50%{opacity:.25}}
+.st{cursor:pointer}
+.st .sx{transition:transform .4s cubic-bezier(.3,1.6,.5,1);animation:tw2 3.4s ease-in-out infinite;animation-delay:var(--d)}
+.st .sx path{fill:#f6cc60}
+@keyframes tw2{50%{opacity:.5}}
+.st .sn{fill:#fff;font-size:7.5px;text-anchor:middle;opacity:.4}
+.st .halo{fill:none;stroke:#f6cc60;stroke-width:.8;opacity:0}
+.st.sel .sx{transform:scale(1.9);animation:none}
+.st.sel .halo{opacity:.7;animation:hl 1.8s ease-in-out infinite}
+.st.sel .sn{opacity:1;fill:#f6cc60}
+@keyframes hl{50%{transform:scale(1.35);opacity:.2}}
+.pop{animation:popy .6s cubic-bezier(.3,1.6,.5,1)}
+@keyframes popy{from{opacity:0;transform:scale(.4)}}
+
+.st .halo{transform-box:fill-box;transform-origin:center}
+.task .tb svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.wrap{padding-bottom:100px}
+#pg1:not(.hide),#pg2:not(.hide){animation:pgin .6s ease}
+@keyframes pgin{from{opacity:0;transform:translateY(12px)}}
+.gr{font-size:.9rem;color:var(--mute);margin-bottom:6px}
+.gr .di{width:11ch;font:600 .95rem Vazirmatn,Tahoma,sans-serif;color:var(--ink);border-bottom:1px dashed var(--mute);text-align:center}
+.nm{width:70%;max-width:280px;background:transparent;border:0;border-bottom:1px dashed rgba(246,204,96,.5);color:#f6efe8;text-align:center;font:400 1.4rem Lalezar,Vazirmatn,sans-serif;padding:0 0 2px;margin-bottom:8px;border-radius:0}
+.nm:focus{border-bottom-style:solid;border-color:#f6cc60}
+.gem{position:relative;width:92px;height:92px;margin:16px auto 8px}
+.gem i{position:absolute;inset:0;border:1.5px solid var(--gold);border-radius:10px;transform:rotate(45deg);animation:gem 7s ease-in-out infinite}
+.gem i:nth-child(2){inset:15px;border-color:var(--bad);animation-delay:-2.3s}
+.gem i:nth-child(3){inset:30px;background:var(--gold);opacity:.75;box-shadow:0 0 26px var(--gold);animation-delay:-4.6s}
+@keyframes gem{50%{transform:rotate(135deg) scale(.86)}}
+.hx{container-type:inline-size;display:flex;flex-direction:column;padding:4px 0 10px}
+.hr{display:flex;gap:1.6cqw;direction:rtl}
+.hr.o{padding-right:8.8cqw}
+.hr+.hr{margin-top:-3cqw}
+.hxw{width:16cqw;aspect-ratio:1/1.1547;position:relative;flex:none;transition:filter .3s,opacity .3s}
+.hex{position:absolute;inset:0;width:100%;height:100%;border:0;padding:0;border-radius:0;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:var(--line);color:var(--mute);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15;transition:transform .2s,background .4s}
+.hex::before{content:"";position:absolute;inset:1.5px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:var(--in);transition:background .4s}
+.hex>*{position:relative}
+.hex b{font:400 1.1rem Lalezar,Vazirmatn,sans-serif;color:var(--ink)}
+.hex small{font-size:.52rem;opacity:.6;direction:ltr}
+.hex:hover{transform:scale(1.07)}.hex:active{transform:scale(.93)}
+.hxw.done .hex{background:var(--gold)}
+.hxw.done .hex::before{background:linear-gradient(160deg,color-mix(in srgb,var(--gold) 45%,var(--bg)),color-mix(in srgb,var(--gold) 16%,var(--bg)))}
+.hxw.done{filter:drop-shadow(0 0 5px color-mix(in srgb,var(--gold) 55%,transparent))}
+.hxw.miss .hex{background:var(--bad)}
+.hxw.miss .hex::before{background:color-mix(in srgb,var(--bad) 22%,var(--bg))}
+.hxw.future{opacity:.5}
+.hxw.today{filter:drop-shadow(0 0 7px var(--ink));animation:tp 2.4s ease-in-out infinite}
+@keyframes tp{50%{filter:drop-shadow(0 0 2px var(--ink))}}
+.steps{display:flex;gap:8px}.steps button{flex:1;padding:10px 0}
+.steps button.on,#hMin .chip.on{background:var(--gold);color:#1a1204;border-color:var(--gold)}
+#nav{position:fixed;bottom:calc(14px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);display:flex;padding:4px;border:1px solid var(--line);border-radius:999px;background:color-mix(in srgb,var(--card) 78%,transparent);backdrop-filter:blur(14px);z-index:8;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+#nav button{position:relative;z-index:1;border:0;background:transparent;border-radius:999px;padding:9px 18px;font-size:.86rem;color:var(--mute);white-space:nowrap;transition:color .3s}
+#nav button.on{color:#1a1204}
+#nvi{position:absolute;top:4px;bottom:4px;left:4px;width:80px;border-radius:999px;background:var(--gold);transition:left .5s cubic-bezier(.5,0,.2,1),width .5s cubic-bezier(.5,0,.2,1),background .6s;z-index:0}
+#wipe{position:fixed;inset:0;z-index:7;pointer-events:none;display:none}
+#wipe.on{display:block}
+#sess{position:fixed;inset:0;z-index:30;background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--glow) 40%,#050812),#03050c 75%);display:none;flex-direction:column;align-items:center;justify-content:center;gap:34px;color:#e8f1f5}
+#sess.on{display:flex}
+.dm{width:150px;height:150px;border:2px solid var(--gold);border-radius:16px;transform:rotate(45deg) scale(.6);box-shadow:0 0 60px color-mix(in srgb,var(--gold) 70%,transparent),inset 0 0 40px color-mix(in srgb,var(--gold) 25%,transparent);transition:transform 4s ease-in-out}
+#sc{font:400 2rem Lalezar,Vazirmatn,sans-serif;color:var(--gt)}
+#stm{font:400 1.2rem Lalezar,Vazirmatn,sans-serif;color:var(--mute);direction:ltr}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lockr{fill:none;stroke:#f6cc60;stroke-width:.8;stroke-dasharray:3 5;transform-box:fill-box;transform-origin:center;animation:spin 6s linear infinite}
+.shoot{animation:shoot 11s linear infinite;opacity:0}
+@keyframes shoot{0%{transform:translate(390px,30px);opacity:0}3%{opacity:1}11%{transform:translate(-70px,140px);opacity:0}100%{transform:translate(-70px,140px);opacity:0}}
+.hp{animation:hp 5s ease-in-out infinite}
+@keyframes hp{50%{opacity:.55}}
+#nav button{padding:9px 14px;font-size:.82rem}
+.pod3{display:flex;gap:7px;align-items:flex-end;justify-content:center;height:66px;margin:16px auto 6px}
+.pod3 i{width:24px;border-radius:5px 5px 0 0;background:linear-gradient(0deg,var(--bad),var(--gold));animation:pb 3.2s ease-in-out infinite;box-shadow:0 0 18px color-mix(in srgb,var(--gold) 45%,transparent)}
+.pod3 i:nth-child(1){height:38px;animation-delay:-1s}.pod3 i:nth-child(2){height:62px}.pod3 i:nth-child(3){height:28px;animation-delay:-2s}
+@keyframes pb{50%{transform:scaleY(.8)}}
+.rtab{position:relative;display:flex;border:1px solid var(--line);border-radius:12px;padding:3px;margin-bottom:12px;background:color-mix(in srgb,var(--card) 80%,transparent)}
+.rtab button{flex:1;position:relative;z-index:1;border:0;background:transparent;padding:10px;color:var(--mute);transition:color .3s}
+.rtab button.on{color:#1a1204}
+#rti{position:absolute;top:3px;bottom:3px;left:3px;width:50px;border-radius:9px;background:var(--gold);transition:left .45s cubic-bezier(.5,0,.2,1),width .45s;z-index:0}
+#rInd:not(.hide),#rCls:not(.hide){animation:pgin .5s ease}
+.hero{text-align:center}
+.hero .lv{font:400 1.05rem Lalezar,Vazirmatn,sans-serif;color:var(--gt);letter-spacing:.5px}
+.hero .big{font:400 3.4rem/1.2 Lalezar,Vazirmatn,sans-serif;color:var(--ink);text-shadow:0 0 28px color-mix(in srgb,var(--gold) 60%,transparent)}
+.xp{height:8px;border-radius:8px;background:var(--line);overflow:hidden;margin:10px 0 6px}
+.xp div{height:100%;width:0;border-radius:8px;background:linear-gradient(90deg,var(--bad),var(--gold),var(--gt));background-size:200% 100%;animation:shine 3s linear infinite;transition:width 1s cubic-bezier(.3,1,.4,1)}
+@keyframes shine{to{background-position:-200% 0}}
+.bdgs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.bdg{border:1px solid var(--line);border-radius:12px;padding:12px 6px;text-align:center;opacity:.45;font-size:.8rem;transition:.4s}
+.bdg i{display:block;width:26px;height:26px;margin:0 auto 6px;background:var(--line);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+.bdg.on{opacity:1;border-color:var(--gold);box-shadow:0 0 16px -4px var(--gold)}
+.bdg.on i{background:linear-gradient(135deg,var(--gt),var(--gold))}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:10px;height:170px;margin-bottom:12px}
+.pc{flex:1;max-width:96px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;text-align:center}
+.pc em{font-style:normal;font-size:.82rem;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pc b{font:400 1.1rem Lalezar,Vazirmatn,sans-serif;color:var(--gt)}
+.pc i{display:block;width:100%;border-radius:8px 8px 0 0;background:linear-gradient(0deg,color-mix(in srgb,var(--gold) 25%,var(--bg)),var(--gold));transition:height .9s cubic-bezier(.3,1.2,.4,1);margin-top:4px}
+.pc.p1 i{background:linear-gradient(0deg,color-mix(in srgb,var(--bad) 30%,var(--bg)),var(--bad))}
+.pc.me i{box-shadow:0 0 18px var(--gold)}
+.pc u{text-decoration:none;font:400 .95rem Lalezar,sans-serif;color:var(--mute);margin-top:2px}
+.cr{display:flex;align-items:center;gap:10px;padding:9px 6px;border-bottom:1px solid var(--line);border-radius:8px}
+.cr.me{background:color-mix(in srgb,var(--gold) 12%,transparent)}
+.cr u{text-decoration:none;width:22px;text-align:center;font:400 1rem Lalezar,sans-serif;color:var(--mute)}
+.cr span{min-width:84px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.9rem}
+.cr div{flex:1;height:4px;border-radius:4px;background:var(--line);overflow:hidden}
+.cr i{display:block;height:100%;background:linear-gradient(90deg,var(--bad),var(--gold))}
+.cr em{font-style:normal;color:var(--mute);font-size:.84rem;min-width:34px;text-align:left}
+.cr .dl{width:26px;height:26px;padding:0;border:0;background:transparent;color:var(--mute);font-size:1.1rem}
+#blinds{position:fixed;inset:0;z-index:7;pointer-events:none;display:none}
+#blinds i{flex:1;transform:scaleY(0)}
+.rk{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;margin-bottom:8px;border:1px solid var(--line);background:color-mix(in srgb,var(--card) 80%,transparent);animation:up .45s ease backwards}
+.rk u{text-decoration:none;font:400 1.2rem Lalezar,Vazirmatn,sans-serif;width:28px;text-align:center;color:var(--mute)}
+.rk span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rk em{font:400 1.15rem Lalezar,Vazirmatn,sans-serif;font-style:normal;color:var(--gt)}
+.rk.me{border-style:dashed;border-color:var(--gold)}
+.rk.r1,.rk.r2,.rk.r3{font-weight:600}
+.rk.r1 u,.rk.r1 em,.rk.r2 u,.rk.r2 em,.rk.r3 u,.rk.r3 em{color:inherit}
+.rk.r1{padding:19px 16px;font-size:1.08rem;background:linear-gradient(135deg,#f6c945,#c88a12);color:#2a1a00;border-color:#f6c945;box-shadow:0 0 24px -6px #f6c945}
+.rk.r2{padding:16px;background:linear-gradient(135deg,#d3dbe6,#8797ad);color:#101826;border-color:#d3dbe6}
+.rk.r3{padding:14px;background:linear-gradient(135deg,#e4985f,#9a4d24);color:#2a1004;border-color:#e4985f}
+.rk .dl{width:26px;height:26px;padding:0;border:0;background:transparent;color:inherit;font-size:1.1rem}
+</style>
+</head>
+<body>
+<div id="pg1">
+<div class="top"><div class="gr">سلام <input class="di" id="gN1" placeholder="اسمت" maxlength="24" autocomplete="off"></div><h1>90</h1>
+  <div class="hring"><svg viewBox="0 0 120 120"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rp" id="rp" cx="60" cy="60" r="52"/></svg><div class="rc"><b id="rDay">—</b><span>از ۹۰</span></div></div>
+  <div class="tl" id="tl"></div></div>
+
+<div class="wrap">
+  <div class="card">
+    <div class="lab">تاریخ شروع خودکار</div>
+    <div class="dtrio"><input class="di" id="mY" readonly aria-label="سال"><span>/</span><input class="di" id="mM" readonly aria-label="ماه"><span>/</span><input class="di" id="mD" readonly aria-label="روز"></div>
+    <div class="note" id="dCap" style="text-align:center;margin-top:6px"></div>
+    <div id="endLine" class="note" style="text-align:center"></div>
+  </div>
+
+  <div class="card" id="c90AccountCard"><h3>حساب و مشخصات</h3><div id="c90AccountStatus" class="note">بدون حساب هم می‌توانی از برنامه استفاده کنی.</div><button id="c90AccountOpen" style="margin-top:10px">ورود یا ساخت حساب</button></div>
+  <div class="card"><h3>مدال‌های پاکی</h3><div id="c90Medals" class="acts"></div></div>
+  <div class="card stats">
+    <div><b id="sStreak">۰</b><span>رکورد پیاپی</span></div>
+    <div><b id="sClean">۰</b><span>روز پاک</span></div>
+    <div><b id="sFail">۰</b><span>روز زدم</span></div>
+    <div><b id="sToday">—</b><span>امروز، روزِ</span></div>
+  </div>
+
+  <div class="card">
+    <div class="meter"><i id="mk"></i></div>
+    <div class="ml"><span>تاریکی</span><span>نور</span></div>
+  </div>
+
+  <div class="card">
+    <div class="grid" id="grid"></div>
+    <div class="legend">
+      <span><i style="background:var(--gold);border-color:var(--gold)"></i>نزدم</span>
+      <span><i style="background:var(--bad);border-color:var(--bad)"></i>زدم</span>
+      <span><i style="box-shadow:0 0 0 2px var(--ink)"></i>امروز</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>روند کارهای روزانه</h3>
+    <div id="trend"></div>
+  </div>
+
+  <div class="card hide" id="pat"><h3>بیشترین دلیل‌های زدن</h3><div id="patL"></div></div>
+
+  <div class="card acts">
+    <button class="g" id="saveFile">ذخیره در پوشه</button>
+    <button id="imp">بازیابی</button>
+    <button id="pick">تغییر محل ذخیره</button>
+    <button id="help">راهنما</button>
+    <input type="file" id="file" accept=".json" class="hide">
+  </div>
+</div>
+
+</div>
+<div id="pg2" class="hide">
+  <div class="top">
+    <div class="gr">سلام <input class="di" id="gN2" placeholder="اسمت" maxlength="24" autocomplete="off"></div>
+    <h1>چالش خودهیپنوتیزمی</h1>
+    <div class="gem"><i></i><i></i><i></i></div>
+    <div class="tl" id="tl2"></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="lab">تاریخ شروع</div>
+      <div class="dtrio"><input class="di" id="hY" inputmode="numeric" maxlength="4" aria-label="سال"><span>/</span><input class="di" id="hM" inputmode="numeric" maxlength="2" aria-label="ماه"><span>/</span><input class="di" id="hD" inputmode="numeric" maxlength="2" aria-label="روز"></div>
+      <div class="note" id="hCap" style="text-align:center;margin-top:6px"></div>
+      <div class="note" id="hEnd" style="text-align:center"></div>
+    </div>
+    <div class="card stats">
+      <div><b id="hStreak">۰</b><span>رکورد پیاپی</span></div>
+      <div><b id="hDone">۰</b><span>جلسه</span></div>
+      <div><b id="hMins">۰</b><span>دقیقه</span></div>
+      <div><b id="hAvg">—</b><span>میانگین آرامش</span></div>
+    </div>
+    <div class="card"><div class="hx" id="hx"></div></div>
+    <div class="card"><h3>روند آرامش</h3><div id="hTrend"></div><div class="note" style="margin-top:6px">ستون‌ها آرامش بعد از جلسه‌اند و خط‌های رنگی آرامش قبل از آن.</div></div>
+  </div>
+</div>
+<div id="pg3" class="hide">
+  <div class="top">
+    <div class="gr">سلام <input class="di" id="gN3" placeholder="اسمت" maxlength="24" autocomplete="off"></div>
+    <h1>رنکینگ</h1>
+    <div class="pod3"><i></i><i></i><i></i></div>
+    <div class="tl" id="tl3"></div>
+  </div>
+  <div class="wrap">
+    <div id="c90ClassRanking" class="card"></div>
+    <div id="rList"></div>
+    <div class="row hide" id="rForm" style="margin:12px 0 0"><div><input type="text" id="rN" placeholder="نام" maxlength="24"></div><div style="max-width:92px"><input type="text" id="rS" inputmode="numeric" placeholder="امتیاز"></div><button class="p" id="rAdd">افزودن</button></div>
+    <div style="text-align:center;margin-top:14px"><button id="rEd" style="font-size:.8rem;padding:6px 14px;color:var(--mute)">ویرایش جدول</button></div>
+  </div>
+</div>
+<div class="day" id="day" role="dialog" aria-modal="true">
+  <div class="dbar"><button id="back">بازگشت</button><b id="dTitle"></b></div>
+  <div class="dbody"><div>
+    <div class="card">
+      <h3>زدم یا نزدم؟</h3>
+      <div class="choice seg">
+        <button class="c" data-s="clean">نزدم</button>
+        <button class="f" data-s="fail">زدم</button>
+      </div>
+    </div>
+
+    <div class="card reason hide" id="reason">
+      <h3>دلیلش چی بود؟</h3>
+      <div class="chips" id="chips"></div>
+      <textarea id="why" placeholder="با خودت صادق باش…"></textarea>
+    </div>
+
+    <div class="card">
+      <h3>از خدا بخواه</h3>
+      <textarea id="pray" placeholder="خدایا…"></textarea>
+    </div>
+
+    <div class="card">
+      <h3>کارهای روزانه</h3>
+      <div class="row"><div><input type="text" id="newTask" placeholder="کار تازه…"></div><button class="p" id="addTask">افزودن</button></div>
+      <div id="taskList"></div>
+      <div class="zbar"><i id="zn"></i><i id="zp"></i></div>
+      <div class="note" id="tTxt"></div>
+      <div id="tMini" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card">
+      <h3>جمله‌ی مثبت</h3>
+      <div class="quote" id="quote"></div>
+      <textarea id="pos" placeholder="جمله‌ی مثبت خودت…" style="min-height:80px"></textarea>
+    </div>
+
+    <div class="card">
+      <h3>خاطره‌ی روز</h3>
+      <textarea id="how" placeholder="امروز چطور گذشت؟"></textarea>
+    </div>
+
+    <div class="card">
+      <h3>صندوقچه اسرار</h3>
+      <div id="vLock">
+        <input type="password" id="pw" autocomplete="off" placeholder="رمز">
+        <div class="note" id="vLabel" style="margin:6px 0"></div>
+        <button class="p" id="vGo">باز کردن</button>
+        <div class="note" id="vMsg" style="color:var(--bad)"></div>
+      </div>
+      <div id="vOpen" class="hide">
+        <textarea id="sec" placeholder="رازهای امروز…"></textarea>
+        <button id="vClose" style="margin-top:8px">قفل کردن</button>
+      </div>
+    </div>
+
+    <div class="card sum" id="sum"></div>
+  </div></div>
+  <div class="dfoot"><button class="g" id="okSave">اوکی، ذخیره</button></div>
+</div>
+<div id="setup" role="dialog" aria-modal="true">
+  <div class="stop">
+    <div class="dtrio"><input class="di" id="sY" inputmode="numeric" maxlength="4" aria-label="سال"><span>/</span><input class="di" id="sM" inputmode="numeric" maxlength="2" aria-label="ماه"><span>/</span><input class="di" id="sD" inputmode="numeric" maxlength="2" aria-label="روز"></div>
+    <div class="scap" id="sCap"></div>
+    <button id="sBack" class="hide" style="margin-top:6px;padding:5px 14px;font-size:.82rem;background:rgba(255,255,255,.06);color:#f6efe8">بازگشت به منظومه</button>
+  </div>
+  <svg id="sky" viewBox="0 0 360 400" preserveAspectRatio="xMidYMid meet"></svg>
+  <div class="shint" id="sHint"></div>
+  <div class="sbot"><button class="g" id="sGo">شروع چالش</button></div>
+</div>
+<div id="intro" role="dialog" aria-modal="true">
+  <div class="ib"><div>
+    <h2>90</h2>
+    <div class="lead">نود روز، نود دایره. تاریخ شروع را بزن؛ بقیه خودکار حساب می‌شود.</div>
+    <div class="ii"><i>۰۱</i><div><b>زدم یا نزدم</b><p>هر روز ثبت کن؛ رنگ برنامه با پیشرفتت تغییر می‌کند.</p></div></div>
+    <div class="ii"><i>۰۲</i><div><b>کارهای روزانه</b><p>انجام دادی یا نه؛ نمودار بالا و پایین می‌رود.</p></div></div>
+    <div class="ii"><i>۰۳</i><div><b>از خدا بخواه</b><p>خواسته‌هایت را بنویس.</p></div></div>
+    <div class="ii"><i>۰۴</i><div><b>جمله‌ی مثبت</b><p>هر روز یک جمله‌ی انگیزه‌بخش و جمله‌ی خودت.</p></div></div>
+    <div class="ii"><i>۰۵</i><div><b>خاطره‌ی روز</b><p>بنویس امروز چطور گذشت.</p></div></div>
+    <div class="ii"><i>۰۶</i><div><b>صندوقچه اسرار</b><p>نوشته‌های خصوصی؛ فقط با رمز خودت باز می‌شود.</p></div></div>
+    <div class="ii"><i>۰۷</i><div><b>ذخیره</b><p>«اوکی، ذخیره» هر روز را در پوشه‌ی «90» نگه می‌دارد.</p></div></div>
+  <div class="ii"><i>۰۸</i><div><b>خودهیپنوتیزم</b><p>چالش بیست‌روزه با جلسه‌ی هدایت‌شده؛ از نوار پایین جابه‌جا شو.</p></div></div>
+  <div class="ii"><i>۰۹</i><div><b>رنکینگ</b><p>جدول امتیاز همه؛ سه نفر اول با رنگ‌های جدا.</p></div></div>
+  </div></div>
+  <div class="dfoot"><button class="g" id="introGo">شروع</button></div>
+</div>
+<div id="splash"><div class="sp3d"><div class="rg"></div><div class="rg"></div><div class="by">Created by</div><div class="lg">mmb</div></div></div>
+<div class="day" id="hday" role="dialog" aria-modal="true">
+  <div class="dbar"><button id="hBack">بازگشت</button><b id="hTitle"></b></div>
+  <div class="dbody"><div>
+    <div class="card">
+      <h3>جلسه</h3>
+      <div class="note">جلسه فقط پس از پایان کامل تایمر ثبت و امتیازدهی می‌شود.</div>
+      <button class="g" id="hStart" style="width:100%;margin-top:12px">شروع تایمر جلسه</button>
+    </div>
+    <div class="card"><h3>مدت جلسه (دقیقه)</h3><input id="hDuration" type="number" inputmode="numeric" min="1" max="180" step="1" value="5" style="width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--in);color:var(--ink);font:inherit"><div class="note" style="margin-top:7px">مدت دلخواه را به دقیقه وارد کن؛ امتیاز فقط بعد از پایان تایمر ثبت می‌شود.</div></div>
+    <div class="card">
+      <h3>میزان آرامش</h3>
+      <div class="note">قبل از جلسه</div><div class="steps" id="hB"></div>
+      <div class="note" style="margin-top:12px">بعد از جلسه</div><div class="steps" id="hA"></div>
+    </div>
+    <div class="card"><h3>تلقین امروز</h3><textarea id="hSug" placeholder="جمله‌ای که به ذهنت می‌سپاری…"></textarea></div>
+    <div class="card"><h3>تجربه‌ی جلسه</h3><textarea id="hNote" placeholder="چه حسی داشتی؟"></textarea></div>
+  </div></div>
+  <div class="dfoot"><button class="g" id="hOk">اوکی، ذخیره</button></div>
+</div>
+<div id="sess"><div class="dm" id="dm"></div><div id="sc"></div><div id="stm"></div><button id="sEnd">پایان جلسه</button></div>
+<div id="wipe"></div>
+<div id="blinds"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<nav id="nav"><i id="nvi"></i><button data-p="1" class="on">نود روزه</button><button data-p="2">خودهیپنوتیزم</button><button data-p="3">رنکینگ</button></nav>
+<div id="flash"></div>
+<div id="toast"></div>
+
+<script>
+(()=>{
+const N=90,KEY="challenge90.v1."+(localStorage.getItem("c90.uid")||"guest"),FOLDER="90",FNAME="90.json",$=id=>document.getElementById(id);
+const fa=n=>Number(n).toLocaleString("fa-IR",{useGrouping:false});
+const MONTHS=["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"];
+const WEEK=["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنجشنبه","جمعه","شنبه"];
+let S=load(),cur=0,t,firstR=true,cryptoKey=null,page=1,busy=false;
+
+/* ---------- تقویم شمسی (بدون وابستگی به مرورگر) ---------- */
+const div=(a,b)=>Math.trunc(a/b),mod=(a,b)=>a-Math.trunc(a/b)*b;
+const BRK=[-61,9,38,199,426,686,756,818,1111,1181,1210,1635,2060,2097,2192,2262,2324,2394,2456,3178];
+function jalCal(jy){
+  let gy=jy+621,leapJ=-14,jp=BRK[0],jm,jump=0,i;
+  for(i=1;i<BRK.length;i++){jm=BRK[i];jump=jm-jp;if(jy<jm)break;leapJ+=div(jump,33)*8+div(mod(jump,33),4);jp=jm}
+  let n=jy-jp;leapJ+=div(n,33)*8+div(mod(n,33)+3,4);
+  if(mod(jump,33)===4&&jump-n===4)leapJ++;
+  const leapG=div(gy,4)-div((div(gy,100)+1)*3,4)-150,march=20+leapJ-leapG;
+  if(jump-n<6)n=n-jump+div(jump+4,33)*33;
+  let leap=mod(mod(n+1,33)-1,4);if(leap===-1)leap=4;
+  return{leap,gy,march};
+}
+function g2d(gy,gm,gd){let d=div((gy+div(gm-8,6)+100100)*1461,4)+div(153*mod(gm+9,12)+2,5)+gd-34840408;return d-div(div(gy+100100+div(gm-8,6),100)*3,4)+752}
+function d2g(jdn){let j=4*jdn+139361631;j+=div(div(4*jdn+183187720,146097)*3,4)*4-3908;const i=div(mod(j,1461),4)*5+308,gd=div(mod(i,153),5)+1,gm=mod(div(i,153),12)+1;return[div(j,1461)-100100+div(8-gm,6),gm,gd]}
+function j2d(jy,jm,jd){const r=jalCal(jy);return g2d(r.gy,3,r.march)+(jm-1)*31-div(jm,7)*(jm-7)+jd-1}
+function d2j(jdn){
+  const gy=d2g(jdn)[0];let jy=gy-621;const r=jalCal(jy),f=g2d(gy,3,r.march);let k=jdn-f;
+  if(k>=0){if(k<=185)return[jy,1+div(k,31),mod(k,31)+1];k-=186}
+  else{jy--;k+=179;if(r.leap===1)k++}
+  return[jy,7+div(k,30),mod(k,30)+1];
+}
+const isoOf=g=>g[0]+"-"+String(g[1]).padStart(2,"0")+"-"+String(g[2]).padStart(2,"0");
+const startJ=()=>{const[a,b,c]=S.start.split("-").map(Number);return g2d(a,b,c)};
+const todayJ=()=>{const n=new Date();return g2d(n.getFullYear(),n.getMonth()+1,n.getDate())};
+const fmtJ=j=>{const[y,m,d]=d2j(j);return WEEK[mod(j+1,7)]+" "+fa(d)+" "+MONTHS[m-1]+" "+fa(y)};
+
+/* ---------- ذخیره‌ی محلی ---------- */
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d)return d}catch(e){}return{start:"",days:{},vault:null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));window.dispatchEvent(new CustomEvent("c90save",{detail:S}))}catch(e){}}
+window.addEventListener("c90cloudupdate",e=>{const d=e.detail;if(!d||typeof d!=="object")return;if(JSON.stringify(S)===JSON.stringify(d))return;S=d;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(x){}if(page===2)hrender();else if(page===3)rrender();else render()});
+function later(){clearTimeout(t);t=setTimeout(save,300)}
+function toast(m){const e=$("toast");e.textContent=m;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",4000)}
+function day(i){const d=S.days[i]||(S.days[i]={st:"",pray:"",how:"",tasks:[],sec:"",why:"",tr:[]});if(!d.tr)d.tr=[];if(d.why==null)d.why="";if(d.pos==null)d.pos="";d.tasks.forEach(x=>{if(x.s==null)x.s=x.d?"y":""});return d}
+function ensureLv(){if(typeof S.lv==="number")return;let c=0,f=0;for(const k in S.days){const x=S.days[k].st;if(x==="clean")c++;if(x==="fail")f++}const n=c-f*2;S.lv=n>=0?Math.min(n/60,1):Math.max(n/20,-1);save()}
+const sOf=x=>x.s!=null?x.s:(x.d?"y":"");
+const score=d=>{if(!d||!d.tasks||!d.tasks.length)return null;let y=0,n=0;d.tasks.forEach(x=>{const s=sOf(x);if(s==="y")y++;else if(s==="n")n++});return Math.round((y-n)/d.tasks.length*100)};
+function drawTrend(el,hi,h){
+  h=h||130;const m=h/2,u="tg"+h;let b="";
+  for(let i=1;i<=N;i++){
+    const v=score(S.days[i]),x=(N-i)*10+1;
+    if(v){const hh=Math.max(3,Math.abs(v)/100*(m-4));b+='<rect x="'+x+'" y="'+(v>0?m-hh:m)+'" width="7" height="'+hh+'" rx="2" style="fill:'+(v>0?'url(#'+u+')':'var(--bad)')+'"><title>'+fa(i)+': '+fa(v)+'</title></rect>'}
+    else b+='<rect x="'+x+'" y="'+(m-1)+'" width="7" height="2" style="fill:var(--line)"/>';
+    if(i===hi)b+='<rect x="'+(x-2)+'" y="1" width="11" height="'+(h-2)+'" rx="3" vector-effect="non-scaling-stroke" style="fill:none;stroke:var(--ink);stroke-width:1.2;opacity:.6"/>';
+  }
+  el.innerHTML='<svg viewBox="0 0 900 '+h+'" preserveAspectRatio="none" style="width:100%;height:'+h+'px;display:block"><defs><linearGradient id="'+u+'" x1="0" y1="1" x2="0" y2="0"><stop offset="0" style="stop-color:var(--gold)"/><stop offset="1" style="stop-color:var(--gt)"/></linearGradient></defs><line x1="0" x2="900" y1="'+m+'" y2="'+m+'" style="stroke:var(--mute);stroke-width:1;stroke-dasharray:3 4;opacity:.6"/>'+b+'</svg>';
+}
+const SUN='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',MOON='<svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>';
+const POS=["من از دیروزم قوی‌ترم.","هر روزی که پاک می‌مانم، آزادتر می‌شوم.","اراده‌ی من از وسوسه بزرگ‌تر است.","من لایق زندگی پاک و آرام هستم.","هر «نه» گفتن، یک پیروزی است.","امروز را فقط برای امروز می‌جنگم.","من فرمانده‌ی خودم هستم.","وسوسه می‌آید و می‌رود؛ من می‌مانم.","هر روز یک قدم به نسخه‌ی بهتر خودم نزدیک‌ترم.","انرژی‌ام را صرف ساختن می‌کنم، نه از دست دادن.","افتادن پایان راه نیست؛ برخاستن شروع دوباره است.","من به خودم قول داده‌ام و پایش می‌ایستم.","ذهن آرام، دل روشن، راه روشن.","من از آنچه فکر می‌کنم قوی‌ترم.","صبر امروز، شادی فرداست.","به خودم افتخار می‌کنم که ادامه می‌دهم.","هر روز پاک، یک آجر برای ساختن آینده‌ام است.","با خودم مهربانم و با وسوسه‌ام محکم.","پیروزی در همین لحظه ساخته می‌شود.","خدا با کسی است که تلاش می‌کند."];
+if(!S.start){S.start=isoOf(d2g(todayJ()));save()}
+ensureLv();
+
+/* ---------- تاریخ شروع ---------- */
+const dg=v=>String(v).replace(/[۰-۹]/g,c=>c.charCodeAt(0)-1776).replace(/[٠-٩]/g,c=>c.charCodeAt(0)-1632).replace(/\D/g,"");
+const MID=["mY","mM","mD"],SID=["sY","sM","sD"];
+function readTrio(ids){const[y,m,d]=ids.map(i=>+dg($(i).value));const mx=m<=6?31:m<=11?30:(jalCal(y).leap===0?30:29);return y>=1300&&y<=1500&&m>=1&&m<=12&&d>=1&&d<=mx?{y,m,d}:null}
+function setTrio(ids,y,m,d){[y,m,d].forEach((v,i)=>{const e=$(ids[i]);if(document.activeElement!==e)e.value=fa(v)})}
+function initDate(){MID.forEach(id=>{const e=$(id);e.readOnly=true;e.tabIndex=-1;e.setAttribute("aria-readonly","true")})}
+const todayIdx=()=>todayJ()-startJ()+1;
+function cleanStreakAt(i){let n=0;for(let k=i;k>=1&&S.days[k]&&S.days[k].st==="clean";k--)n++;return n}
+if(!S.start){S.start=isoOf(d2g(todayJ()));S.setup=true;save()}
+
+/* ---------- تم پویا: تاریکی ⇄ روشنایی ---------- */
+const mixA=(a,b,t)=>a.map((v,i)=>Math.round(v+(b[i]-v)*t));
+const mixO=(A,B,t)=>{const o={};for(const k in A)o[k]=mixA(A[k],B[k],t);return o};
+const TN={bg:[24,19,24],card:[39,31,38],line:[70,57,64],gold:[236,186,64],gt:[246,204,96],bad:[222,52,68],glow:[140,28,44],hd:[54,24,34]};
+const TL={bg:[48,39,27],card:[67,55,38],line:[108,90,58],gold:[255,214,100],gt:[255,224,132],bad:[216,72,58],glow:[214,166,64],hd:[100,79,38]};
+const TB={bg:[38,13,15],card:[58,21,23],line:[100,40,40],gold:[214,132,60],gt:[240,168,104],bad:[230,50,50],glow:[150,22,22],hd:[78,21,23]};
+function themeFor(s){return s<0?mixO(TN,TB,-s):mixO(TN,TL,s)}
+const TH3={bg:[14,7,25],card:[28,17,47],line:[60,38,95],gold:[188,132,255],gt:[216,178,255],bad:[255,140,92],glow:[122,42,192],hd:[48,17,84]};
+const TH2={bg:[7,11,24],card:[17,25,46],line:[38,52,86],gold:[79,209,197],gt:[132,230,219],bad:[214,96,150],glow:[56,80,210],hd:[16,26,72]};
+function applyTheme(){
+  const s=S.lv,o=page===2?TH2:page===3?TH3:themeFor(s),r=document.documentElement.style,c=a=>"rgb("+a.join(",")+")";
+  $("mk").style.left=((s+1)/2*100)+"%";
+  ["bg","card","line","gold","gt","bad","glow","hd"].forEach(k=>r.setProperty("--"+k,c(o[k])));
+  r.setProperty("--ink",page===2?"#e8f1f5":page===3?"#f1e9fb":"#f7f0e9");
+  r.setProperty("--mute",page===2?"#9fb3c8":page===3?"#b3a2cc":"#c9b9ae");
+  r.setProperty("--in",c(mixA(o.bg,[0,0,0],.3)));
+  r.setProperty("--btn",c(mixA(o.card,[255,255,255],.08)));
+}
+
+/* ---------- صفحه‌ی اصلی ---------- */
+function render(){
+  const ti=todayIdx(),j0=startJ(),g=$("grid");g.innerHTML="";
+  const medals=$("c90Medals");if(medals){medals.innerHTML="";[7,14,30,60,90].forEach(n=>{const b=document.createElement("button"),earned=cleanStreakAt(ti)>=n;b.innerHTML=(earned?'<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z M7 6H4v2a4 4 0 0 0 4 4M17 6h3v2a4 4 0 0 1-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> ':'<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 1 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> ')+fa(n)+" روز";b.disabled=!earned;medals.appendChild(b)})}
+  let clean=0,fail=0,streak=0;
+  for(let i=1;i<=N;i++){
+    const d=S.days[i],b=document.createElement("button"),jd=d2j(j0+i-1);
+    b.className="dot"+(d&&d.st?" "+d.st:"")+(i===ti?" today":"")+(i>ti?" future":"");
+    b.innerHTML="<b>"+fa(i)+"</b><small>"+fa(jd[1])+"/"+fa(jd[2])+"</small>";
+    b.setAttribute("aria-label","روز "+fa(i));
+    if(firstR){b.classList.add("in");b.style.setProperty("--i",i)}
+    b.onclick=()=>openDay(i);g.appendChild(b);
+    if(d&&d.st==="clean")clean++;if(d&&d.st==="fail")fail++;
+  }
+  let k=Math.min(ti,N);if(k>0&&!(S.days[k]&&S.days[k].st))k--;
+  while(k>=1&&S.days[k]&&S.days[k].st==="clean"){streak++;k--}
+  $("sStreak").textContent=fa(streak);$("sClean").textContent=fa(clean);$("sFail").textContent=fa(fail);
+  $("sToday").textContent=ti>=1&&ti<=N?fa(ti):(ti>N?"پایان":"—");
+  const jp=d2j(j0);setTrio(MID,jp[0],jp[1],jp[2]);$("dCap").textContent=fmtJ(j0);
+  $("endLine").textContent="روز ۹۰ ام: "+fmtJ(j0+N-1);
+  $("tl").textContent=ti>=1&&ti<=N?"امروز روز "+fa(ti)+" است — "+fmtJ(todayJ()):(ti<1?"شروع: "+fmtJ(j0):"چالش تمام شد");
+  drawTrend($("trend"),0,130);
+  const pd=Math.max(0,Math.min(ti,N));$("rDay").textContent=ti<1?"—":fa(pd);$("rp").style.strokeDashoffset=326.7*(1-pd/N);
+  firstR=false;applyTheme();patterns();
+}
+
+/* ---------- صفحه‌ی تمام‌صفحه‌ی روز ---------- */
+function openDay(i){
+  const today=todayIdx();
+  if(i!==today){toast(i>today?"این روز هنوز باز نشده است.":"روزهای گذشته فقط برای مشاهده هستند و امکان ویرایش ندارند.");return}
+  cur=i;const d=day(i);
+  $("dTitle").textContent="روز "+fa(i)+" — "+fmtJ(startJ()+i-1);
+  $("pray").value=d.pray;$("pos").value=d.pos;$("how").value=d.how;$("sec").value="";$("why").value=d.why;$("quote").textContent=POS[(i-1)%POS.length];
+  $("day").classList.add("on");$("day").querySelector(".dbody").scrollTop=0;
+  paint();vaultUI();
+}
+function closeDay(){cryptoKey=null;$("sec").value="";$("pw").value="";$("day").classList.remove("on");render()}
+const CH=["تنهایی","بی‌حوصلگی","استرس","خستگی","شب‌بیداری","گوشی","وسوسه‌ی ناگهانی","محتوای تحریک‌کننده"];
+const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+function paint(){
+  const d=day(cur);
+  document.querySelectorAll(".choice button").forEach(b=>b.classList.toggle("on",b.dataset.s===d.st));
+  $("reason").classList.toggle("hide",d.st!=="fail");
+  const C=$("chips");C.innerHTML="";
+  CH.forEach(n=>{const b=document.createElement("button");b.className="chip"+(d.tr.includes(n)?" on":"");b.textContent=n;b.onclick=()=>{const k=d.tr.indexOf(n);k<0?d.tr.push(n):d.tr.splice(k,1);save();paint()};C.appendChild(b)});
+  const L=$("taskList");L.innerHTML="";
+  d.tasks.forEach((x,j)=>{
+    const st=sOf(x),r=document.createElement("div");r.className="task "+st;
+    const sp=document.createElement("span");sp.textContent=x.t;
+    const mk=(k,sym,lab)=>{const b=document.createElement("button");b.className="tb "+k+(st===k?" on":"");b.innerHTML=sym;b.setAttribute("aria-label",lab);b.onclick=()=>{x.s=st===k?"":k;save();paint();if(navigator.vibrate)navigator.vibrate(15)};return b};
+    const del=document.createElement("button");del.className="dl";del.textContent="×";del.setAttribute("aria-label","حذف");del.onclick=()=>{d.tasks.splice(j,1);save();paint()};
+    r.append(sp,mk("y",SUN,"انجام دادم"),mk("n",MOON,"ندادم"),del);L.appendChild(r);
+  });
+  const sc=score(d);
+  $("zp").style.width=(sc>0?sc/2:0)+"%";$("zn").style.width=(sc<0?-sc/2:0)+"%";
+  $("tTxt").textContent=sc===null?"":"نمره‌ی امروز: "+fa(Math.abs(sc))+"٪"+(sc<0?" منفی":"");
+  drawTrend($("tMini"),cur,90);
+  summary(d);
+}
+function summary(d){
+  const sc=score(d),c={y:0,n:0,"":0};d.tasks.forEach(x=>c[sOf(x)]++);
+  const stT=d.st==="clean"?"نزدی ✔":d.st==="fail"?"زدی؛ فردا دوباره":"هنوز ثبت نشده";
+  const ps=S.days[cur-1]?score(S.days[cur-1]):null;
+  let tr="";if(sc!==null&&ps!==null)tr=sc>ps?" — بهتر از دیروز":sc<ps?" — کمتر از دیروز":" — مثل دیروز";
+  const rem=d.tasks.filter(x=>sOf(x)==="").map(x=>"• "+esc(x.t)).join("<br>");
+  const why=d.st==="fail"&&(d.tr.length||d.why)?"<br>دلیل: "+esc(d.tr.join("، "))+(d.why?(d.tr.length?" — ":"")+esc(d.why.slice(0,80)):""):"";
+  $("sum").innerHTML="<h3>خلاصه‌ی پایان روز</h3>"+stT+(d.tasks.length?"<br>انجام شد: "+fa(c.y)+" | نشد: "+fa(c.n)+" | مانده: "+fa(c[""])+tr:"")+why+(rem?"<br><span class='note'>بی‌پاسخ:</span><br>"+rem:"");
+}
+
+/* ---------- صندوقچه‌ی اسرار (رمزنگاری AES-GCM) ---------- */
+const enc=new TextEncoder(),dec=new TextDecoder();
+const b64=u=>btoa(String.fromCharCode(...new Uint8Array(u))),unb=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function derive(pw,salt){const m=await crypto.subtle.importKey("raw",enc.encode(pw),"PBKDF2",false,["deriveKey"]);return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:200000,hash:"SHA-256"},m,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
+async function encT(txt){const iv=crypto.getRandomValues(new Uint8Array(12));const c=await crypto.subtle.encrypt({name:"AES-GCM",iv},cryptoKey,enc.encode(txt));return b64(iv)+":"+b64(c)}
+async function decT(s){const[a,b]=s.split(":");return dec.decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:unb(a)},cryptoKey,unb(b)))}
+async function vaultUI(){
+  const open=!!cryptoKey;
+  $("vLock").classList.toggle("hide",open);$("vOpen").classList.toggle("hide",!open);
+  $("vLabel").textContent=S.vault?"":"یک رمز بساز؛ فراموشی رمز بازیابی ندارد.";
+  $("vGo").textContent=S.vault?"باز کردن":"ساخت و باز کردن";
+  if(open){const d=day(cur),want=cur;let v="";try{v=d.sec?await decT(d.sec):""}catch(e){}if(want===cur)$("sec").value=v}
+}
+$("vGo").onclick=async()=>{
+  const pw=$("pw").value;if(pw.length<4){$("vMsg").textContent="رمز دست‌کم ۴ نویسه باشد.";return}
+  try{
+    if(!S.vault){const salt=crypto.getRandomValues(new Uint8Array(16));cryptoKey=await derive(pw,salt);S.vault={salt:b64(salt),chk:await encT("ok")};save()}
+    else{cryptoKey=await derive(pw,unb(S.vault.salt));if(await decT(S.vault.chk)!=="ok")throw 0}
+    $("vMsg").textContent="";$("pw").value="";vaultUI();
+  }catch(e){cryptoKey=null;$("vMsg").textContent="رمز درست نیست."}
+};
+$("pw").onkeydown=e=>{if(e.key==="Enter")$("vGo").click()};
+$("vClose").onclick=()=>{cryptoKey=null;$("sec").value="";vaultUI()};
+async function flushSec(){if(cryptoKey&&cur){const v=$("sec").value;day(cur).sec=v?await encT(v):""}}
+$("sec").oninput=async()=>{await flushSec();later()};
+$("how").oninput=e=>{day(cur).how=e.target.value;later()};
+
+/* ---------- ذخیره در پوشه ---------- */
+function idb(mode,fn){return new Promise((res,rej)=>{const r=indexedDB.open("c90",1);r.onupgradeneeded=()=>r.result.createObjectStore("h");r.onsuccess=()=>{const tx=r.result.transaction("h",mode),q=fn(tx.objectStore("h"));tx.oncomplete=()=>res(q&&q.result);tx.onerror=()=>rej(tx.error)};r.onerror=()=>rej(r.error)})}
+async function getDir(force){
+  let h=null;
+  if(!force){try{h=await idb("readonly",s=>s.get("dir"))}catch(e){}}
+  if(h){try{if(await h.queryPermission({mode:"readwrite"})!=="granted"&&await h.requestPermission({mode:"readwrite"})!=="granted")h=null}catch(e){h=null}}
+  if(!h){h=await window.showDirectoryPicker({mode:"readwrite"});try{await idb("readwrite",s=>s.put(h,"dir"))}catch(e){}}
+  return h;
+}
+async function writeFolder(force){
+  if(!window.showDirectoryPicker)return false;
+  try{
+    const root=await getDir(force),dir=await root.getDirectoryHandle(FOLDER,{create:true});
+    const f=await dir.getFileHandle(FNAME,{create:true}),w=await f.createWritable();
+    await w.write(JSON.stringify(S,null,1));await w.close();return true;
+  }catch(e){return false}
+}
+async function saveFileBtn(force){
+  save();
+  if(await writeFolder(force)){toast("ذخیره شد ✔");return}
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,1)],{type:"application/json"}));a.download=FNAME;a.click();
+  toast("فایل دانلود شد؛ آن را در پوشه‌ی «"+FOLDER+"» بگذار.");
+}
+$("saveFile").onclick=()=>saveFileBtn(false);
+$("pick").onclick=()=>window.showDirectoryPicker?saveFileBtn(true):toast("این مرورگر انتخاب پوشه ندارد.");
+$("okSave").onclick=async()=>{
+  const n=cur;await flushSec();save();await writeFolder(false);
+  closeDay();toast("روز "+fa(n)+" ذخیره شد ✔");
+};
+$("imp").onclick=()=>$("file").click();
+$("file").onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(x=>{try{const d=JSON.parse(x);if(!d.days)throw 0;S=d;if(!S.start)S.start=isoOf(d2g(todayJ()));S.setup=true;ensureLv();save();render();toast("بازیابی شد ✔")}catch(err){toast("فایل معتبر نیست.")}})};
+
+/* ---------- رویدادها ---------- */
+$("pray").oninput=e=>{day(cur).pray=e.target.value;later()};
+$("pos").oninput=e=>{day(cur).pos=e.target.value;later()};
+const VAL={clean:.06,fail:-.12,"":0};
+function flash(st){if(!st)return;const e=$("flash");e.style.background="radial-gradient(circle at 50% 70%,"+(st==="clean"?"rgba(255,214,120,.65)":"rgba(190,20,35,.7)")+",transparent 70%)";e.classList.remove("go");void e.offsetWidth;e.classList.add("go")}
+function patterns(){const c={};for(const k in S.days)(S.days[k].tr||[]).forEach(x=>c[x]=(c[x]||0)+1);const a=Object.entries(c).sort((x,y)=>y[1]-x[1]).slice(0,4),L=$("patL");$("pat").classList.toggle("hide",!a.length);L.innerHTML="";a.forEach(([n,v])=>{const r=document.createElement("div");r.className="pr";r.innerHTML="<span></span><div><i style='width:"+Math.round(v/a[0][1]*100)+"%'></i></div><em>"+fa(v)+"</em>";r.firstChild.textContent=n;L.appendChild(r)})}
+document.querySelectorAll(".choice button").forEach(b=>b.onclick=()=>{
+  const d=day(cur),old=d.st,nw=old===b.dataset.s?"":b.dataset.s;
+  d.st=nw;S.lv=Math.max(-1,Math.min(1,S.lv+VAL[nw]-VAL[old]));
+  save();applyTheme();paint();flash(nw);
+  if(navigator.vibrate)navigator.vibrate(nw==="fail"?[30,40,30]:20);
+  if(nw==="fail")setTimeout(()=>$("reason").scrollIntoView({behavior:"smooth",block:"center"}),120);
+});
+$("why").oninput=e=>{day(cur).why=e.target.value;later()};
+function addT(){const v=$("newTask").value.trim();if(!v)return;day(cur).tasks.push({t:v,s:""});$("newTask").value="";save();paint()}
+$("addTask").onclick=addT;$("newTask").onkeydown=e=>{if(e.key==="Enter")addT()};
+$("back").onclick=()=>{save();closeDay()};
+document.onkeydown=e=>{if(e.key==="Escape"&&$("day").classList.contains("on")){save();closeDay()}};
+
+/* ---------- معرفی و افکت سازنده ---------- */
+function splash(){const e=$("splash");e.classList.remove("on");void e.offsetWidth;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),1000)}
+let fromHelp=false;
+function showIntro(h){fromHelp=h;$("intro").classList.add("on")}
+$("introGo").onclick=()=>{try{localStorage.setItem("c90.seen","1")}catch(e){}$("intro").classList.remove("on");if(!fromHelp)splash()};
+$("help").onclick=()=>showIntro(true);
+/* ---------- صفحه‌ی اول: منظومه‌ی ماه‌ها ---------- */
+const EN=["Farvardin","Ordibehesht","Khordad","Tir","Mordad","Shahrivar","Mehr","Aban","Azar","Dey","Bahman","Esfand"];
+const RM={A:"ᚨ",B:"ᛒ",C:"ᚲ",K:"ᚲ",Q:"ᚲ",D:"ᛞ",E:"ᛖ",F:"ᚠ",G:"ᚷ",H:"ᚺ",I:"ᛁ",J:"ᛁ",L:"ᛚ",M:"ᛗ",N:"ᚾ",O:"ᛟ",P:"ᛈ",R:"ᚱ",S:"ᛋ",T:"ᛏ",U:"ᚢ",V:"ᚢ",W:"ᚹ",X:"ᛪ",Y:"ᛦ",Z:"ᛉ"};
+const rune=w=>[...w.toUpperCase()].map(c=>RM[c]||c).join("");
+const NS="http://www.w3.org/2000/svg";
+const PK=[["earth",205,45,27],["gas",340,38,32],["earth",150,38,25],["gas",30,52,31],["rock",10,48,26],["ring",42,42,33],["rock",22,40,23],["ice",195,40,36],["gas",275,34,31],["ice",212,24,46],["earth",172,38,25],["ring",300,32,29]];
+let T={y:0,m:1,d:1},view="sys",seed=1,planets=[],built=false,raf=0,lastM=0,SP=[];
+const rnd=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646};
+const maxD=(y,m)=>m<=6?31:m<=11?30:(jalCal(y).leap===0?30:29);
+const clampD=()=>{T.d=Math.min(T.d,maxD(T.y,T.m))};
+const hsl=(h,s,l,a)=>"hsla("+h+","+s+"%,"+l+"%,"+(a==null?1:a)+")";
+function el(t,a,p){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
+function grad(defs,type,a,st){const g=el(type,a,defs);st.forEach(([o,c])=>el("stop",{offset:o,"stop-color":c},g));return g}
+function ringHalf(P,k,r,u,back){
+  const [,h]=PK[k],defs=$("sky").querySelector("defs"),id=(back?"rb":"rf")+u;
+  const old=defs.querySelector("#"+id);if(old)old.remove();
+  const cp=el("clipPath",{id},defs);el("rect",{x:-r*3,y:back?-r*3:0,width:r*6,height:r*3},cp);
+  const g=el("g",{transform:"rotate(-20)","clip-path":"url(#"+id+")"},P);
+  el("ellipse",{rx:r*1.85,ry:r*.46,fill:"none",stroke:"url(#rg"+k+")","stroke-width":r*.2},g);
+  el("ellipse",{rx:r*1.55,ry:r*.39,fill:"none",stroke:hsl(h,30,85,.5),"stroke-width":r*.05},g);
+}
+function makePlanet(P,k,r,big){
+  const [ty,h,s,l]=PK[k],u="p"+k+(big?"b":"s"),defs=$("sky").querySelector("defs");
+  el("circle",{r:r*1.3,fill:"url(#atm"+k+")"},P);
+  if(ty==="ring")ringHalf(P,k,r,u,true);
+  const old=defs.querySelector("#"+u);if(old)old.remove();
+  const cp=el("clipPath",{id:u},defs);el("circle",{r},cp);
+  const g=el("g",{},P);
+  el("circle",{r,fill:"url(#pg"+k+")"},g);
+  const c=el("g",{"clip-path":"url(#"+u+")"},g),f=el("g",big?{filter:"url(#fS)"}:{},c);
+  seed=k*131+7;
+  if(ty==="gas"||ty==="ring")for(let i=0;i<(big?11:4);i++){const y=(rnd()*2-1)*r*.9,hh=r*(.07+rnd()*.2);el("rect",{x:-r,y:y-hh/2,width:2*r,height:hh,fill:rnd()>.5?hsl(h,s,l+20,.38):hsl(h+14,s,l-24,.42)},f)}
+  if(ty==="earth"||ty==="ice"){
+    for(let i=0;i<(big?7:3);i++)el("ellipse",{cx:(rnd()*2-1)*r*.7,cy:(rnd()*2-1)*r*.7,rx:r*(.18+rnd()*.3),ry:r*(.1+rnd()*.14),fill:ty==="earth"?hsl(h-55,45,34,.7):hsl(h,30,92,.55)},f);
+    for(let i=0;i<(big?8:3);i++)el("ellipse",{cx:(rnd()*2-1)*r*.8,cy:(rnd()*2-1)*r*.8,rx:r*(.2+rnd()*.35),ry:r*(.05+rnd()*.07),fill:"#fff",opacity:.18+rnd()*.25},f);
+  }
+  if(ty==="rock")for(let i=0;i<(big?10:3);i++){const cr=r*(.06+rnd()*.12);el("circle",{cx:(rnd()*2-1)*r*.75,cy:(rnd()*2-1)*r*.75,r:cr,fill:hsl(h,s,l-18,.5),stroke:hsl(h,s,l+22,.4),"stroke-width":cr*.2},f)}
+  if(big)el("rect",{x:-r,y:-r,width:2*r,height:2*r,filter:"url(#nz"+k+")",opacity:.35,style:"mix-blend-mode:soft-light"},c);
+  el("circle",{r,fill:"url(#shade)"},g);
+  el("circle",{r,fill:"url(#spec)"},g);
+  el("circle",{r,fill:"none",stroke:"rgba(255,255,255,.22)","stroke-width":r*.025},g);
+  if(ty==="ring")ringHalf(P,k,r,u,false);
+}
+function buildSky(){
+  const sky=$("sky");sky.innerHTML="";const defs=el("defs",{},sky);
+  for(let k=0;k<12;k++){
+    const [,h,s,l]=PK[k];
+    grad(defs,"radialGradient",{id:"pg"+k,cx:".32",cy:".28",r:".9"},[["0",hsl(h,s,l+26)],[".5",hsl(h,s,l)],["1",hsl(h,s,l-30)]]);
+    grad(defs,"radialGradient",{id:"atm"+k},[["0",hsl(h,90,70,0)],[".74",hsl(h,90,70,0)],[".8",hsl(h,80,60,.22)],["1",hsl(h,90,72,0)]]);
+    grad(defs,"linearGradient",{id:"rg"+k,x1:"0",x2:"1",y1:"0",y2:"0"},[["0",hsl(h,40,80,0)],[".15",hsl(h,35,60,.55)],[".5",hsl(h,40,42,.8)],[".85",hsl(h,35,60,.55)],["1",hsl(h,40,80,0)]]);
+    const f=el("filter",{id:"nz"+k,x:"0",y:"0",width:"1",height:"1"},defs);
+    el("feTurbulence",{type:"fractalNoise",baseFrequency:".7",numOctaves:"2",seed:k+1},f);
+    el("feColorMatrix",{type:"matrix",values:"0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.4 -.45"},f);
+  }
+  grad(defs,"radialGradient",{id:"shade",cx:".3",cy:".27",r:".95"},[["0","rgba(0,0,0,0)"],[".45","rgba(0,0,0,.2)"],["1","rgba(0,0,0,.9)"]]);
+  grad(defs,"radialGradient",{id:"spec",cx:".3",cy:".27",r:".35"},[["0","rgba(255,255,255,.16)"],["1","rgba(255,255,255,0)"]]);
+  grad(defs,"radialGradient",{id:"halo"},[["0","rgba(0,0,0,0)"],[".4","rgba(0,0,0,0)"],[".52","rgba(255,170,60,.38)"],[".72","rgba(214,40,66,.16)"],["1","rgba(0,0,0,0)"]]);
+  grad(defs,"linearGradient",{id:"disk",x1:"0",x2:"1",y1:"0",y2:"0"},[["0","rgba(179,24,46,0)"],[".14","#b3182e"],[".38","#f2a43a"],[".5","#fff3d0"],[".62","#f2a43a"],[".86","#b3182e"],["1","rgba(179,24,46,0)"]]);
+  grad(defs,"radialGradient",{id:"neb1"},[["0","rgba(150,20,50,.3)"],["1","rgba(150,20,50,0)"]]);
+  grad(defs,"radialGradient",{id:"neb2"},[["0","rgba(232,179,57,.16)"],["1","rgba(232,179,57,0)"]]);
+  const fs=el("filter",{id:"fS"},defs);el("feGaussianBlur",{stdDeviation:"1.6"},fs);
+  const fb=el("filter",{id:"fB",x:"-20%",y:"-100%",width:"140%",height:"300%"},defs);el("feGaussianBlur",{stdDeviation:".9"},fb);
+  const cpL=el("clipPath",{id:"lowHalf"},defs);el("rect",{x:-60,y:0,width:120,height:60},cpL);
+  // پس‌زمینه
+  el("ellipse",{cx:80,cy:120,rx:190,ry:140,fill:"url(#neb1)"},sky);
+  el("ellipse",{cx:300,cy:320,rx:170,ry:130,fill:"url(#neb2)"},sky);
+  grad(defs,"linearGradient",{id:"trail",gradientUnits:"userSpaceOnUse",x1:"0",y1:"0",x2:"46",y2:"-16"},[["0","rgba(255,255,255,.95)"],["1","rgba(255,255,255,0)"]]);
+  seed=7;const bg=el("g",{},sky);
+  el("line",{x1:0,y1:0,x2:46,y2:-16,stroke:"url(#trail)","stroke-width":1.4,"stroke-linecap":"round",class:"shoot"},bg);
+  for(let i=0;i<90;i++){const c=el("circle",{cx:rnd()*360,cy:rnd()*400,r:.3+rnd()*.9,fill:"#fff",opacity:.15+rnd()*.6},bg);if(i%4===0){c.setAttribute("class","tw");c.style.animationDelay=(rnd()*4)+"s"}}
+  // منظومه
+  const sys=el("g",{id:"sys"},sky),rot=el("g",{transform:"rotate(-20 180 200)"},sys);planets=[];
+  for(let k=0;k<12;k++){
+    const rx=38+k*13.2,ry=rx*.6,o=el("ellipse",{cx:180,cy:200,rx,ry,class:"orb"},rot);
+    const g=el("g",{class:"pn",transform:"translate(180 200)"},rot),bd=el("g",{class:"bd"},g);
+    makePlanet(bd,k,11.5,false);
+    let mo=null;if(k%3===2){mo=el("g",{},g);el("circle",{r:2.4,fill:"#b9b2ad"},mo);el("circle",{r:2.4,fill:"url(#shade)"},mo)}
+        el("circle",{r:17,fill:"transparent"},g);
+    g.onclick=()=>{T.m=k+1;clampD();showView("pl");paintSetup()};
+    planets.push({g,o,rx,ry,a0:rnd()*6.28,sp:.5/(1+k*.28),wx:180,wy:200,mo});
+  }
+  const lk=el("g",{id:"lock",transform:"translate(180 200)"},sys);el("circle",{r:21,class:"lockr"},lk);
+  // سیاه‌چاله
+  el("circle",{cx:180,cy:200,r:62,fill:"url(#halo)",class:"hp"},sys);
+  const dk=()=>({cx:180,cy:200,rx:46,ry:11,transform:"rotate(-20 180 200)"});
+  el("ellipse",Object.assign(dk(),{fill:"url(#disk)",filter:"url(#fB)",opacity:.95}),sys);
+  el("ellipse",{cx:180,cy:200,rx:18,ry:26,fill:"none",stroke:"rgba(255,200,110,.45)","stroke-width":.7},sys);
+  el("circle",{cx:180,cy:200,r:17.5,fill:"#000"},sys);
+  el("circle",{cx:180,cy:200,r:18.2,fill:"none",stroke:"rgba(255,225,160,.9)","stroke-width":1.1},sys);
+  el("circle",{cx:180,cy:200,r:20.5,fill:"none",stroke:"rgba(255,170,60,.3)","stroke-width":3},sys);
+  const lf=el("g",{transform:"rotate(-20 180 200)"},sys),lg=el("g",{transform:"translate(180 200)","clip-path":"url(#lowHalf)"},lf);
+  el("ellipse",{rx:46,ry:11,fill:"url(#disk)",filter:"url(#fB)"},lg);
+  el("ellipse",Object.assign(dk(),{class:"sh"}),sys);
+  el("text",{x:180,y:207,"text-anchor":"middle","font-size":19,"font-weight":900,fill:"#f6cc60",style:"font-family:Arial,sans-serif;paint-order:stroke;stroke:rgba(0,0,0,.7);stroke-width:2px"},sys).textContent="M";
+  el("circle",{id:"wave",cx:180,cy:200,r:22,class:"wave"},sys);
+  el("text",{id:"yTxt",x:180,y:62,"text-anchor":"middle","font-size":36,fill:"#f6cc60",style:"paint-order:stroke;stroke:rgba(0,0,0,.5);stroke-width:3px"},sys);
+  el("text",{id:"mFa",x:180,y:352,"text-anchor":"middle","font-size":26,fill:"#fff"},sys);
+  // سیاره‌ی بزرگ
+  const pl=el("g",{id:"pl",class:"off"},sky);
+  el("g",{id:"pbig",transform:"translate(180 205)"},pl);
+  el("line",{id:"ray",stroke:"#f6cc60","stroke-width":.6,"stroke-dasharray":"2 3",opacity:0},pl);
+  el("g",{id:"stars"},pl);
+  built=true;
+}
+function rebuildBig(){
+  const P=$("pbig");P.innerHTML="";makePlanet(P,T.m-1,66,true);
+  const tx={"text-anchor":"middle",fill:"#fff",style:"paint-order:stroke;stroke:rgba(0,0,0,.55);stroke-width:3px"};
+  el("text",Object.assign({y:10,"font-size":32},tx),P).textContent=MONTHS[T.m-1];
+  lastM=T.m;
+}
+function drawStars(){
+  const g=$("stars");g.innerHTML="";const n=maxD(T.y,T.m);SP=[];seed=T.m*977+3;
+  for(let k=1;k<=n;k++){
+    let x,y,tries=0;
+    do{const a=rnd()*6.283,r=90+rnd()*60;x=180+Math.cos(a)*r;y=205+Math.sin(a)*r*1.12;tries++}while(tries<50&&SP.some(p=>(p[0]-x)**2+(p[1]-y)**2<27*27));
+    SP.push([x,y]);
+    const s=el("g",{class:"st",transform:"translate("+x.toFixed(1)+" "+y.toFixed(1)+")"},g);
+    const w=el("g",{transform:"scale("+(.7+rnd()*.5).toFixed(2)+")"},s),sx=el("g",{class:"sx"},w);
+    sx.style.setProperty("--d",(rnd()*3).toFixed(1)+"s");
+    el("path",{d:"M0-10C1-3 3-1 10 0 3 1 1 3 0 10-1 3-3 1-10 0-3-1-1-3 0-10Z"},sx);
+    el("circle",{r:1.3,fill:"#fff"},sx);
+    const hl=el("circle",{r:13,class:"halo"},s);hl.style.transformBox="fill-box";hl.style.transformOrigin="center";
+    el("text",{y:21,class:"sn"},s).textContent=fa(k);
+    el("circle",{r:16,fill:"transparent"},s);
+    s.onclick=()=>{T.d=k;paintSetup();if(navigator.vibrate)navigator.vibrate(12)};
+  }
+}
+function showView(v){
+  view=v;
+  if(v==="pl"){const p=planets[T.m-1];$("pl").style.transformOrigin=p.wx.toFixed(1)+"px "+p.wy.toFixed(1)+"px";if(lastM!==T.m)rebuildBig();drawStars()}
+  $("sys").classList.toggle("off",v!=="sys");$("pl").classList.toggle("off",v!=="pl");
+  $("sBack").classList.toggle("hide",v!=="pl");
+  $("sHint").textContent=v==="sys"?"یک سیاره را برای انتخاب ماه لمس کن":"یک ستاره را برای انتخاب روز لمس کن";
+}
+function paintSetup(){
+  setTrio(SID,T.y,T.m,T.d);$("sCap").textContent=fmtJ(j2d(T.y,T.m,T.d));
+  planets.forEach((p,k)=>{p.g.classList.toggle("sel",k+1===T.m);p.o.classList.toggle("sel",k+1===T.m)});
+  $("yTxt").textContent=fa(T.y);$("mFa").textContent=MONTHS[T.m-1];
+  if(view==="pl"){
+    if(lastM!==T.m)rebuildBig();
+    [...$("stars").children].forEach((s,i)=>s.classList.toggle("sel",i+1===T.d));
+    const p=SP[T.d-1],ray=$("ray");
+    if(p){const dx=180-p[0],dy=205-p[1],L=Math.hypot(dx,dy);ray.setAttribute("x1",p[0]);ray.setAttribute("y1",p[1]);ray.setAttribute("x2",180-dx/L*70);ray.setAttribute("y2",205-dy/L*70);ray.setAttribute("opacity",.55)}
+  }
+}
+function yearFx(){
+  const w=$("wave");w.classList.remove("go");void w.getBoundingClientRect();w.classList.add("go");
+  const y=$("yTxt");y.classList.remove("pop");void y.getBoundingClientRect();y.classList.add("pop");
+  if(navigator.vibrate)navigator.vibrate(25);
+}
+function loop(t){
+  if(!$("setup").classList.contains("on")){raf=0;return}
+  if(view==="sys"){
+    const s=t/1000,c=.9397,n=.342;
+    planets.forEach((p,k)=>{
+      const a=p.a0+s*p.sp,x=180+p.rx*Math.cos(a),y=200+p.ry*Math.sin(a),dx=x-180,dy=y-200;
+      p.g.setAttribute("transform","translate("+x.toFixed(1)+" "+y.toFixed(1)+")");
+      p.wx=180+dx*c+dy*n;p.wy=200-dx*n+dy*c;
+      if(p.mo)p.mo.setAttribute("transform","translate("+(19*Math.cos(s*1.3+k)).toFixed(1)+" "+(9*Math.sin(s*1.3+k)).toFixed(1)+")");
+      if(k+1===T.m)$("lock").setAttribute("transform","translate("+p.wx.toFixed(1)+" "+p.wy.toFixed(1)+")");
+      
+    });
+  }
+  raf=requestAnimationFrame(loop);
+}
+function buildSetupUI(){
+  SID.forEach(id=>{const e=$(id);e.onfocus=()=>e.select();e.onkeydown=k=>{if(k.key==="Enter")e.blur()};
+    e.onchange=()=>{
+      const v=readTrio(SID);if(!v){toast("تاریخ درست نیست");paintSetup();return}
+      const yc=v.y!==T.y;T={y:v.y,m:v.m,d:v.d};
+      if(view==="pl"){if(lastM!==T.m)rebuildBig();drawStars()}
+      if(yc)yearFx();paintSetup();
+    }});
+  $("sBack").onclick=()=>{showView("sys");paintSetup()};
+  $("sGo").onclick=()=>{
+    S.start=isoOf(d2g(j2d(T.y,T.m,T.d)));S.setup=true;save();
+    $("setup").classList.remove("on");render();toast("چالش شروع شد");
+  };
+}
+function openSetup(){
+  if(!built){buildSky();buildSetupUI()}
+  const has=Object.values(S.days).some(d=>d.st||(d.tasks&&d.tasks.length)),j=d2j(has?startJ():todayJ());
+  T={y:j[0],m:j[1],d:j[2]};lastM=0;
+  $("setup").classList.add("on");
+  showView("sys");paintSetup();if(!raf)raf=requestAnimationFrame(loop);
+}
+
+function boot(){
+  let seen=false;try{seen=!!localStorage.getItem("c90.seen")}catch(e){}
+  if(!S.setup)S.setup=true;
+  seen?splash():showIntro(false);
+  if(seen&&S.name&&S.name.trim())setTimeout(()=>toast("سلام، "+S.name.trim()),1150);
+}
+
+/* ---------- نام، جابه‌جایی بین چالش‌ها، خودهیپنوتیزم ---------- */
+const NMS=["gN1","gN2","gN3"];
+function initName(){
+  NMS.forEach(id=>{const e=$(id);e.value=S.name||"";
+    e.oninput=()=>{S.name=e.value;NMS.forEach(o=>{if(o!==id)$(o).value=e.value});later()};
+    e.onkeydown=k=>{if(k.key==="Enter")e.blur()};if(id!=="sName")e.onfocus=()=>e.select()});
+}
+const NAVB=document.querySelectorAll("#nav button");
+function moveInd(){const b=document.querySelector('#nav button[data-p="'+page+'"]'),i=$("nvi");i.style.left=b.offsetLeft+"px";i.style.width=b.offsetWidth+"px";NAVB.forEach(x=>x.classList.toggle("on",x===b))}
+function setPage(n){
+  if(n===page||busy)return;busy=true;
+  const prev=page,o=n===2?TH2:n===3?TH3:themeFor(S.lv),bg="rgb("+o.bg.join(",")+")";
+  page=n;moveInd();
+  const swap=()=>{[1,2,3].forEach(i=>$("pg"+i).classList.toggle("hide",i!==n));window.scrollTo(0,0);
+    if(n===2)hrender();else if(n===3){rrender();if(window.C90_LOAD_RANKING)window.C90_LOAD_RANKING().catch(e=>toast("رتبه‌بندی آنلاین در دسترس نیست؛ SQL رتبه‌بندی را در Supabase اجرا کن."))}else render();applyTheme()};
+  if(n===3||prev===3){
+    const B=$("blinds"),K=[...B.children];B.style.display="flex";
+    K.forEach((e,i)=>{e.style.background=bg;e.style.transition="none";e.style.transformOrigin=i%2?"bottom":"top";e.style.transform="scaleY(0)"});void B.offsetWidth;
+    K.forEach((e,i)=>{e.style.transition="transform .45s cubic-bezier(.6,0,.3,1) "+i*55+"ms";e.style.transform="scaleY(1)"});
+    setTimeout(()=>{swap();K.forEach((e,i)=>{e.style.transformOrigin=i%2?"top":"bottom";e.style.transition="transform .5s cubic-bezier(.6,0,.3,1) "+(K.length-1-i)*55+"ms";e.style.transform="scaleY(0)"});
+      setTimeout(()=>{B.style.display="none";busy=false},850)},780);
+    return;
+  }
+  const b=document.querySelector('#nav button[data-p="'+n+'"]').getBoundingClientRect(),cx=b.left+b.width/2,cy=b.top+b.height/2,w=$("wipe");
+  w.style.transition="none";w.style.opacity=1;w.style.background=bg;
+  w.style.clipPath="circle(0px at "+cx+"px "+cy+"px)";w.classList.add("on");void w.offsetWidth;
+  w.style.transition="clip-path .6s cubic-bezier(.6,0,.3,1)";w.style.clipPath="circle(160% at "+cx+"px "+cy+"px)";
+  setTimeout(()=>{swap();w.style.transition="opacity .55s ease";w.style.opacity=0;
+    setTimeout(()=>{w.classList.remove("on");w.style.transition="none";busy=false},580)},620);
+}
+NAVB.forEach(b=>b.onclick=()=>setPage(+b.dataset.p));
+
+const HN=20,HID=["hY","hM","hD"];
+function ensureHyp(){if(!S.hyp)S.hyp={start:"",days:{}};if(!S.hyp.start)S.hyp.start=isoOf(d2g(todayJ()))}
+const hStartJ=()=>{ensureHyp();const[a,b,c]=S.hyp.start.split("-").map(Number);return g2d(a,b,c)};
+function hday(i){ensureHyp();return S.hyp.days[i]||(S.hyp.days[i]={st:"",min:0,b:0,a:0,sug:"",note:""})}
+let hcur=0,SE=null;
+function hrender(){
+  ensureHyp();const j0=hStartJ(),ti=todayJ()-j0+1,g=$("hx");g.innerHTML="";
+  let done=0,streak=0,mins=0,rs=0,rc=0;
+  for(let r=0;r<4;r++){
+    const row=document.createElement("div");row.className="hr"+(r%2?" o":"");
+    for(let c=0;c<5;c++){
+      const i=r*5+c+1,d=S.hyp.days[i],jd=d2j(j0+i-1),w=document.createElement("div"),b=document.createElement("button");
+      w.className="hxw"+(d&&d.st?" "+d.st:"")+(i===ti?" today":"")+(i>ti?" future":"");b.className="hex";
+      b.innerHTML="<b>"+fa(i)+"</b><small>"+fa(jd[1])+"/"+fa(jd[2])+"</small>";b.setAttribute("aria-label","روز "+fa(i));b.onclick=()=>openH(i);
+      w.appendChild(b);row.appendChild(w);
+      if(d){if(d.st==="done"){done++;mins+=d.min||0}if(d.a){rs+=d.a;rc++}}
+    }
+    g.appendChild(row);
+  }
+  let k=Math.min(ti,HN);if(k>0&&!(S.hyp.days[k]&&S.hyp.days[k].st))k--;
+  while(k>=1&&S.hyp.days[k]&&S.hyp.days[k].st==="done"){streak++;k--}
+  $("hDone").textContent=fa(done);$("hStreak").textContent=fa(streak);$("hMins").textContent=fa(mins);$("hAvg").textContent=rc?fa(+(rs/rc).toFixed(1)):"—";
+  const jp=d2j(j0);setTrio(HID,jp[0],jp[1],jp[2]);$("hCap").textContent=fmtJ(j0);$("hEnd").textContent="روز ۲۰ ام: "+fmtJ(j0+HN-1);
+  $("tl2").textContent=ti>=1&&ti<=HN?"امروز روز "+fa(ti)+" از ۲۰ است":(ti<1?"شروع: "+fmtJ(j0):"چالش تمام شد");
+  let b="";
+  for(let i=1;i<=HN;i++){const d=S.hyp.days[i],x=(HN-i)*40+4;
+    if(d&&d.a)b+='<rect x="'+x+'" y="'+(60-d.a*11)+'" width="30" height="'+d.a*11+'" rx="3" style="fill:var(--gold)"/>';
+    else b+='<rect x="'+x+'" y="58" width="30" height="2" style="fill:var(--line)"/>';
+    if(d&&d.b)b+='<rect x="'+(x-2)+'" y="'+(60-d.b*11-1)+'" width="34" height="2" style="fill:var(--bad)"/>';
+  }
+  $("hTrend").innerHTML='<svg viewBox="0 0 800 64" preserveAspectRatio="none" style="width:100%;height:90px;display:block">'+b+'</svg>';
+}
+function openH(i){
+  const today=todayJ()-hStartJ()+1;
+  if(i!==today){toast(i>today?"این روز هنوز باز نشده است.":"روزهای گذشته فقط برای مشاهده هستند.");return}
+  hcur=i;const d=hday(i);
+  $("hTitle").textContent="روز "+fa(i)+" — "+fmtJ(hStartJ()+i-1);$("hSug").value=d.sug;$("hNote").value=d.note;
+  $("hday").classList.add("on");$("hday").querySelector(".dbody").scrollTop=0;hpaint();
+}
+function hpaint(){
+  const d=hday(hcur);
+  const duration=$("hDuration");if(duration)duration.value=String(d.min||5);
+  [["hB","b"],["hA","a"]].forEach(([id,k])=>{const E=$(id);E.innerHTML="";for(let v=1;v<=5;v++){const b=document.createElement("button");b.textContent=fa(v);if(d[k]===v)b.className="on";b.onclick=()=>{d[k]=d[k]===v?0:v;save();hpaint()};E.appendChild(b)}});
+}
+function startSess(){
+  const d=hday(hcur);
+  if(d.st==="done"){toast("امتیاز این جلسه قبلاً ثبت شده است.");return}
+  const entered=Math.floor(Number($("hDuration").value)||0);
+  if(!Number.isFinite(entered)||entered<1||entered>180){toast("مدت جلسه باید بین ۱ تا ۱۸۰ دقیقه باشد.");return}
+  d.min=entered;save();
+  const end=Date.now()+entered*60000,P=[["دم",4000,1],["نگه دار",2000,1],["بازدم",6000,.6]];
+  let ph=0,pt=Date.now();
+  const setPh=()=>{const p=P[ph],dm=$("dm");$("sc").textContent=p[0];dm.style.transitionDuration=p[1]+"ms";dm.style.transform="rotate(45deg) scale("+p[2]+")"};
+  $("dm").style.transitionDuration="0ms";$("dm").style.transform="rotate(45deg) scale(.6)";$("sess").classList.add("on");
+  const tick=()=>{
+    const now=Date.now(),left=Math.max(0,end-now),sec=Math.ceil(left/1000);
+    $("stm").textContent=fa(Math.floor(sec/60))+":"+fa(String(sec%60).padStart(2,"0"));
+    if(now-pt>=P[ph][1]){ph=(ph+1)%P.length;pt=now;setPh()}
+    if(left<=0)endSess(true);
+  };
+  clearInterval(SE);setPh();tick();SE=setInterval(tick,200);
+}
+function endSess(ok){
+  clearInterval(SE);SE=null;$("sess").classList.remove("on");
+  if(ok){const d=hday(hcur);d.st="done";d.min=Math.max(1,Math.floor(Number(d.min)||5));save();hpaint();hrender();if(navigator.vibrate)navigator.vibrate([200,100,200]);toast("جلسه کامل شد؛ امتیاز ثبت شد")}
+  else {toast("جلسه متوقف شد؛ تایمر از ابتدا شروع می‌شود.")}
+}
+function initHyp(){
+  initName();
+  HID.forEach(id=>{const e=$(id);e.onfocus=()=>e.select();e.onkeydown=k=>{if(k.key==="Enter")e.blur()};
+    e.onchange=()=>{const v=readTrio(HID);if(!v){toast("تاریخ درست نیست");hrender();return}ensureHyp();S.hyp.start=isoOf(d2g(j2d(v.y,v.m,v.d)));save();hrender()}});
+  $("hDuration").onchange=e=>{const v=Math.max(1,Math.min(180,Math.floor(Number(e.target.value)||5)));e.target.value=String(v);hday(hcur).min=v;save()};
+  $("hSug").oninput=e=>{hday(hcur).sug=e.target.value;later()};
+  $("hNote").oninput=e=>{hday(hcur).note=e.target.value;later()};
+  const hc=()=>{save();$("hday").classList.remove("on");hrender()};
+  $("hBack").onclick=hc;
+  $("hOk").onclick=async()=>{const n=hcur;save();await writeFolder(false);hc();toast("روز "+fa(n)+" ذخیره شد")};
+  $("hStart").onclick=startSess;$("sEnd").onclick=()=>endSess(false);
+  document.addEventListener("visibilitychange",()=>{if(document.hidden&&SE)endSess(false)});
+  window.addEventListener("pagehide",()=>{if(SE)endSess(false)});
+  moveInd();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(moveInd);window.addEventListener("resize",moveInd);
+}
+
+/* ---------- رنکینگ (ساده) ---------- */
+function calcScore(){
+  let clean=0,fail=0,ty=0,tn=0;
+  for(let i=1;i<=N;i++){const d=S.days[i];
+    if(d&&d.st==="clean")clean++;
+    else if(d&&d.st==="fail")fail++;
+    if(d&&d.tasks)d.tasks.forEach(x=>{const s=sOf(x);if(s==="y")ty++;else if(s==="n")tn++});
+  }
+  let hs=0,hm=0;
+  if(S.hyp)for(let i=1;i<=HN;i++){const d=S.hyp.days[i];if(d&&d.st==="done"){hs++;hm+=d.min||0}}
+  const main=clean*100-fail*150+ty*5-tn*2;
+  const hypnosis=hs*10+Math.floor(hm/5);
+  return{total:Math.max(0,main+hypnosis),main,hypnosis};
+}
+let rEdit=false;
+let c90RankingTab="class";
+function renderClassRanking(){
+ const box=document.getElementById("c90ClassRanking");
+ if(!box)return;
+ box.innerHTML='<div class="rtab" id="c90RankTabs"><button data-rank="class">کلاسی</button><button data-rank="person">فردی</button></div><div id="c90RankList"></div><div class="note" id="c90RankNote"></div>';
+ box.querySelectorAll("[data-rank]").forEach(b=>{
+  b.classList.toggle("on",b.dataset.rank===c90RankingTab);
+  b.setAttribute("aria-pressed",b.dataset.rank===c90RankingTab?"true":"false");
+  b.onclick=()=>{
+   if(c90RankingTab===b.dataset.rank)return;
+   c90RankingTab=b.dataset.rank;
+   box.querySelectorAll("[data-rank]").forEach(x=>{const active=x.dataset.rank===c90RankingTab;x.classList.toggle("on",active);x.setAttribute("aria-pressed",active?"true":"false")});
+   renderRankingContent();
+  };
+ });
+ renderRankingContent();
+}
+function renderRankingContent(){
+ const list=document.getElementById("c90RankList"),note=document.getElementById("c90RankNote");
+ if(!list||!note)return;
+ list.innerHTML="";
+ const classMode=c90RankingTab==="class";
+ const rows=classMode?window.CHALLENGE_CLASSES:window.CHALLENGE_INDIVIDUALS;
+ if(!Array.isArray(rows)){note.textContent="برای مشاهده رتبه‌بندی آنلاین وارد حساب کاربری شو.";return}
+ if(!rows.length){note.textContent="هنوز اطلاعاتی برای رتبه‌بندی ثبت نشده است.";return}
+ rows.forEach((x,i)=>{
+  const row=document.createElement("div");
+  row.className="rk"+(i<3?" r"+(i+1):"")+(x.is_my_class||x.is_me?" me":"");
+  row.style.animationDelay=(i*60)+"ms";
+  row.innerHTML="<u>"+fa(i+1)+"</u><span></span><em>"+fa(classMode?(+x.ranking_score||0):(+x.points||0))+"</em>";
+  row.children[1].textContent=classMode?x.class_name:(x.display_name||x.username)+(x.is_me?" (تو)":"");
+  list.appendChild(row);
+ });
+ note.textContent=classMode?"امتیاز کلاسی: ۵۰٪ میانگین، ۳۰٪ مشارکت، ۲۰٪ استمرار.":"رتبه‌بندی افراد هم‌پایه و هم‌رشته بر اساس امتیاز ثبت‌شده.";
+}
+function rrender(){
+ const online=!!window.C90_CURRENT_USERNAME;
+ $("c90ClassRanking").classList.toggle("hide",!online);
+ $("rList").classList.toggle("hide",online);
+ $("rEd").classList.toggle("hide",online);
+ $("rForm").classList.toggle("hide",online);
+ if(online){renderClassRanking();return}
+ let detail=document.getElementById("rScoreDetail");if(!detail){detail=document.createElement("div");detail.id="rScoreDetail";detail.className="note";const host=document.getElementById("rList");host.parentNode.insertBefore(detail,host)}
+ const sc=calcScore(),nm=(S.name||"").trim()||"من";
+ if(!S.rank)S.rank={members:[]};
+ const ext=Array.isArray(window.CHALLENGE_RANKING)?window.CHALLENGE_RANKING.map(x=>({n:String(x.display_name||x.username),s:+x.points||0,me:String(x.username)===String(window.C90_CURRENT_USERNAME||"")})):null;
+ const arr=(ext||[{n:nm,s:sc.total,me:true}].concat(S.rank.members.map((m,i)=>({n:m.n,s:m.s,i})))).sort((a,b)=>b.s-a.s);
+ const me=arr.findIndex(x=>x.me)+1;
+ detail.textContent="چالش ۹۰ روزه: "+fa(sc.main)+" امتیاز | خودهیپنوتیزمی: "+fa(sc.hypnosis)+" امتیاز";
+ $("tl3").textContent=me?"رتبه‌ی تو: "+fa(me)+" از "+fa(arr.length):"";
+ $("rEd").classList.toggle("hide",!!ext);$("rForm").classList.toggle("hide",!rEdit||!!ext);
+ const L=$("rList");L.innerHTML="";
+ arr.forEach((a,k)=>{
+  const r=document.createElement("div");r.className="rk"+(k<3?" r"+(k+1):"")+(a.me?" me":"");r.style.animationDelay=k*60+"ms";
+  r.innerHTML="<u>"+fa(k+1)+"</u><span></span><em>"+fa(a.s)+"</em>";r.children[1].textContent=a.n+(a.me?" (تو)":"");
+  if(rEdit&&!a.me&&!ext){const x=document.createElement("button");x.className="dl";x.textContent="×";x.setAttribute("aria-label","حذف");x.onclick=()=>{S.rank.members.splice(a.i,1);save();rrender()};r.appendChild(x)}
+  L.appendChild(r);
+ });
+}
+window.addEventListener("c90ranking",()=>{if(page===3){if(window.C90_CURRENT_USERNAME)renderRankingContent();else rrender()}});
+function initRank(){
+  $("rEd").onclick=()=>{rEdit=!rEdit;rrender()};
+  $("rAdd").onclick=()=>{
+    const n=$("rN").value.trim(),s=Math.max(0,parseInt(dg($("rS").value))||0);
+    if(!n){toast("نام را بنویس");return}
+    if(!S.rank)S.rank={members:[]};const m=S.rank.members.find(x=>x.n===n);
+    if(m)m.s=s;else S.rank.members.push({n,s});
+    $("rN").value="";$("rS").value="";save();rrender();
+  };
+}
+
+initDate();initHyp();initRank();render();boot();
+})();
+</script>
+
+<style>
+#C90_AUTH_PANEL{position:fixed;inset:0;z-index:1000;background:#0b0809;color:#f3ebe6;display:none;align-items:center;justify-content:center;padding:18px;font-family:Vazirmatn,Tahoma,sans-serif}
+#C90_AUTH_PANEL .authbox{width:100%;max-width:430px;background:#181113;border:1px solid #49343b;border-radius:18px;padding:22px;box-shadow:0 20px 70px #0009}
+#C90_AUTH_PANEL h2{color:#e8b339;margin:0 0 8px}
+#C90_AUTH_PANEL input,#C90_AUTH_PANEL select{display:block;width:100%;margin:10px 0;padding:12px;border-radius:10px;border:1px solid #49343b;background:#0f0b0c;color:#fff;font:inherit}
+#C90_AUTH_PANEL .authrow{display:flex;gap:8px;margin-top:12px}
+#C90_AUTH_PANEL button{flex:1;padding:12px}
+#C90_AUTH_PANEL .authmsg{min-height:28px;color:#e8b339;font-size:.85rem;margin-top:10px}
+#C90_ADMIN{position:fixed;inset:0;z-index:900;background:#0b0809;color:#f3ebe6;display:none;overflow:auto;padding:18px;font-family:Vazirmatn,Tahoma,sans-serif}
+#C90_ADMIN .adminbox{max-width:760px;margin:20px auto;background:#181113;border:1px solid #49343b;border-radius:16px;padding:18px}
+#C90_ADMIN input{width:100%;padding:12px;background:#0f0b0c;color:white;border:1px solid #49343b;border-radius:9px;font:inherit}
+#C90_ADMIN .userrow{padding:12px;border-bottom:1px solid #49343b;cursor:pointer}
+#C90_ADMIN .adminnav{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:14px 0}
+#C90_ADMIN .adminnav button.active{background:#e8b339;color:#1a1204;border-color:#e8b339}
+#C90_ADMIN .adminsection{background:#0f0b0c;border:1px solid #49343b;border-radius:12px;padding:12px;margin:10px 0}
+#C90_ADMIN .admincircles{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:12px}
+#C90_ADMIN .admincircle{aspect-ratio:1;border-radius:50%;padding:0;background:#30242a;color:#fff}
+#C90_ADMIN .admincircle.clean{background:#e8b339;color:#1a1204}
+#C90_ADMIN .admincircle.fail{background:#d62839;color:#fff}
+#C90_ADMIN .admincircle.selected{outline:2px solid #fff;outline-offset:2px}
+#C90_ADMIN .adminitem{padding:10px 4px;border-bottom:1px solid #49343b}
+#C90_ADMIN .adminmuted{color:#a1908a;font-size:.85rem}
+#C90_ADMIN .admindate{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0}
+#C90_ADMIN .admindate input{flex:1;min-width:150px}
+.c90-accountbar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:8px}
+#c90RankTabs [data-rank].on{background:var(--gold);color:#1a1204}
+</style>
+<div id="C90_AUTH_PANEL">
+ <div class="authbox">
+  <h2>۹۰ روز | حساب کاربری</h2>
+  <div id="c90AuthIntro">برای ذخیره‌ی امن اطلاعات، وارد حساب خودت شو یا حساب جدید بساز.</div>
+  <input id="c90Username" autocomplete="username" placeholder="نام کاربری (انگلیسی، ۳ تا ۳۰ نویسه)" maxlength="30">
+  <input id="c90Display" autocomplete="name" placeholder="نام نمایشی (اختیاری)">
+  <input id="c90Password" type="password" autocomplete="current-password" placeholder="رمز عبور">
+  <div class="authrow"><select id="c90Grade"><option value="">پایه تحصیلی</option><option value="10">دهم</option><option value="11">یازدهم</option><option value="12">دوازدهم</option></select><select id="c90Major"><option value="">رشته</option><option value="کامپیوتر">کامپیوتر</option><option value="گرافیک">گرافیک</option><option value="معماری">معماری</option></select></div>
+  <div class="authrow"><button class="g" id="c90Login">ورود</button><button id="c90Signup">ثبت‌نام</button></div>
+  <div class="authmsg" id="c90AuthMsg"></div>
+ </div>
+</div>
+<div id="C90_ADMIN">
+ <div class="adminbox">
+  <h2 style="color:#e8b339">پنل مدیریت شرکت‌کنندگان</h2>
+  <button id="c90AdminClose">بازگشت</button>
+  <input id="c90AdminSearch" placeholder="جست‌وجوی نام کاربری">
+  <div id="c90AdminUsers" style="margin-top:12px"></div>
+  <h3 id="c90AdminTitle"></h3>
+  <div id="c90DeviceTools" class="adminsection" style="display:none"></div>
+  <div id="c90AdminViewer" class="adminsection">ابتدا یک شرکت‌کننده را انتخاب کن.</div>
+ </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(()=>{
+const URL="https://ghklgfvifqlsmlkpcpqi.supabase.co";
+const KEY="sb_publishable_npuLhwy-KA2kH9HsML2S1w_Gx1XISzy";
+const $=id=>document.getElementById(id);
+let session=null,profile=null,cloudTimer=null,allUsers=[];
+const authHeaders=()=>({"apikey":KEY,"Authorization":"Bearer "+session.access_token,"Content-Type":"application/json"});
+const msg=t=>$("c90AuthMsg").textContent=t;
+const internalEmail=u=>u.toLowerCase()+"@example.com";
+async function request(path,opts={}){
+ const r=await fetch(URL+path,{...opts,headers:{apikey:KEY,"Content-Type":"application/json",...(opts.headers||{})}});
+ const d=await r.json().catch(()=>({}));
+ if(!r.ok)throw new Error(d.msg||d.message||d.error_description||d.error||"خطا در ارتباط با سرور");
+ return d;
+}
+async function getProfile(){
+ const a=await request("/rest/v1/profiles?select=user_id,username,display_name,role,grade,major,class_name,start_date&user_id=eq."+encodeURIComponent(session.user.id),{headers:authHeaders()});
+ if(!a.length)throw new Error("پروفایل حساب پیدا نشد؛ تنظیمات پایگاه داده را بررسی کنیم.");
+ profile=a[0];
+}
+async function loadCloud(){
+ const a=await request("/rest/v1/daily_reports?select=payload&report_date=eq.2000-01-01&user_id=eq."+encodeURIComponent(session.user.id),{headers:authHeaders()});
+ if(a.length&&a[0].payload&&typeof a[0].payload==="object"){
+  localStorage.setItem("challenge90.v1."+session.user.id,JSON.stringify(a[0].payload));
+  return true;
+ }
+ return false;
+}
+async function syncCloud(data){
+ if(!session||!data)return;
+ const payload={user_id:session.user.id,report_date:"2000-01-01",payload:data,updated_at:new Date().toISOString()};
+ await request("/rest/v1/daily_reports?on_conflict=user_id,report_date",{method:"POST",headers:{...authHeaders(),Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(payload)});
+}
+function scheduleSync(data){
+ if(!session)return;
+ clearTimeout(cloudTimer);
+ cloudTimer=setTimeout(()=>syncCloud(data).catch(e=>console.warn("Cloud sync:",e.message)),1000);
+}
+async function enter(s){
+ session=s;
+ await getProfile();
+ const nativeApp=!!(window.NativeDevice&&typeof window.NativeDevice.getDeviceHash==="function");
+ if(nativeApp){
+  let deviceHash="";
+  try{deviceHash=window.NativeDevice.getDeviceHash()}catch(e){}
+  if(!/^[a-f0-9]{64}$/.test(deviceHash)){session=null;throw new Error("شناسه امن دستگاه در دسترس نیست.");}
+  const deviceBound=await request("/rest/v1/rpc/bind_device",{method:"POST",headers:authHeaders(),body:JSON.stringify({p_device_hash:deviceHash})});
+  if(deviceBound!==true){session=null;throw new Error("این دستگاه به حساب دیگری متصل شده است.");}
+ }
+ localStorage.setItem("c90.session",JSON.stringify(s));localStorage.setItem("c90.uid",s.user.id);
+ if(sessionStorage.getItem("c90.active_uid")!==s.user.id){
+  sessionStorage.setItem("c90.active_uid",s.user.id);
+  await loadCloud();
+  location.reload();
+  return;
+ }
+ window.C90_CURRENT_USERNAME=profile.username;
+ if(profile.start_date){if(S.start!==profile.start_date){S.start=profile.start_date;save()}}else{const todayIso=isoOf(d2g(todayJ()));await request('/rest/v1/profiles?user_id=eq.'+encodeURIComponent(session.user.id),{method:'PATCH',headers:{...authHeaders(),Prefer:'return=representation'},body:JSON.stringify({start_date:todayIso})});profile.start_date=todayIso;S.start=todayIso;save()}
+ window.C90_RANK_SIGNATURE=null;
+ window.C90_LOAD_RANKING=async()=>{
+  const classes=await request("/rest/v1/rpc/class_ranking",{method:"POST",headers:authHeaders(),body:"{}"});
+  let individuals=null;
+  try{
+    individuals=await request("/rest/v1/rpc/individual_ranking",{method:"POST",headers:authHeaders(),body:"{}"});
+  }catch(individualError){
+    console.warn("Individual ranking RPC is not installed yet:",individualError.message);
+  }
+  const signature=JSON.stringify([classes,individuals]);
+  window.CHALLENGE_CLASSES=classes;
+  window.CHALLENGE_INDIVIDUALS=individuals;
+  // Update the visible ranking only when the server data actually changes.
+  if(signature!==window.C90_RANK_SIGNATURE){
+    window.C90_RANK_SIGNATURE=signature;
+    window.dispatchEvent(new Event("c90ranking"));
+  }
+  return {classes,individuals};
+ };
+ try{
+  if(window.supabase&&window.supabase.createClient){
+   if(!window.C90_RT_CLIENT)window.C90_RT_CLIENT=window.supabase.createClient(URL,KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+   await window.C90_RT_CLIENT.realtime.setAuth(session.access_token);
+   if(window.C90_RT_CHANNEL)await window.C90_RT_CLIENT.removeChannel(window.C90_RT_CHANNEL);
+   window.C90_RT_CHANNEL=window.C90_RT_CLIENT.channel("challenge90-class-ranking")
+    .on("postgres_changes",{event:"*",schema:"public",table:"daily_reports"},()=>window.C90_LOAD_RANKING().catch(()=>{}))
+    .on("postgres_changes",{event:"*",schema:"public",table:"profiles"},()=>window.C90_LOAD_RANKING().catch(()=>{}))
+    .on("postgres_changes",{event:"*",schema:"public",table:"daily_reports",filter:"user_id=eq."+session.user.id},payload=>{
+      const row=payload.new;
+      if(!row||row.report_date!=="2000-01-01"||!row.payload)return;
+      const local=localStorage.getItem("challenge90.v1."+session.user.id);
+      try{if(JSON.stringify(JSON.parse(local||"null"))!==JSON.stringify(row.payload))window.dispatchEvent(new CustomEvent("c90cloudupdate",{detail:row.payload}))}catch(e){}
+    })
+    .subscribe();
+  }
+ }catch(rtError){console.warn("Realtime subscription unavailable; using refresh fallback.",rtError)}
+ clearInterval(window.C90_CLASS_RANK_TIMER);
+ window.C90_CLASS_RANK_TIMER=setInterval(()=>{if(session&&navigator.onLine&&document.visibilityState==='visible')window.C90_LOAD_RANKING().catch(()=>{})},15000);
+ $("c90AccountStatus").textContent="حساب: "+(profile.display_name||profile.username)+" | پایه: "+(profile.grade||"—")+" | رشته: "+(profile.major||"—");
+ $("c90AccountOpen").textContent="مدیریت حساب";
+ 
+ const hadCloud=await loadCloud();
+ if(hadCloud&&!sessionStorage.getItem("c90.loaded")){
+  sessionStorage.setItem("c90.loaded","1");location.reload();return;
+ }
+ await ensureSchoolInfo();
+ $("C90_AUTH_PANEL").style.display="none";
+ if(profile.role==="admin"){
+  const b=document.createElement("div");b.className="c90-accountbar";
+  b.innerHTML='<button id="c90AdminOpen">پنل مدیریت</button>';
+  document.querySelector(".wrap").prepend(b);
+  $("c90AdminOpen").onclick=openAdmin;
+ }
+ const out=document.createElement("div");out.className="c90-accountbar";
+ out.innerHTML='<span style="color:var(--mute)">حساب: '+String(profile.username||"").replace(/[&<>"]/g,"")+'</span><button id="c90Logout">خروج از حساب</button>';
+ document.querySelector(".wrap").prepend(out);
+ $("c90Logout").onclick=async()=>{try{await request("/auth/v1/logout",{method:"POST",headers:authHeaders()})}catch(e){}localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");sessionStorage.removeItem("c90.loaded");sessionStorage.removeItem("c90.active_uid");location.reload()};
+ window.addEventListener("c90save",e=>scheduleSync(e.detail));
+ if(navigator.onLine){const local=localStorage.getItem("challenge90.v1."+session.user.id);if(local){try{await syncCloud(JSON.parse(local))}catch(e){console.warn(e)}}}
+}
+async function ensureSchoolInfo(){
+ if(profile.grade&&profile.major){
+  const class_name="پایه "+profile.grade+" - "+profile.major;
+  if(profile.class_name!==class_name){
+   await request("/rest/v1/profiles?user_id=eq."+encodeURIComponent(session.user.id),{method:"PATCH",headers:{...authHeaders(),Prefer:"return=representation"},body:JSON.stringify({class_name})});
+   profile.class_name=class_name;
+  }
+  return;
+ }
+ const box=document.createElement("div");
+ box.style.cssText="position:fixed;inset:0;z-index:1100;background:#080609f2;display:grid;place-items:center;padding:18px;font-family:Vazirmatn,Tahoma,sans-serif";
+ box.innerHTML='<div style="width:100%;max-width:420px;background:#181113;border:1px solid #49343b;border-radius:16px;padding:20px;color:#fff"><h3 style="color:#e8b339">تکمیل مشخصات تحصیلی</h3><p>برای رتبه‌بندی هم‌پایه و هم‌رشته، پایه و رشته را ثبت کن.</p><select id="c90SetGrade" style="width:100%;padding:12px;margin:8px 0;background:#0f0b0c;color:white"><option value="">پایه تحصیلی</option><option value="10">دهم</option><option value="11">یازدهم</option><option value="12">دوازدهم</option></select><select id="c90SetMajor" style="width:100%;padding:12px;margin:8px 0;background:#0f0b0c;color:white"><option value="">رشته</option><option>کامپیوتر</option><option>گرافیک</option><option>معماری</option></select><button id="c90SetSave" style="width:100%;padding:12px;margin-top:10px">ثبت مشخصات</button><div id="c90SetMsg" style="color:#e8b339;margin-top:8px"></div></div>';
+ document.body.appendChild(box);
+ if(profile.grade)box.querySelector("#c90SetGrade").value=String(profile.grade);
+ if(profile.major)box.querySelector("#c90SetMajor").value=profile.major;
+ await new Promise(resolve=>{
+  box.querySelector("#c90SetSave").onclick=async()=>{
+   const grade=Number(box.querySelector("#c90SetGrade").value),major=box.querySelector("#c90SetMajor").value;
+   if(![10,11,12].includes(grade)||!["کامپیوتر","گرافیک","معماری"].includes(major)){box.querySelector("#c90SetMsg").textContent="پایه و رشته را انتخاب کن.";return}
+   const class_name="پایه "+grade+" - "+major;
+   try{
+    await request("/rest/v1/profiles?user_id=eq."+encodeURIComponent(session.user.id),{method:"PATCH",headers:{...authHeaders(),Prefer:"return=representation"},body:JSON.stringify({grade,major,class_name})});
+    profile.grade=grade;profile.major=major;profile.class_name=class_name;box.remove();resolve();
+   }catch(e){box.querySelector("#c90SetMsg").textContent=e.message}
+  };
+ });
+}
+
+async function login(){
+ const u=$("c90Username").value.trim().toLowerCase(),p=$("c90Password").value;
+ if(!/^[a-z0-9][a-z0-9._-]{2,29}$/.test(u)){msg("نام کاربری باید ۳ تا ۳۰ نویسه و فقط شامل حروف انگلیسی کوچک، عدد، نقطه، خط تیره یا زیرخط باشد.");return}
+ if(!p){msg("رمز عبور را وارد کن.");return}
+ msg("در حال ورود…");
+ const d=await request("/auth/v1/token?grant_type=password",{method:"POST",body:JSON.stringify({email:internalEmail(u),password:p})});
+ await enter(d);
+}
+async function signup(){
+ const u=$("c90Username").value.trim().toLowerCase(),p=$("c90Password").value,n=$("c90Display").value.trim(),grade=Number($("c90Grade").value),major=$("c90Major").value;
+ if(!/^[a-z0-9][a-z0-9._-]{2,29}$/.test(u)){msg("نام کاربری باید ۳ تا ۳۰ نویسه و فقط شامل حروف انگلیسی کوچک، عدد، نقطه، خط تیره یا زیرخط باشد.");return}
+ if(p.length<8){msg("رمز عبور باید حداقل ۸ نویسه باشد.");return}
+ if(![10,11,12].includes(grade)||!["کامپیوتر","گرافیک","معماری"].includes(major)){msg("پایه و رشته را انتخاب کن.");return}
+ msg("در حال ساخت حساب…");
+ const d=await request("/auth/v1/signup",{method:"POST",body:JSON.stringify({email:internalEmail(u),password:p,data:{username:u,display_name:n||u,grade,major,class_name:"پایه "+grade+" - "+major}})});
+ if(!d.access_token){msg("حساب ایجاد شد؛ اگر تأیید ایمیل خاموش نیست، ابتدا تنظیمات تأیید ایمیل را بررسی کنیم.");return}
+ await enter(d);
+}
+async function openAdmin(){
+ $("C90_ADMIN").style.display="block";$("c90AdminUsers").textContent="در حال دریافت فهرست…";
+ try{
+  allUsers=await request("/rest/v1/profiles?select=user_id,username,display_name,role,grade,major,start_date&order=created_at.desc",{headers:authHeaders()});
+  drawUsers();
+ }catch(e){$("c90AdminUsers").textContent="خطا: "+e.message}
+}
+function drawUsers(){
+ const q=$("c90AdminSearch").value.trim().toLowerCase();
+ const list=allUsers.filter(x=>(x.username||"").toLowerCase().includes(q)||(x.display_name||"").toLowerCase().includes(q));
+ $("c90AdminUsers").innerHTML="";
+ list.forEach(x=>{
+  const d=document.createElement("div");d.className="userrow";
+  d.textContent=(x.display_name||x.username)+"  @"+x.username+"  "+(x.role==="admin"?"مدیر":"شرکت‌کننده");
+  d.onclick=()=>showUser(x);$("c90AdminUsers").appendChild(d);
+ });
+ if(!list.length)$("c90AdminUsers").textContent="موردی پیدا نشد.";
+}
+let viewedUser=null,viewedState=null,viewDay=0,viewTab="status";
+function adminDateFor(state,i){
+ if(!state||!state.start||!i)return "";
+ const d=new Date(state.start+"T00:00:00Z");d.setUTCDate(d.getUTCDate()+i-1);
+ return d.toISOString().slice(0,10);
+}
+function adminDayIndex(state,iso){
+ if(!state||!state.start||!iso)return 0;
+ return Math.round((Date.parse(iso+"T00:00:00Z")-Date.parse(state.start+"T00:00:00Z"))/86400000)+1;
+}
+function adminText(tag,cls,txt){
+ const e=document.createElement(tag);if(cls)e.className=cls;e.textContent=txt;return e;
+}
+function renderAdminViewer(){
+ const root=$("c90AdminViewer");root.innerHTML="";
+ if(!viewedState){root.textContent="هنوز گزارشی ثبت نشده است.";return}
+ const state=viewedState,days=state.days||{},keys=Object.keys(days).map(Number).filter(n=>n>=1&&n<=90).sort((a,b)=>a-b);
+ const dateBox=adminText("div","admindate","");
+ dateBox.append(adminText("label","adminmuted","نمایش اطلاعات یک تاریخ:"));
+ const date=document.createElement("input");date.type="date";date.value=adminDateFor(state,viewDay||1);
+ const go=adminText("button","","نمایش تاریخ");
+ go.onclick=()=>{const idx=adminDayIndex(state,date.value);if(idx<1||idx>90){alert("این تاریخ خارج از بازه ۹۰ روزه است.");return}viewDay=idx;viewTab="day";renderAdminViewer()};
+ dateBox.append(date,go);root.append(dateBox);
+ const nav=adminText("div","adminnav","");
+ const tabs=[["status","وضعیت ۹۰ روز"],["positive","جمله‌های مثبت"],["tasks","کارهای روزانه"],["notes","نوشته‌های روزانه"],["day","اطلاعات تاریخ انتخابی"]];
+ tabs.forEach(([id,label])=>{const b=adminText("button",viewTab===id?"active":"",label);b.onclick=()=>{viewTab=id;renderAdminViewer()};nav.append(b)});root.append(nav);
+ if(viewTab==="status"){
+  root.append(adminText("div","adminmuted","طلایی: نزدم | قرمز: زدم | خاکستری: ثبت‌نشده. برای دیدن جزئیات یک روز، دایره‌اش را بزن."));
+  const grid=adminText("div","admincircles","");for(let i=1;i<=90;i++){
+   const d=days[i]||{},b=adminText("button","admincircle "+(d.st||""),String(i));
+   if(i===viewDay)b.classList.add("selected");
+   b.onclick=()=>{viewDay=i;viewTab="day";renderAdminViewer()};
+   grid.append(b);
+  }root.append(grid);
+ }else if(viewTab==="positive"){
+  let count=0;keys.forEach(i=>{const d=days[i]||{};if((d.pos||"").trim()){count++;const item=adminText("div","adminitem","");item.append(adminText("b","","روز "+i+" | "+adminDateFor(state,i)),adminText("div","","“"+d.pos+"”"));root.append(item)}});
+  if(!count)root.append(adminText("div","adminmuted","هنوز جمله‌ی مثبتی ثبت نشده است."));
+ }else if(viewTab==="tasks"){
+  let count=0;keys.forEach(i=>{const d=days[i]||{};if(d.tasks&&d.tasks.length){count++;const item=adminText("div","adminitem","");item.append(adminText("b","","روز "+i+" | "+adminDateFor(state,i)));d.tasks.forEach(t=>item.append(adminText("div","",((t.s==="y"||t.d)?"✓ انجام شد: ":"× انجام نشد/ثبت نشده: ")+(t.t||""))));root.append(item)}});
+  if(!count)root.append(adminText("div","adminmuted","کار روزانه‌ای ثبت نشده است."));
+ }else if(viewTab==="notes"){
+  let count=0;keys.forEach(i=>{const d=days[i]||{},vals=[["خاطره",d.how],["دعا",d.pray],["دلیل",d.why]];const filled=vals.filter(x=>(x[1]||"").trim());if(filled.length){count++;const item=adminText("div","adminitem","");item.append(adminText("b","","روز "+i+" | "+adminDateFor(state,i)));filled.forEach(([k,v])=>item.append(adminText("div","",k+": "+v)));root.append(item)}});
+  if(!count)root.append(adminText("div","adminmuted","نوشته‌ای ثبت نشده است."));
+ }else{
+  const i=viewDay||1,d=days[i]||{};
+  root.append(adminText("h3","","روز "+i+" | "+adminDateFor(state,i)));
+  root.append(adminText("div","", "وضعیت: "+(d.st==="clean"?"نزدم":d.st==="fail"?"زدم":"ثبت نشده")));
+  if(d.tr&&d.tr.length)root.append(adminText("div","","دلیل‌های انتخابی: "+d.tr.join("، ")));
+  [["جمله مثبت",d.pos],["کارهای روزانه",(d.tasks||[]).map(t=>(t.s==="y"||t.d?"✓ ":"○ ")+(t.t||"")).join("\n")],["خاطره",d.how],["دعا",d.pray],["توضیح",d.why]].forEach(([k,v])=>{if((v||"").trim())root.append(adminText("div","adminitem",k+": "+v))});
+  if(!d.st&&!d.pos&&!(d.tasks||[]).length&&!d.how&&!d.pray&&!d.why)root.append(adminText("div","adminmuted","برای این روز اطلاعاتی ثبت نشده است."));
+ }
+}
+async function showUser(u){
+ viewedUser=u;viewedState=null;viewDay=1;viewTab="status";
+ $("c90AdminTitle").textContent=(u.display_name||u.username)+" (@"+u.username+")";
+ $("c90AdminViewer").textContent="در حال دریافت گزارش…";
+ try{
+  const a=await request("/rest/v1/daily_reports?select=payload,updated_at&user_id=eq."+encodeURIComponent(u.user_id)+"&order=updated_at.desc&limit=1",{headers:authHeaders()});
+  viewedState=a.length?a[0].payload:null;renderAdminViewer();
+  const tools=$("c90DeviceTools");tools.innerHTML="";tools.style.display="block";
+  tools.append(adminText("div","adminmuted","مدیریت اتصال دستگاه این حساب"));
+  const release=adminText("button","","آزادسازی دستگاه برای ورود به گوشی جدید");
+  release.onclick=async()=>{
+   if(!confirm("اتصال دستگاه قبلی این حساب آزاد شود؟ اطلاعات و گزارش‌های کاربر حذف نمی‌شوند."))return;
+   release.disabled=true;release.textContent="در حال آزادسازی…";
+   try{
+    const done=await request("/rest/v1/rpc/admin_release_device",{method:"POST",headers:authHeaders(),body:JSON.stringify({p_user_id:u.user_id})});
+    alert(done===true?"اتصال دستگاه آزاد شد. کاربر اکنون می‌تواند با همان نام کاربری و رمز عبور روی گوشی جدید وارد شود.":"برای این حساب اتصال دستگاهی ثبت نشده بود.");
+   }catch(e){alert("آزادسازی انجام نشد: "+e.message)}
+   finally{release.disabled=false;release.textContent="آزادسازی دستگاه برای ورود به گوشی جدید"}
+  };
+  tools.append(release);
+  const dateWrap=adminText("div","adminsection","");
+  dateWrap.append(adminText("div","adminmuted","تغییر تاریخ شروع چالش (فقط مدیر)"));
+  const startInput=document.createElement("input");startInput.type="date";startInput.value=u.start_date||((viewedState&&viewedState.start)||"");
+  const setStart=adminText("button","","ثبت تاریخ شروع جدید");
+  setStart.onclick=async()=>{
+   if(!startInput.value){alert("تاریخ معتبر انتخاب کن.");return}
+   if(!confirm("تاریخ شروع این کاربر تغییر کند؟ شماره روزهای چالش نیز بر اساس تاریخ جدید محاسبه می‌شود."))return;
+   setStart.disabled=true;
+   try{
+    await request("/rest/v1/profiles?user_id=eq."+encodeURIComponent(u.user_id),{method:"PATCH",headers:{...authHeaders(),Prefer:"return=representation"},body:JSON.stringify({start_date:startInput.value})});
+    if(viewedState){viewedState.start=startInput.value;await request("/rest/v1/daily_reports?user_id=eq."+encodeURIComponent(u.user_id)+"&report_date=eq.2000-01-01",{method:"PATCH",headers:{...authHeaders(),Prefer:"return=minimal"},body:JSON.stringify({payload:viewedState})})}
+    u.start_date=startInput.value;
+    alert("تاریخ شروع به‌روزرسانی شد.");
+   }catch(e){alert("تغییر تاریخ انجام نشد: "+e.message)}
+   finally{setStart.disabled=false}
+  };
+  dateWrap.append(startInput,setStart);tools.append(dateWrap);
+ }catch(e){$("c90AdminViewer").textContent="خطا: "+e.message}
+}
+$("c90Login").onclick=()=>login().catch(e=>msg(e.message));
+$("c90AccountOpen").onclick=()=>{$("C90_AUTH_PANEL").style.display="flex"};
+$("c90Signup").onclick=()=>signup().catch(e=>msg(e.message));
+$("c90Password").onkeydown=e=>{if(e.key==="Enter")login().catch(x=>msg(x.message))};
+$("c90AdminClose").onclick=()=>$("C90_ADMIN").style.display="none";
+$("c90AdminSearch").oninput=drawUsers;
+(async()=>{
+ try{
+  const raw=localStorage.getItem("c90.session");
+  if(!raw){$("C90_AUTH_PANEL").style.display="none";return}
+  let old=JSON.parse(raw),u;
+  try{u=await request("/auth/v1/user",{headers:{apikey:KEY,Authorization:"Bearer "+old.access_token}})}
+  catch(expired){
+    if(!old.refresh_token)throw expired;
+    old=await request("/auth/v1/token?grant_type=refresh_token",{method:"POST",body:JSON.stringify({refresh_token:old.refresh_token})});
+    u=old.user||await request("/auth/v1/user",{headers:{apikey:KEY,Authorization:"Bearer "+old.access_token}});
+  }
+  old.user=u;await enter(old);
+ }catch(e){
+  localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");
+  sessionStorage.removeItem("c90.active_uid");
+  $("C90_AUTH_PANEL").style.display="flex";msg("برای ادامه دوباره وارد حساب شو.");
+ }
+})();
+})();
+</script>
+
+</body>
+</html>
