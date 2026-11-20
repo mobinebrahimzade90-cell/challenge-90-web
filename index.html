@@ -456,7 +456,7 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
   </div></div>
   <div class="dfoot"><button class="g" id="introGo">شروع</button></div>
 </div>
-<div id="splash"><div class="sp3d"><div class="rg"></div><div class="rg"></div><div class="by">Created by</div><div class="lg">mmb</div></div></div>
+
 <div class="day" id="hday" role="dialog" aria-modal="true">
   <div class="dbar"><button id="hBack">بازگشت</button><b id="hTitle"></b></div>
   <div class="dbody"><div>
@@ -485,7 +485,7 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
 
 <script>
 (()=>{
-const N=90,KEY="challenge90.v1."+(localStorage.getItem("c90.uid")||"guest"),FOLDER="90",FNAME="90.json",$=id=>document.getElementById(id);
+const N=90;let KEY="challenge90.v1."+(localStorage.getItem("c90.uid")||"guest");const FOLDER="90",FNAME="90.json",$=id=>document.getElementById(id);
 const fa=n=>Number(n).toLocaleString("fa-IR",{useGrouping:false});
 const MONTHS=["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"];
 const WEEK=["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنجشنبه","جمعه","شنبه"];
@@ -1152,6 +1152,19 @@ initDate();initHyp();initRank();render();boot();
 .c90-accountbar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:8px}
 #c90RankTabs [data-rank].on{background:var(--gold);color:#1a1204}
 </style>
+<style>
+#c90Loading{position:fixed;inset:0;z-index:2000;background:#0b0809;display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px;color:#f3ebe6;font-family:Vazirmatn,Tahoma,sans-serif}
+#c90Loading.on{display:flex}
+#c90Loading .track{width:min(72vw,300px);height:7px;border-radius:10px;background:#49343b;overflow:hidden}
+#c90Loading .bar{height:100%;width:38%;border-radius:10px;background:#e8b339;animation:c90load 1.2s ease-in-out infinite alternate}
+#c90Loading .label{font-size:.95rem;color:#e8b339}
+@keyframes c90load{from{transform:translateX(-10%)}to{transform:translateX(170%)}}
+</style>
+<div id="c90Loading" aria-live="polite"><div style="font-size:1.5rem">۹۰</div><div class="track"><div class="bar"></div></div><div class="label" id="c90LoadingLabel">در حال بارگذاری…</div></div>
+<script>
+function showLoader(label){const e=document.getElementById("c90Loading");if(e){document.getElementById("c90LoadingLabel").textContent=label||"در حال بارگذاری…";e.classList.add("on")}}
+function hideLoader(){const e=document.getElementById("c90Loading");if(e)e.classList.remove("on")}
+</script>
 <div id="C90_AUTH_PANEL">
  <div class="authbox">
   <div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><h2>۹۰ روز | حساب کاربری</h2><button type="button" id="c90AuthBack" style="flex:0 0 auto;padding:7px 14px">بازگشت</button></div>
@@ -1228,9 +1241,11 @@ async function enter(s){
  localStorage.setItem("c90.session",JSON.stringify(s));localStorage.setItem("c90.uid",s.user.id);
  if(sessionStorage.getItem("c90.active_uid")!==s.user.id){
   sessionStorage.setItem("c90.active_uid",s.user.id);
+  KEY="challenge90.v1."+s.user.id;
   await loadCloud();
-  location.reload();
-  return;
+  S=load();
+  ensureLv();
+  render();
  }
  window.C90_CURRENT_USERNAME=profile.username;
  if(profile.start_date){if(typeof window.C90_SET_START_DATE!=="function")throw new Error("ماژول برنامه بارگذاری نشده است؛ صفحه را تازه‌سازی کن.");window.C90_SET_START_DATE(profile.start_date)}else{const initialized=await request("/rest/v1/rpc/c90_initialize_start_date",{method:"POST",headers:authHeaders(),body:"{}"});const todayIso=String(initialized);profile.start_date=todayIso;if(typeof window.C90_SET_START_DATE!=="function")throw new Error("ماژول برنامه بارگذاری نشده است؛ صفحه را تازه‌سازی کن.");window.C90_SET_START_DATE(todayIso)}
@@ -1275,10 +1290,11 @@ async function enter(s){
  $("c90AccountStatus").textContent="حساب: "+(profile.display_name||profile.username)+" | پایه: "+(profile.grade||"—")+" | رشته: "+(profile.major||"—");
  $("c90AccountOpen").textContent="مدیریت حساب";
  
- const hadCloud=await loadCloud();
- if(hadCloud&&!sessionStorage.getItem("c90.loaded")){
-  sessionStorage.setItem("c90.loaded","1");location.reload();return;
- }
+ await loadCloud();
+ KEY="challenge90.v1."+session.user.id;
+ S=load();
+ ensureLv();
+ render();
  await ensureSchoolInfo();
  $("C90_AUTH_PANEL").style.display="none";
  if(profile.role==="admin"){
@@ -1449,17 +1465,18 @@ async function showUser(u){
   dateWrap.append(startInput,setStart);tools.append(dateWrap);
  }catch(e){$("c90AdminViewer").textContent="خطا: "+e.message}
 }
-$("c90Login").onclick=()=>login().catch(e=>msg(e.message));
+$("c90Login").onclick=async()=>{showLoader("در حال ورود به حساب…");try{await login()}catch(e){msg(e.message)}finally{hideLoader()}};
 $("c90AccountOpen").onclick=()=>{$("C90_AUTH_PANEL").style.display="flex"};
 $("c90AuthBack").onclick=()=>{$("C90_AUTH_PANEL").style.display="none";msg("");};
-$("c90Signup").onclick=()=>signup().catch(e=>msg(e.message));
-$("c90Password").onkeydown=e=>{if(e.key==="Enter")login().catch(x=>msg(x.message))};
+$("c90Signup").onclick=async()=>{showLoader("در حال ساخت حساب…");try{await signup()}catch(e){msg(e.message)}finally{hideLoader()}};
+$("c90Password").onkeydown=e=>{if(e.key==="Enter")$("c90Login").click()};
 $("c90AdminClose").onclick=()=>$("C90_ADMIN").style.display="none";
 $("c90AdminSearch").oninput=drawUsers;
 (async()=>{
  try{
   const raw=localStorage.getItem("c90.session");
   if(!raw){$("C90_AUTH_PANEL").style.display="none";return}
+  showLoader("در حال بازیابی حساب…");
   let old=JSON.parse(raw),u;
   try{u=await request("/auth/v1/user",{headers:{apikey:KEY,Authorization:"Bearer "+old.access_token}})}
   catch(expired){
@@ -1472,7 +1489,7 @@ $("c90AdminSearch").oninput=drawUsers;
   localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");
   sessionStorage.removeItem("c90.active_uid");
   $("C90_AUTH_PANEL").style.display="flex";msg("بازیابی ورود ناموفق بود: "+(e&&e.message?e.message:"خطای نامشخص")+"؛ دوباره وارد شو.");
- }
+ }finally{hideLoader()}
 })();
 })();
 </script>
