@@ -1232,7 +1232,7 @@ async function enter(s){
   return;
  }
  window.C90_CURRENT_USERNAME=profile.username;
- if(profile.start_date){if(S.start!==profile.start_date){S.start=profile.start_date;save()}}else{const todayIso=isoOf(d2g(todayJ()));await request('/rest/v1/profiles?user_id=eq.'+encodeURIComponent(session.user.id),{method:'PATCH',headers:{...authHeaders(),Prefer:'return=representation'},body:JSON.stringify({start_date:todayIso})});profile.start_date=todayIso;S.start=todayIso;save()}
+ if(profile.start_date){if(S.start!==profile.start_date){S.start=profile.start_date;save()}}else{const now=new Date();const todayIso=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-"+String(now.getDate()).padStart(2,"0");await request('/rest/v1/profiles?user_id=eq.'+encodeURIComponent(session.user.id),{method:'PATCH',headers:{...authHeaders(),Prefer:'return=representation'},body:JSON.stringify({start_date:todayIso})});profile.start_date=todayIso;S.start=todayIso;save()}
  window.C90_RANK_SIGNATURE=null;
  window.C90_LOAD_RANKING=async()=>{
   const classes=await request("/rest/v1/rpc/class_ranking",{method:"POST",headers:authHeaders(),body:"{}"});
