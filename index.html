@@ -1281,13 +1281,14 @@ async function getProfile(){
  if(!a.length)throw new Error("پروفایل حساب پیدا نشد؛ تنظیمات پایگاه داده را بررسی کنیم.");
  profile=a[0];
 }
-let cloudReadFailed=false;
+let cloudReadFailed=false,cloudReadInProgress=false;
 async function loadCloud(){
- cloudReadFailed=false;
+ cloudReadFailed=false;cloudReadInProgress=true;
  try{
   const a=await request("/rest/v1/daily_reports?select=payload&report_date=eq.2000-01-01&user_id=eq."+encodeURIComponent(session.user.id),{headers:authHeaders(),timeoutMs:12000});
   if(a.length&&a[0].payload&&typeof a[0].payload==="object"){
    localStorage.setItem("challenge90.v1."+session.user.id,JSON.stringify(a[0].payload));
+   window.dispatchEvent(new CustomEvent("c90cloudupdate",{detail:a[0].payload}));
    return true;
   }
   return false;
@@ -1295,7 +1296,7 @@ async function loadCloud(){
   cloudReadFailed=true;
   console.warn("Cloud restore:",e.message);
   return false;
- }
+ }finally{cloudReadInProgress=false}
 }
 async function ensureInitialDays(){
  if(profile.initial_days!==null&&profile.initial_days!==undefined)return;
@@ -1321,7 +1322,7 @@ async function ensureInitialDays(){
  });
 }
 async function syncCloud(data){
- if(!session||!data||cloudReadFailed)return;
+ if(!session||!data||cloudReadFailed||cloudReadInProgress)return;
  const payload={user_id:session.user.id,report_date:"2000-01-01",payload:data,updated_at:new Date().toISOString()};
  await request("/rest/v1/daily_reports?on_conflict=user_id,report_date",{method:"POST",headers:{...authHeaders(),Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(payload)});
 }
@@ -1393,12 +1394,15 @@ async function enter(s){
  $("c90AccountStatus").textContent="حساب: "+(profile.display_name||profile.username)+" | پایه: "+(profile.grade||"—")+" | رشته: "+(profile.major||"—");
  $("c90AccountOpen").textContent="مدیریت حساب";
  
- setLoaderStage(3,"در حال بازیابی اطلاعات","دریافت وضعیت روزها و امتیازها",shownName,shownClass);
- await loadCloud();
+ setLoaderStage(3,"در حال آماده‌سازی اطلاعات","بازیابی اطلاعات حساب",shownName,shownClass);
  if(typeof window.C90_LOAD_USER_STATE!=="function")throw new Error("ماژول اطلاعات حساب بارگذاری نشده است؛ صفحه را تازه‌سازی کن.");
  window.C90_LOAD_USER_STATE(session.user.id,profile.start_date);
+ hideLoader();
  await ensureInitialDays();
+ showLoader("در حال تکمیل ورود…");
+ setLoaderStage(3,"در حال تکمیل اطلاعات","بررسی مشخصات و امتیازها",shownName,shownClass);
  await ensureSchoolInfo();
+ loadCloud().catch(e=>console.warn("Cloud restore:",e.message));
  const finalClass=(profile.grade?"پایه "+profile.grade:"پایه ثبت نشده")+(profile.major?" · "+profile.major:"");
  setLoaderStage(4,"حساب آماده است","اطلاعات حساب با موفقیت بازیابی شد",shownName,finalClass);
  $("C90_AUTH_PANEL").style.display="none";
