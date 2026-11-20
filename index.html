@@ -1154,16 +1154,42 @@ initDate();initHyp();initRank();render();boot();
 #c90RankTabs [data-rank].on{background:var(--gold);color:#1a1204}
 </style>
 <style>
-#c90Loading{position:fixed;inset:0;z-index:2000;background:#0b0809;display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px;color:#f3ebe6;font-family:Vazirmatn,Tahoma,sans-serif}
+#c90Loading{position:fixed;inset:0;z-index:2000;background:radial-gradient(ellipse at 50% 38%,#28161b 0,#100c0e 48%,#090708 100%);display:none;align-items:center;justify-content:center;padding:22px;color:#f3ebe6;font-family:Vazirmatn,Tahoma,sans-serif;text-align:center}
 #c90Loading.on{display:flex}
-#c90Loading .track{width:min(72vw,300px);height:7px;border-radius:10px;background:#49343b;overflow:hidden}
-#c90Loading .bar{height:100%;width:38%;border-radius:10px;background:#e8b339;animation:c90load 1.2s ease-in-out infinite alternate}
-#c90Loading .label{font-size:.95rem;color:#e8b339}
-@keyframes c90load{from{transform:translateX(-10%)}to{transform:translateX(170%)}}
+#c90Loading .loadpanel{width:min(100%,390px);border:1px solid #59404a;border-radius:22px;background:linear-gradient(150deg,#21171b,#120e10 72%);padding:28px 22px 24px;box-shadow:0 24px 70px #000a, inset 0 1px #ffffff0b;position:relative;overflow:hidden;animation:loadEnter .35s ease-out both}
+#c90Loading .loadpanel:before{content:"";position:absolute;inset:0 15% auto;height:1px;background:linear-gradient(90deg,transparent,#e8b339,transparent)}
+#c90Loading .loadmark{width:76px;height:76px;margin:0 auto 18px;border:1px solid #785c36;border-radius:22px;display:grid;place-items:center;position:relative;transform:rotate(45deg);background:linear-gradient(145deg,#38252a,#171114);box-shadow:0 0 28px #e8b33922}
+#c90Loading .loadmark:before,#c90Loading .loadmark:after{content:"";position:absolute;border:1px solid #e8b33966;border-radius:15px;inset:8px;animation:loadPulse 2s ease-in-out infinite}
+#c90Loading .loadmark:after{inset:-7px;border-color:#d6283944;animation-delay:.5s}
+#c90Loading .loadglyph{font-size:1.55rem;color:#f1c45c;transform:rotate(-45deg);font-weight:900}
+#c90Loading .eyebrow{font-size:.68rem;letter-spacing:.22em;color:#b89b72;direction:ltr;margin-bottom:6px}
+#c90Loading .label{font-size:1.12rem;font-weight:800;color:#f3d17d;margin:0 0 5px}
+#c90Loading .detail{font-size:.85rem;color:#b9a9a5;min-height:27px;margin-bottom:19px}
+#c90Loading .identity{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 20px}
+#c90Loading .identity>div{background:#0d0a0c;border:1px solid #3b2b31;border-radius:11px;padding:9px 7px;min-width:0}
+#c90Loading .identity small{display:block;font-size:.68rem;color:#9b8581}
+#c90Loading .identity b{display:block;font-size:.85rem;color:#f0e5dc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#c90Loading .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;direction:rtl}
+#c90Loading .step{height:5px;border-radius:8px;background:#49343b;overflow:hidden;position:relative}
+#c90Loading .step.on{background:#e8b339;box-shadow:0 0 12px #e8b33955}
+#c90Loading .step.now:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,#fff9,transparent);animation:stepSweep 1.1s linear infinite}
+#c90Loading .stepnames{display:flex;justify-content:space-between;gap:4px;color:#907e7b;font-size:.62rem;margin-top:8px}
+@keyframes loadEnter{from{opacity:0;transform:translateY(9px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes loadPulse{0%,100%{transform:scale(.94);opacity:.35}50%{transform:scale(1.06);opacity:1}}
+@keyframes stepSweep{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
 </style>
-<div id="c90Loading" aria-live="polite"><div style="font-size:1.5rem">۹۰</div><div class="track"><div class="bar"></div></div><div class="label" id="c90LoadingLabel">در حال بارگذاری…</div></div>
+<div id="c90Loading" aria-live="polite" aria-busy="true"><div class="loadpanel">
+ <div class="loadmark"><span class="loadglyph">◇</span></div>
+ <div class="eyebrow">PLAYER PROFILE / SYNC</div>
+ <div class="label" id="c90LoadingLabel">در حال آماده‌سازی حساب</div>
+ <div class="detail" id="c90LoadingDetail">اتصال امن و بررسی اطلاعات حساب</div>
+ <div class="identity"><div><small>نام کاربر</small><b id="c90LoadingName">در انتظار شناسایی</b></div><div><small>پایه و رشته</small><b id="c90LoadingClass">در حال بررسی</b></div></div>
+ <div class="steps"><i class="step on now"></i><i class="step"></i><i class="step"></i><i class="step"></i></div>
+ <div class="stepnames"><span>ورود</span><span>پروفایل</span><span>اطلاعات</span><span>آماده</span></div>
+ </div></div>
 <script>
-function showLoader(label){const e=document.getElementById("c90Loading");if(e){document.getElementById("c90LoadingLabel").textContent=label||"در حال بارگذاری…";e.classList.add("on")}}
+function showLoader(label){const e=document.getElementById("c90Loading");if(e){document.getElementById("c90LoadingLabel").textContent=label||"در حال آماده‌سازی حساب";document.getElementById("c90LoadingDetail").textContent="اتصال امن و بررسی اطلاعات حساب";document.getElementById("c90LoadingName").textContent="در انتظار شناسایی";document.getElementById("c90LoadingClass").textContent="در حال بررسی";setLoaderStage(1);e.classList.add("on")}}
+function setLoaderStage(stage,label,detail,name,school){const e=document.getElementById("c90Loading");if(!e)return;if(label)document.getElementById("c90LoadingLabel").textContent=label;if(detail)document.getElementById("c90LoadingDetail").textContent=detail;if(name)document.getElementById("c90LoadingName").textContent=name;if(school)document.getElementById("c90LoadingClass").textContent=school;const n=Math.max(1,Math.min(4,Number(stage)||1));e.querySelectorAll(".step").forEach((x,i)=>{x.classList.toggle("on",i<n);x.classList.toggle("now",i===n-1)})}
 function hideLoader(){const e=document.getElementById("c90Loading");if(e)e.classList.remove("on")}
 </script>
 <div id="C90_AUTH_PANEL">
@@ -1230,7 +1256,11 @@ function scheduleSync(data){
 }
 async function enter(s){
  session=s;
+ setLoaderStage(1,"در حال شناسایی حساب","اعتبارسنجی نشست کاربری");
  await getProfile();
+ const shownName=profile.display_name||profile.username||"کاربر";
+ const shownClass=(profile.grade?"پایه "+profile.grade:"پایه ثبت نشده")+(profile.major?" · "+profile.major:"");
+ setLoaderStage(2,"پروفایل شناسایی شد","اطلاعات حساب دریافت شد",shownName,shownClass);
  const nativeApp=!!(window.NativeDevice&&typeof window.NativeDevice.getDeviceHash==="function");
  if(nativeApp){
   let deviceHash="";
@@ -1244,6 +1274,7 @@ async function enter(s){
   sessionStorage.setItem("c90.active_uid",s.user.id);
  }
  window.C90_CURRENT_USERNAME=profile.username;
+ setLoaderStage(2,"در حال آماده‌سازی پروفایل","بررسی وضعیت حساب",shownName,shownClass);
  if(profile.start_date){if(typeof window.C90_SET_START_DATE!=="function")throw new Error("ماژول برنامه بارگذاری نشده است؛ صفحه را تازه‌سازی کن.");window.C90_SET_START_DATE(profile.start_date)}else{const initialized=await request("/rest/v1/rpc/c90_initialize_start_date",{method:"POST",headers:authHeaders(),body:"{}"});const todayIso=String(initialized);profile.start_date=todayIso;if(typeof window.C90_SET_START_DATE!=="function")throw new Error("ماژول برنامه بارگذاری نشده است؛ صفحه را تازه‌سازی کن.");window.C90_SET_START_DATE(todayIso)}
  window.C90_RANK_SIGNATURE=null;
  window.C90_LOAD_RANKING=async()=>{
@@ -1286,10 +1317,13 @@ async function enter(s){
  $("c90AccountStatus").textContent="حساب: "+(profile.display_name||profile.username)+" | پایه: "+(profile.grade||"—")+" | رشته: "+(profile.major||"—");
  $("c90AccountOpen").textContent="مدیریت حساب";
  
+ setLoaderStage(3,"در حال بازیابی اطلاعات","دریافت وضعیت روزها و امتیازها",shownName,shownClass);
  await loadCloud();
  if(typeof window.C90_LOAD_USER_STATE!=="function")throw new Error("ماژول اطلاعات حساب بارگذاری نشده است؛ صفحه را تازه‌سازی کن.");
  window.C90_LOAD_USER_STATE(session.user.id);
  await ensureSchoolInfo();
+ const finalClass=(profile.grade?"پایه "+profile.grade:"پایه ثبت نشده")+(profile.major?" · "+profile.major:"");
+ setLoaderStage(4,"حساب آماده است","اطلاعات حساب با موفقیت بازیابی شد",shownName,finalClass);
  $("C90_AUTH_PANEL").style.display="none";
  if(profile.role==="admin"){
   const b=document.createElement("div");b.className="c90-accountbar";
