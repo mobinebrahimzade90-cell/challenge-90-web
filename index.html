@@ -1153,7 +1153,7 @@ initDate();initHyp();initRank();render();boot();
 </style>
 <div id="C90_AUTH_PANEL">
  <div class="authbox">
-  <h2>۹۰ روز | حساب کاربری</h2>
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><h2>۹۰ روز | حساب کاربری</h2><button type="button" id="c90AuthBack" style="flex:0 0 auto;padding:7px 14px">بازگشت</button></div>
   <div id="c90AuthIntro">برای ذخیره‌ی امن اطلاعات، وارد حساب خودت شو یا حساب جدید بساز.</div>
   <input id="c90Username" autocomplete="username" placeholder="نام کاربری (انگلیسی، ۳ تا ۳۰ نویسه)" maxlength="30">
   <input id="c90Display" autocomplete="name" placeholder="نام نمایشی (اختیاری)">
@@ -1450,6 +1450,7 @@ async function showUser(u){
 }
 $("c90Login").onclick=()=>login().catch(e=>msg(e.message));
 $("c90AccountOpen").onclick=()=>{$("C90_AUTH_PANEL").style.display="flex"};
+$("c90AuthBack").onclick=()=>{$("C90_AUTH_PANEL").style.display="none";msg("");};
 $("c90Signup").onclick=()=>signup().catch(e=>msg(e.message));
 $("c90Password").onkeydown=e=>{if(e.key==="Enter")login().catch(x=>msg(x.message))};
 $("c90AdminClose").onclick=()=>$("C90_ADMIN").style.display="none";
@@ -1469,7 +1470,7 @@ $("c90AdminSearch").oninput=drawUsers;
  }catch(e){
   localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");
   sessionStorage.removeItem("c90.active_uid");
-  $("C90_AUTH_PANEL").style.display="flex";msg("برای ادامه دوباره وارد حساب شو.");
+  $("C90_AUTH_PANEL").style.display="flex";msg("بازیابی ورود ناموفق بود: "+(e&&e.message?e.message:"خطای نامشخص")+"؛ دوباره وارد شو.");
  }
 })();
 })();
