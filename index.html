@@ -521,6 +521,7 @@ const fmtJ=j=>{const[y,m,d]=d2j(j);return WEEK[mod(j+1,7)]+" "+fa(d)+" "+MONTHS[
 /* ---------- ذخیره‌ی محلی ---------- */
 function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d)return d}catch(e){}return{start:"",days:{},vault:null}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));window.dispatchEvent(new CustomEvent("c90save",{detail:S}))}catch(e){}}
+window.C90_SET_START_DATE=function(value){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(value)))throw new Error("تاریخ شروع نامعتبر است");S.start=String(value);save();if(page===1)render()};
 window.addEventListener("c90cloudupdate",e=>{const d=e.detail;if(!d||typeof d!=="object")return;if(JSON.stringify(S)===JSON.stringify(d))return;S=d;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(x){}if(page===2)hrender();else if(page===3)rrender();else render()});
 function later(){clearTimeout(t);t=setTimeout(save,300)}
 function toast(m){const e=$("toast");e.textContent=m;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",4000)}
@@ -1232,7 +1233,7 @@ async function enter(s){
   return;
  }
  window.C90_CURRENT_USERNAME=profile.username;
- if(profile.start_date){if(S.start!==profile.start_date){S.start=profile.start_date;save()}}else{const initialized=await request("/rest/v1/rpc/c90_initialize_start_date",{method:"POST",headers:authHeaders(),body:"{}"});const todayIso=String(initialized);profile.start_date=todayIso;S.start=todayIso;save()}
+ if(profile.start_date){if(typeof window.C90_SET_START_DATE!=="function")throw new Error("ماژول برنامه بارگذاری نشده است؛ صفحه را تازه‌سازی کن.");window.C90_SET_START_DATE(profile.start_date)}else{const initialized=await request("/rest/v1/rpc/c90_initialize_start_date",{method:"POST",headers:authHeaders(),body:"{}"});const todayIso=String(initialized);profile.start_date=todayIso;if(typeof window.C90_SET_START_DATE!=="function")throw new Error("ماژول برنامه بارگذاری نشده است؛ صفحه را تازه‌سازی کن.");window.C90_SET_START_DATE(todayIso)}
  window.C90_RANK_SIGNATURE=null;
  window.C90_LOAD_RANKING=async()=>{
   const classes=await request("/rest/v1/rpc/class_ranking",{method:"POST",headers:authHeaders(),body:"{}"});
