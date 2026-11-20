@@ -439,12 +439,12 @@ begin
 
   return query
   with cohort as (
-    select p.user_id, p.username, p.display_name
+    select p.user_id, p.username, p.display_name, coalesce(p.initial_days, 0) as initial_days
     from public.profiles p
     where p.grade = v_grade and p.major = v_major
   ),
   reports as (
-    select c.user_id, c.username, c.display_name, dr.payload
+    select c.user_id, c.username, c.display_name, c.initial_days, dr.payload
     from cohort c
     left join public.daily_reports dr
       on dr.user_id = c.user_id
@@ -461,6 +461,7 @@ begin
         - coalesce(d.tasks_missed, 0)::numeric * 2
         + coalesce(h.sessions_done, 0)::numeric * 10
         + floor(coalesce(h.minutes_done, 0)::numeric / 5)
+        + coalesce(r.initial_days, 0)::numeric * 10
       ) as score
     from reports r
     left join lateral (
