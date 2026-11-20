@@ -1209,9 +1209,9 @@ initDate();initHyp();initRank();render();boot();
  <div class="stepnames"><span>ورود</span><span>پروفایل</span><span>اطلاعات</span><span>آماده</span></div>
  </div></div>
 <script>
-function showLoader(label){const e=document.getElementById("c90Loading");if(e){document.getElementById("c90LoadingLabel").textContent=label||"در حال آماده‌سازی حساب";document.getElementById("c90LoadingDetail").textContent="اتصال امن و بررسی اطلاعات حساب";document.getElementById("c90LoadingName").textContent="در انتظار شناسایی";document.getElementById("c90LoadingClass").textContent="در حال بررسی";setLoaderStage(1);e.classList.add("on")}}
+function showLoader(label){const e=document.getElementById("c90Loading");if(e){document.body.style.overflow="hidden";document.getElementById("c90LoadingLabel").textContent=label||"در حال آماده‌سازی حساب";document.getElementById("c90LoadingDetail").textContent="اتصال امن و بررسی اطلاعات حساب";document.getElementById("c90LoadingName").textContent="در انتظار شناسایی";document.getElementById("c90LoadingClass").textContent="در حال بررسی";setLoaderStage(1);e.classList.add("on")}}
 function setLoaderStage(stage,label,detail,name,school){const e=document.getElementById("c90Loading");if(!e)return;if(label)document.getElementById("c90LoadingLabel").textContent=label;if(detail)document.getElementById("c90LoadingDetail").textContent=detail;if(name)document.getElementById("c90LoadingName").textContent=name;if(school)document.getElementById("c90LoadingClass").textContent=school;const n=Math.max(1,Math.min(4,Number(stage)||1));e.querySelectorAll(".step").forEach((x,i)=>{x.classList.toggle("on",i<n);x.classList.toggle("now",i===n-1)})}
-function hideLoader(){const e=document.getElementById("c90Loading");if(e)e.classList.remove("on")}
+function hideLoader(){const e=document.getElementById("c90Loading");if(e)e.classList.remove("on");document.body.style.overflow=""}
 </script>
 <div id="C90_AUTH_PANEL">
  <div class="authbox">
@@ -1246,6 +1246,12 @@ function hideLoader(){const e=document.getElementById("c90Loading");if(e)e.class
   <div id="c90AdminViewer" class="adminsection">ابتدا یک شرکت‌کننده را انتخاب کن.</div>
  </div>
 </div>
+<script>
+["c90Loading","C90_AUTH_PANEL","C90_INITIAL_DAYS","C90_ADMIN"].forEach(id=>{
+ const layer=document.getElementById(id);
+ if(layer&&layer.parentElement!==document.body)document.body.appendChild(layer);
+});
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (()=>{
