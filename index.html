@@ -210,13 +210,13 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
 @keyframes tp{50%{filter:drop-shadow(0 0 2px var(--ink))}}
 .steps{display:flex;gap:8px}.steps button{flex:1;padding:10px 0}
 .steps button.on,#hMin .chip.on{background:var(--gold);color:#1a1204;border-color:var(--gold)}
-#nav{position:fixed;bottom:calc(14px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);display:flex;padding:4px;border:1px solid var(--line);border-radius:999px;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(14px);z-index:70;box-shadow:0 10px 30px rgba(0,0,0,.45);isolation:isolate}
+#nav{position:fixed;bottom:calc(14px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);display:flex;padding:4px;border:1px solid var(--line);border-radius:999px;background:color-mix(in srgb,var(--card) 78%,transparent);backdrop-filter:blur(14px);z-index:8;box-shadow:0 10px 30px rgba(0,0,0,.45)}
 #nav button{position:relative;z-index:1;border:0;background:transparent;border-radius:999px;padding:9px 18px;font-size:.86rem;color:var(--mute);white-space:nowrap;transition:color .3s}
 #nav button.on{color:#1a1204}
 #nvi{position:absolute;top:4px;bottom:4px;left:4px;width:80px;border-radius:999px;background:var(--gold);transition:left .5s cubic-bezier(.5,0,.2,1),width .5s cubic-bezier(.5,0,.2,1),background .6s;z-index:0}
 #wipe{position:fixed;inset:0;z-index:7;pointer-events:none;display:none}
 #wipe.on{display:block}
-#sess{position:fixed;inset:0;z-index:80;background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--glow) 40%,#050812),#03050c 75%);display:none;flex-direction:column;align-items:center;justify-content:center;gap:34px;color:#e8f1f5}
+#sess{position:fixed;inset:0;z-index:30;background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--glow) 40%,#050812),#03050c 75%);display:none;flex-direction:column;align-items:center;justify-content:center;gap:34px;color:#e8f1f5}
 #sess.on{display:flex}
 .dm{width:150px;height:150px;border:2px solid var(--gold);border-radius:16px;transform:rotate(45deg) scale(.6);box-shadow:0 0 60px color-mix(in srgb,var(--gold) 70%,transparent),inset 0 0 40px color-mix(in srgb,var(--gold) 25%,transparent);transition:transform 4s ease-in-out}
 #sc{font:400 2rem Lalezar,Vazirmatn,sans-serif;color:var(--gt)}
@@ -970,20 +970,7 @@ NAV.addEventListener("click",event=>{
   const button=event.target.closest("button[data-p]");
   if(!button||!NAV.contains(button))return;
   event.preventDefault();
-  const target=button.dataset.p;
-  if($("day").classList.contains("on")){
-    flushSec().catch(error=>console.warn("Secure note flush:",error)).finally(()=>{
-      save();
-      closeDay();
-      setPage(target);
-    });
-    return;
-  }
-  if($("hday").classList.contains("on")){
-    save();
-    $("hday").classList.remove("on");
-  }
-  setPage(target);
+  setPage(button.dataset.p);
 },true);
 
 const HN=20,HID=["hY","hM","hD"];
@@ -1096,13 +1083,47 @@ const C90_RANK_LEVELS=[
  {key:"legendary",name:"لجندری",min:9000,tone:"legendary"}
 ];
 function c90CurrentPoints(){
-  const currentProfile=window.C90_CURRENT_PROFILE||null;
-  const username=String(currentProfile&&currentProfile.username||window.C90_CURRENT_USERNAME||"").toLowerCase();
-  const rows=window.CHALLENGE_INDIVIDUALS;
-  if(username&&Array.isArray(rows)){const me=rows.find(x=>String(x.username||"").toLowerCase()===username);if(me&&Number.isFinite(Number(me.points)))return Math.max(0,Number(me.points))}
-  const base=typeof calcScore==="function"?Number(calcScore().total)||0:0;
-  const bonus=currentProfile&&currentProfile.initial_days!=null?Number(currentProfile.initial_days)*10:0;
-  return Math.max(0,base+bonus);
+ const currentProfile=window.C90_CURRENT_PROFILE||null;
+ const username=String(currentProfile&&currentProfile.username||window.C90_CURRENT_USERNAME||"").toLowerCase();
+ const rows=window.CHALLENGE_INDIVIDUALS;
+ if(username&&Array.isArray(rows)){const me=rows.find(x=>String(x.username||"").toLowerCase()===username);if(me&&Number.isFinite(Number(me.points)))return Math.max(0,Number(me.points))}
+ const base=typeof calcScore==="function"?Number(calcScore().total)||0:0;
+ const bonus=currentProfile&&currentProfile.initial_days!=null?Number(currentProfile.initial_days)*10:0;
+ return Math.max(0,base+bonus);
+}
+function c90RankIcon(level,size=54){
+ const p={bronze:["#f7bb78","#8e4828","#3c1d18"],silver:["#fff","#8995a6","#333d50"],gold:["#fff0a0","#c27a13","#5b3508"],diamond:["#e9e4ff","#8c50ff","#1d3a83"],champion:["#fff2b0","#f0a62c","#8c202b"],titan:["#e2f7ff","#43a9ed","#253d72"],legendary:["#fff0d2","#f23b80","#6d155e"],starter:["#d4c4b6","#77636e","#30232c"]};
+ const c=p[level.key]||p.starter,star=level.key==="diamond"||level.key==="legendary";
+ const center=star?"<path d='M50 27 72 50 50 73 28 50Z' fill='url(#g"+level.key+")' stroke='"+c[0]+"' stroke-width='2'/>":"<path d='m50 29 6.5 14 15.5 2-11.5 10.5 3.2 15L50 63l-13.7 7.5 3.2-15L28 45l15.5-2Z' fill='url(#g"+level.key+")' stroke='"+c[0]+"' stroke-width='1.8' stroke-linejoin='round'/>";
+ return "<svg class='rank-medal-svg' width='"+size+"' height='"+size+"' viewBox='0 0 100 100' aria-hidden='true'><defs><linearGradient id='m"+level.key+"' x1='0' y1='0' x2='1' y2='1'><stop stop-color='"+c[0]+"'/><stop offset='.48' stop-color='"+c[1]+"'/><stop offset='1' stop-color='"+c[2]+"'/></linearGradient><linearGradient id='g"+level.key+"' x1='0' y1='0' x2='1' y2='1'><stop stop-color='"+c[0]+"'/><stop offset='.5' stop-color='"+c[1]+"'/><stop offset='1' stop-color='"+c[2]+"'/></linearGradient></defs><path d='M50 4 61 15 78 13 82 29 96 40 88 55 91 73 73 79 62 94 50 87 38 94 27 79 9 73 12 55 4 40 18 29 22 13 39 15Z' fill='url(#m"+level.key+")' stroke='"+c[0]+"' stroke-width='2'/><path d='M50 17 77 29 83 58 69 80 50 88 31 80 17 58 23 29Z' fill='"+c[2]+"' stroke='url(#m"+level.key+")' stroke-width='4'/><path d='M50 22 74 34 78 57 66 75 50 82 34 75 22 57 26 34Z' fill='none' stroke='"+c[0]+"' stroke-opacity='.75' stroke-width='1.6'/>"+center+"<path d='M50 7v12M50 81v11' stroke='"+c[0]+"' stroke-width='2' opacity='.8'/></svg>";
+}
+function c90RankForPoints(points){let rank=null;for(const level of C90_RANK_LEVELS){if(points>=level.min)rank=level;else break}return rank||{key:"starter",name:"تازه‌وارد",min:0,tone:"starter"}}
+function renderRankProgress(){
+ const box=document.getElementById("c90RankProgress");if(!box)return;
+ const points=c90CurrentPoints(),current=c90RankForPoints(points);
+ const next=C90_RANK_LEVELS.find(level=>points<level.min)||null;
+ const pct=next?Math.max(0,Math.min(100,((points-current.min)/(next.min-current.min))*100)):100;
+ const remaining=next?Math.max(0,next.min-points):0;
+ box.dataset.tier=current.tone;
+ box.innerHTML='<div class="rank-progress-head"><div><small>امتیاز و سطح بازیکن</small><h3>مسیر ارتقا</h3></div><div class="rank-points"><b>'+fa(points)+'</b><span>امتیاز</span></div></div>'+
+ '<div class="rank-current"><div class="rank-current-medal">'+c90RankIcon(current,82)+'</div><div><small>رتبهٔ فعلی</small><strong>'+current.name+'</strong><span>'+(next?'تا رتبهٔ '+next.name+'، '+fa(remaining)+' امتیاز دیگر':'بالاترین رتبهٔ فعلی')+'</span></div></div>'+
+ '<div class="rank-progress-track"><i style="width:'+pct+'%"></i></div><div class="rank-progress-caption"><span>'+fa(current.min)+'</span><span>'+(next?fa(next.min):"۹۰۰۰+")+'</span></div>'+
+ '<div class="rank-level-grid">'+C90_RANK_LEVELS.map(level=>{const unlocked=points>=level.min;return '<div class="rank-level '+(unlocked?'unlocked':'')+' '+(current.key===level.key?'current':'')+'" data-tier="'+level.tone+'">'+c90RankIcon(level,54)+'<b>'+level.name+'</b><small>'+fa(level.min)+'+</small></div>'}).join("")+'</div>';
+}
+
+function renderClassRanking(){
+ const box=document.getElementById("c90ClassRanking");
+ if(!box)return;
+ box.innerHTML='<div class="rtab" id="c90RankTabs"><button data-rank="person">فردی</button><button data-rank="class">کلاسی</button></div><div id="c90RankList"></div><div class="note" id="c90RankNote"></div>';
+ box.querySelectorAll("[data-rank]").forEach(b=>{
+  b.classList.toggle("on",b.dataset.rank===c90RankingTab);
+  b.setAttribute("aria-pressed",b.dataset.rank===c90RankingTab?"true":"false");
+  b.onclick=()=>{
+   if(c90RankingTab===b.dataset.rank)return;
+   c90RankingTab=b.dataset.rank;
+   box.querySelectorAll("[data-rank]").forEach(x=>{const active=x.dataset.rank===c90RankingTab;x.classList.toggle("on",active);x.setAttribute("aria-pressed",active?"true":"false")});
+   renderRankingContent();
+  };
  });
  renderRankingContent();
 }
