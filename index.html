@@ -1146,6 +1146,15 @@ initDate();initHyp();initRank();render();boot();
 #C90_AUTH_PANEL .authrow{display:flex;gap:8px;margin-top:12px}
 #C90_AUTH_PANEL button{flex:1;padding:12px}
 #C90_AUTH_PANEL .authmsg{min-height:28px;color:#e8b339;font-size:.85rem;margin-top:10px}
+#C90_INITIAL_DAYS{position:fixed;inset:0;z-index:1500;display:none;align-items:center;justify-content:center;padding:20px;background:#090708eF;backdrop-filter:blur(10px);font-family:Vazirmatn,Tahoma,sans-serif;color:#f5eee8;text-align:center}
+#C90_INITIAL_DAYS.on{display:flex}
+#C90_INITIAL_DAYS .initialbox{width:min(100%,390px);padding:26px 22px;border:1px solid #715332;border-radius:22px;background:linear-gradient(150deg,#26191c,#120e10);box-shadow:0 25px 80px #000b}
+#C90_INITIAL_DAYS h2{margin:0 0 10px;color:#efc45d;font-size:1.25rem}
+#C90_INITIAL_DAYS p{color:#c8b9b0;line-height:1.8;margin:0 0 18px}
+#C90_INITIAL_DAYS input{width:100%;box-sizing:border-box;text-align:center;direction:ltr;font:700 2rem Tahoma,sans-serif;letter-spacing:.12em;color:#f4d17a;background:#0c090a;border:1px solid #614b3d;border-radius:13px;padding:15px;margin:0 0 8px}
+#C90_INITIAL_DAYS .initialhint{font-size:.78rem;color:#a9958e;margin-bottom:16px}
+#C90_INITIAL_DAYS button{width:100%;border:0;border-radius:12px;padding:13px;background:#e8b339;color:#21150a;font:700 1rem inherit}
+#C90_INITIAL_DAYS .initialmsg{min-height:25px;margin-top:10px;color:#efc45d;font-size:.82rem}
 #C90_ADMIN{position:fixed;inset:0;z-index:900;background:#0b0809;color:#f3ebe6;display:none;overflow:auto;padding:18px;font-family:Vazirmatn,Tahoma,sans-serif}
 #C90_ADMIN .adminbox{max-width:760px;margin:20px auto;background:#181113;border:1px solid #49343b;border-radius:16px;padding:18px}
 #C90_ADMIN input{width:100%;padding:12px;background:#0f0b0c;color:white;border:1px solid #49343b;border-radius:9px;font:inherit}
@@ -1216,6 +1225,16 @@ function hideLoader(){const e=document.getElementById("c90Loading");if(e)e.class
   <div class="authmsg" id="c90AuthMsg"></div>
  </div>
 </div>
+<div id="C90_INITIAL_DAYS" role="dialog" aria-modal="true" aria-labelledby="c90InitialTitle">
+ <div class="initialbox">
+  <h2 id="c90InitialTitle">شروع مسیرت از کجاست؟</h2>
+  <p>چند روز از آخرین باری که این عادت را کنار گذاشتی گذشته؟ فقط عدد روزها را وارد کن. این ثبت فقط یک‌بار انجام می‌شود.</p>
+  <input id="c90InitialInput" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="۰ تا ۹۰">
+  <div class="initialhint">به ازای هر روز، ۱۰ امتیاز آغازین دریافت می‌کنی.</div>
+  <button id="c90InitialSave" type="button">ثبت و ادامه</button>
+  <div class="initialmsg" id="c90InitialMsg"></div>
+ </div>
+</div>
 <div id="C90_ADMIN">
  <div class="adminbox">
   <h2 style="color:#e8b339">پنل مدیریت شرکت‌کنندگان</h2>
@@ -1244,7 +1263,7 @@ async function request(path,opts={}){
  return d;
 }
 async function getProfile(){
- const a=await request("/rest/v1/profiles?select=user_id,username,display_name,role,grade,major,class_name,start_date&user_id=eq."+encodeURIComponent(session.user.id),{headers:authHeaders()});
+ const a=await request("/rest/v1/profiles?select=user_id,username,display_name,role,grade,major,class_name,start_date,initial_days&user_id=eq."+encodeURIComponent(session.user.id),{headers:authHeaders()});
  if(!a.length)throw new Error("پروفایل حساب پیدا نشد؛ تنظیمات پایگاه داده را بررسی کنیم.");
  profile=a[0];
 }
@@ -1255,6 +1274,29 @@ async function loadCloud(){
   return true;
  }
  return false;
+}
+async function ensureInitialDays(){
+ if(profile.initial_days!==null&&profile.initial_days!==undefined)return;
+ const modal=$("C90_INITIAL_DAYS"),input=$("c90InitialInput"),button=$("c90InitialSave"),message=$("c90InitialMsg");
+ modal.classList.add("on");input.value="";message.textContent="";button.disabled=false;
+ await new Promise(resolve=>{
+  const submit=async()=>{
+   const raw=input.value.trim();
+   if(!/^\\d{1,2}$/.test(raw)){message.textContent="فقط عدد صحیح از ۰ تا ۹۰ وارد کن.";return}
+   const days=Number(raw);
+   if(!Number.isInteger(days)||days<0||days>90){message.textContent="عدد باید بین ۰ تا ۹۰ باشد.";return}
+   button.disabled=true;message.textContent="در حال ثبت امتیاز آغازین…";
+   try{
+    const result=await request("/rest/v1/rpc/c90_set_initial_days",{method:"POST",headers:authHeaders(),body:JSON.stringify({p_days:days})});
+    profile.initial_days=Number(result.initial_days);
+    message.textContent="+"+fa(Number(result.bonus_points))+" امتیاز ثبت شد.";
+    setTimeout(()=>{modal.classList.remove("on");resolve()},650);
+   }catch(e){button.disabled=false;message.textContent=e.message}
+  };
+  button.onclick=submit;
+  input.oninput=()=>{input.value=input.value.replace(/[^0-9]/g,"").slice(0,2)};
+  input.onkeydown=e=>{if(e.key==="Enter")submit()};
+ });
 }
 async function syncCloud(data){
  if(!session||!data)return;
@@ -1333,6 +1375,7 @@ async function enter(s){
  await loadCloud();
  if(typeof window.C90_LOAD_USER_STATE!=="function")throw new Error("ماژول اطلاعات حساب بارگذاری نشده است؛ صفحه را تازه‌سازی کن.");
  window.C90_LOAD_USER_STATE(session.user.id,profile.start_date);
+ await ensureInitialDays();
  await ensureSchoolInfo();
  const finalClass=(profile.grade?"پایه "+profile.grade:"پایه ثبت نشده")+(profile.major?" · "+profile.major:"");
  setLoaderStage(4,"حساب آماده است","اطلاعات حساب با موفقیت بازیابی شد",shownName,finalClass);
