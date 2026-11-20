@@ -409,7 +409,7 @@ drop function if exists public.individual_ranking();
 
 create function public.individual_ranking()
 returns table (
-  position integer,
+  "position" integer,
   username text,
   display_name text,
   points numeric,
@@ -495,8 +495,7 @@ begin
         count(*) filter (where x.value->>'st' = 'done') as sessions_done,
         coalesce(sum(
           case when x.value->>'st' = 'done'
-            and coalesce(x.value->>'min', '') ~ '^[0-9]+
-
+            and coalesce(x.value->>'min', '') ~ '^[0-9]+$'
             then greatest(0, (x.value->>'min')::integer)
             else 0 end
         ), 0) as minutes_done
