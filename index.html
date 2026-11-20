@@ -62,6 +62,7 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
 .dot.clean{background:var(--gold);border-color:var(--gold);color:#1a1204;box-shadow:inset 0 0 0 2px rgba(0,0,0,.12)}
 .dot.fail{background:var(--bad);border-color:var(--bad);color:#fff;box-shadow:inset 0 0 0 2px rgba(0,0,0,.18)}
 .dot.future{opacity:.45}
+.dot.open-past{border-style:dashed;border-color:var(--gold);opacity:.9;background:color-mix(in srgb,var(--gold) 7%,var(--card));}
 .dot.today{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--ink)}
 .dot:hover{transform:scale(1.07)}
 .dot:active{transform:scale(.93)}
@@ -526,7 +527,15 @@ window.C90_LOAD_USER_STATE=function(uid){KEY="challenge90.v1."+String(uid);S=loa
 window.addEventListener("c90cloudupdate",e=>{const d=e.detail;if(!d||typeof d!=="object")return;if(JSON.stringify(S)===JSON.stringify(d))return;S=d;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(x){}if(page===2)hrender();else if(page===3)rrender();else render()});
 function later(){clearTimeout(t);t=setTimeout(save,300)}
 function toast(m){const e=$("toast");e.textContent=m;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",4000)}
-function day(i){const d=S.days[i]||(S.days[i]={st:"",pray:"",how:"",tasks:[],sec:"",why:"",tr:[]});if(!d.tr)d.tr=[];if(d.why==null)d.why="";if(d.pos==null)d.pos="";d.tasks.forEach(x=>{if(x.s==null)x.s=x.d?"y":""});return d}
+function day(i){const d=S.days[i]||(S.days[i]={st:"",pray:"",how:"",tasks:[],sec:"",why:"",tr:[]});if(!d.tr)d.tr=[];if(d.why==null)d.why="";if(d.pos==null)d.pos="";if(!d.tasks)d.tasks=[];d.tasks.forEach(x=>{if(x.s==null)x.s=x.d?"y":""});return d}
+function dayHasSavedData(d){
+ if(!d)return false;
+ if(d.st==="clean"||d.st==="fail")return true;
+ if([d.pray,d.how,d.sec,d.why,d.pos].some(v=>typeof v==="string"&&v.trim().length>0))return true;
+ if(Array.isArray(d.tr)&&d.tr.length>0)return true;
+ if(Array.isArray(d.tasks)&&d.tasks.some(x=>x&&((x.t||"").trim()||x.s==="y"||x.s==="n"||x.d)))return true;
+ return false;
+}
 function ensureLv(){if(typeof S.lv==="number")return;let c=0,f=0;for(const k in S.days){const x=S.days[k].st;if(x==="clean")c++;if(x==="fail")f++}const n=c-f*2;S.lv=n>=0?Math.min(n/60,1):Math.max(n/20,-1);save()}
 const sOf=x=>x.s!=null?x.s:(x.d?"y":"");
 const score=d=>{if(!d||!d.tasks||!d.tasks.length)return null;let y=0,n=0;d.tasks.forEach(x=>{const s=sOf(x);if(s==="y")y++;else if(s==="n")n++});return Math.round((y-n)/d.tasks.length*100)};
@@ -581,11 +590,11 @@ function render(){
   let clean=0,fail=0,streak=0;
   for(let i=1;i<=N;i++){
     const d=S.days[i],b=document.createElement("button"),jd=d2j(j0+i-1);
-    b.className="dot"+(d&&d.st?" "+d.st:"")+(i===ti?" today":"")+(i>ti?" future":"");
+    const saved=dayHasSavedData(d);b.className="dot"+(d&&d.st?" "+d.st:"")+(i===ti?" today":"")+(i>ti?" future":"")+(i<ti&&!saved?" open-past":"");
     b.innerHTML="<b>"+fa(i)+"</b><small>"+fa(jd[1])+"/"+fa(jd[2])+"</small>";
     b.setAttribute("aria-label","روز "+fa(i));
     if(firstR){b.classList.add("in");b.style.setProperty("--i",i)}
-    b.onclick=()=>openDay(i);g.appendChild(b);
+    b.onclick=()=>openDay(i);b.title=i>ti?"این روز هنوز باز نشده است":i<ti&&saved?"برای این روز اطلاعات ذخیره شده است":"برای ثبت اطلاعات باز کن";g.appendChild(b);
     if(d&&d.st==="clean")clean++;if(d&&d.st==="fail")fail++;
   }
   let k=Math.min(ti,N);if(k>0&&!(S.days[k]&&S.days[k].st))k--;
@@ -603,7 +612,9 @@ function render(){
 /* ---------- صفحه‌ی تمام‌صفحه‌ی روز ---------- */
 function openDay(i){
   const today=todayIdx();
-  if(i!==today){toast(i>today?"این روز هنوز باز نشده است.":"روزهای گذشته فقط برای مشاهده هستند و امکان ویرایش ندارند.");return}
+  if(i>today){toast("این روز هنوز باز نشده است.");return}
+  const existing=S.days[i];
+  if(i<today&&dayHasSavedData(existing)){toast("برای این روز اطلاعات ذخیره شده است و امکان ویرایش ندارد.");return}
   cur=i;const d=day(i);
   $("dTitle").textContent="روز "+fa(i)+" — "+fmtJ(startJ()+i-1);
   $("pray").value=d.pray;$("pos").value=d.pos;$("how").value=d.how;$("sec").value="";$("why").value=d.why;$("quote").textContent=POS[(i-1)%POS.length];
