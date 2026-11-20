@@ -1146,6 +1146,13 @@ initDate();initHyp();initRank();render();boot();
 #C90_AUTH_PANEL .authrow{display:flex;gap:8px;margin-top:12px}
 #C90_AUTH_PANEL button{flex:1;padding:12px}
 #C90_AUTH_PANEL .authmsg{min-height:28px;color:#e8b339;font-size:.85rem;margin-top:10px}
+ #C90_AUTH_PANEL .initial-prelogin{margin:12px 0;padding:12px;border:1px solid #715332;border-radius:12px;background:#100c0e}
+ #C90_AUTH_PANEL .initial-prelogin label{display:block;color:#efc45d;font-size:.9rem;margin-bottom:8px}
+ #C90_AUTH_PANEL .initial-pre-row{display:flex;gap:8px;align-items:center}
+ #C90_AUTH_PANEL .initial-pre-row input{flex:1;min-width:0;margin:0;text-align:center;direction:ltr}
+ #C90_AUTH_PANEL .initial-pre-row button{flex:0 0 auto;padding:10px 14px}
+ #C90_AUTH_PANEL #c90PreMsg{display:block;color:#b9a9a5;font-size:.75rem;line-height:1.7;margin-top:7px}
+ #C90_AUTH_PANEL #c90PreSave:disabled{opacity:.45;filter:grayscale(1)}
 #C90_INITIAL_DAYS{position:fixed;inset:0;z-index:2200;display:none;align-items:center;justify-content:center;padding:20px;background:#090708eF;backdrop-filter:blur(10px);font-family:Vazirmatn,Tahoma,sans-serif;color:#f5eee8;text-align:center}
 #C90_INITIAL_DAYS.on{display:flex}
 #C90_INITIAL_DAYS .initialbox{width:min(100%,390px);padding:26px 22px;border:1px solid #715332;border-radius:22px;background:linear-gradient(150deg,#26191c,#120e10);box-shadow:0 25px 80px #000b}
@@ -1218,6 +1225,11 @@ function hideLoader(){const e=document.getElementById("c90Loading");if(e)e.class
   <div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><h2>۹۰ روز | حساب کاربری</h2><button type="button" id="c90AuthBack" style="flex:0 0 auto;padding:7px 14px">بازگشت</button></div>
   <div id="c90AuthIntro">برای ذخیره‌ی امن اطلاعات، وارد حساب خودت شو یا حساب جدید بساز.</div>
   <input id="c90Username" autocomplete="username" placeholder="نام کاربری (انگلیسی، ۳ تا ۳۰ نویسه)" maxlength="30">
+  <div class="initial-prelogin">
+   <label for="c90PreDays">روزهای پاکی پیش از شروع چالش</label>
+   <div class="initial-pre-row"><input id="c90PreDays" type="text" inputmode="numeric" maxlength="2" placeholder="۰ تا ۹۰"><button type="button" id="c90PreSave">ثبت روزها</button></div>
+   <small id="c90PreMsg">هر روز = ۱۰ امتیاز آغازین؛ پس از ثبت، انتخاب قفل می‌شود.</small>
+  </div>
   <input id="c90Display" autocomplete="name" placeholder="نام نمایشی (اختیاری)">
   <input id="c90Password" type="password" autocomplete="current-password" placeholder="رمز عبور">
   <div class="authrow"><select id="c90Grade"><option value="">پایه تحصیلی</option><option value="10">دهم</option><option value="11">یازدهم</option><option value="12">دوازدهم</option></select><select id="c90Major"><option value="">رشته</option><option value="کامپیوتر">کامپیوتر</option><option value="گرافیک">گرافیک</option><option value="معماری">معماری</option></select></div>
@@ -1298,8 +1310,25 @@ async function loadCloud(){
   return false;
  }finally{cloudReadInProgress=false}
 }
+async function saveInitialDays(days){
+ const result=await request("/rest/v1/rpc/c90_set_initial_days",{method:"POST",headers:authHeaders(),body:JSON.stringify({p_days:days})});
+ profile.initial_days=Number(result.initial_days);
+ localStorage.removeItem("c90.pendingInitialDays."+String(profile.username||"").toLowerCase());
+ return result;
+}
 async function ensureInitialDays(){
- if(profile.initial_days!==null&&profile.initial_days!==undefined)return;
+ const username=String(profile.username||"").toLowerCase();
+ if(profile.initial_days!==null&&profile.initial_days!==undefined){
+  localStorage.removeItem("c90.pendingInitialDays."+username);
+  return;
+ }
+ const pending=localStorage.getItem("c90.pendingInitialDays."+username);
+ if(pending!==null){
+  const days=Number(pending);
+  if(Number.isInteger(days)&&days>=0&&days<=90){
+   try{await saveInitialDays(days);return}catch(e){console.warn("Pending initial-days save:",e.message)}
+  }
+ }
  const modal=$("C90_INITIAL_DAYS"),input=$("c90InitialInput"),button=$("c90InitialSave"),message=$("c90InitialMsg");
  modal.classList.add("on");input.value="";message.textContent="";button.disabled=false;
  await new Promise(resolve=>{
@@ -1310,8 +1339,7 @@ async function ensureInitialDays(){
    if(!Number.isInteger(days)||days<0||days>90){message.textContent="عدد باید بین ۰ تا ۹۰ باشد.";return}
    button.disabled=true;message.textContent="در حال ثبت امتیاز آغازین…";
    try{
-    const result=await request("/rest/v1/rpc/c90_set_initial_days",{method:"POST",headers:authHeaders(),body:JSON.stringify({p_days:days})});
-    profile.initial_days=Number(result.initial_days);
+    const result=await saveInitialDays(days);
     message.textContent="+"+fa(Number(result.bonus_points))+" امتیاز ثبت شد.";
     setTimeout(()=>{modal.classList.remove("on");resolve()},650);
    }catch(e){button.disabled=false;message.textContent=e.message}
@@ -1321,6 +1349,29 @@ async function ensureInitialDays(){
   input.onkeydown=e=>{if(e.key==="Enter")submit()};
  });
 }
+function refreshPreInitialDays(){
+ const user=String($("c90Username").value||"").trim().toLowerCase();
+ const input=$("c90PreDays"),button=$("c90PreSave"),note=$("c90PreMsg");
+ const saved=localStorage.getItem("c90.pendingInitialDays."+user);
+ if(saved!==null){
+  input.value=saved;input.disabled=true;button.disabled=true;
+  note.textContent="روزهای آغازین برای این نام کاربری ثبت شده و انتخاب قفل است.";
+ }else{
+  input.disabled=false;button.disabled=false;
+  note.textContent="هر روز = ۱۰ امتیاز آغازین؛ پس از ثبت، انتخاب قفل می‌شود.";
+ }
+}
+$("c90Username").addEventListener("input",refreshPreInitialDays);
+$("c90PreSave").onclick=()=>{
+ const user=String($("c90Username").value||"").trim().toLowerCase();
+ const raw=$("c90PreDays").value.trim();
+ if(!/^[a-z0-9][a-z0-9._-]{2,29}$/.test(user)){ $("c90PreMsg").textContent="ابتدا نام کاربری معتبر را وارد کن.";return}
+ if(!/^[0-9]{1,2}$/.test(raw)||Number(raw)>90){$("c90PreMsg").textContent="عدد صحیح بین ۰ تا ۹۰ وارد کن.";return}
+ localStorage.setItem("c90.pendingInitialDays."+user,String(Number(raw)));
+ refreshPreInitialDays();
+ $("c90PreMsg").textContent="انتخاب ذخیره شد؛ پس از ورود به همین حساب، امتیاز آغازین ثبت می‌شود.";
+};
+refreshPreInitialDays();
 async function syncCloud(data){
  if(!session||!data||cloudReadFailed||cloudReadInProgress)return;
  const payload={user_id:session.user.id,report_date:"2000-01-01",payload:data,updated_at:new Date().toISOString()};
