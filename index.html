@@ -1146,7 +1146,7 @@ initDate();initHyp();initRank();render();boot();
 #C90_AUTH_PANEL .authrow{display:flex;gap:8px;margin-top:12px}
 #C90_AUTH_PANEL button{flex:1;padding:12px}
 #C90_AUTH_PANEL .authmsg{min-height:28px;color:#e8b339;font-size:.85rem;margin-top:10px}
-#C90_INITIAL_DAYS{position:fixed;inset:0;z-index:1500;display:none;align-items:center;justify-content:center;padding:20px;background:#090708eF;backdrop-filter:blur(10px);font-family:Vazirmatn,Tahoma,sans-serif;color:#f5eee8;text-align:center}
+#C90_INITIAL_DAYS{position:fixed;inset:0;z-index:2200;display:none;align-items:center;justify-content:center;padding:20px;background:#090708eF;backdrop-filter:blur(10px);font-family:Vazirmatn,Tahoma,sans-serif;color:#f5eee8;text-align:center}
 #C90_INITIAL_DAYS.on{display:flex}
 #C90_INITIAL_DAYS .initialbox{width:min(100%,390px);padding:26px 22px;border:1px solid #715332;border-radius:22px;background:linear-gradient(150deg,#26191c,#120e10);box-shadow:0 25px 80px #000b}
 #C90_INITIAL_DAYS h2{margin:0 0 10px;color:#efc45d;font-size:1.25rem}
@@ -1425,7 +1425,7 @@ async function ensureSchoolInfo(){
   return;
  }
  const box=document.createElement("div");
- box.style.cssText="position:fixed;inset:0;z-index:1100;background:#080609f2;display:grid;place-items:center;padding:18px;font-family:Vazirmatn,Tahoma,sans-serif";
+ box.style.cssText="position:fixed;inset:0;z-index:2200;background:#080609f2;display:grid;place-items:center;padding:18px;font-family:Vazirmatn,Tahoma,sans-serif";
  box.innerHTML='<div style="width:100%;max-width:420px;background:#181113;border:1px solid #49343b;border-radius:16px;padding:20px;color:#fff"><h3 style="color:#e8b339">تکمیل مشخصات تحصیلی</h3><p>برای رتبه‌بندی هم‌پایه و هم‌رشته، پایه و رشته را ثبت کن.</p><select id="c90SetGrade" style="width:100%;padding:12px;margin:8px 0;background:#0f0b0c;color:white"><option value="">پایه تحصیلی</option><option value="10">دهم</option><option value="11">یازدهم</option><option value="12">دوازدهم</option></select><select id="c90SetMajor" style="width:100%;padding:12px;margin:8px 0;background:#0f0b0c;color:white"><option value="">رشته</option><option>کامپیوتر</option><option>گرافیک</option><option>معماری</option></select><button id="c90SetSave" style="width:100%;padding:12px;margin-top:10px">ثبت مشخصات</button><div id="c90SetMsg" style="color:#e8b339;margin-top:8px"></div></div>';
  document.body.appendChild(box);
  if(profile.grade)box.querySelector("#c90SetGrade").value=String(profile.grade);
