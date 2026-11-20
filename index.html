@@ -522,6 +522,7 @@ const fmtJ=j=>{const[y,m,d]=d2j(j);return WEEK[mod(j+1,7)]+" "+fa(d)+" "+MONTHS[
 function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d)return d}catch(e){}return{start:"",days:{},vault:null}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));window.dispatchEvent(new CustomEvent("c90save",{detail:S}))}catch(e){}}
 window.C90_SET_START_DATE=function(value){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(value)))throw new Error("تاریخ شروع نامعتبر است");S.start=String(value);save();if(page===1)render()};
+window.C90_LOAD_USER_STATE=function(uid){KEY="challenge90.v1."+String(uid);S=load();ensureLv();render()};
 window.addEventListener("c90cloudupdate",e=>{const d=e.detail;if(!d||typeof d!=="object")return;if(JSON.stringify(S)===JSON.stringify(d))return;S=d;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(x){}if(page===2)hrender();else if(page===3)rrender();else render()});
 function later(){clearTimeout(t);t=setTimeout(save,300)}
 function toast(m){const e=$("toast");e.textContent=m;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",4000)}
@@ -1241,11 +1242,6 @@ async function enter(s){
  localStorage.setItem("c90.session",JSON.stringify(s));localStorage.setItem("c90.uid",s.user.id);
  if(sessionStorage.getItem("c90.active_uid")!==s.user.id){
   sessionStorage.setItem("c90.active_uid",s.user.id);
-  KEY="challenge90.v1."+s.user.id;
-  await loadCloud();
-  S=load();
-  ensureLv();
-  render();
  }
  window.C90_CURRENT_USERNAME=profile.username;
  if(profile.start_date){if(typeof window.C90_SET_START_DATE!=="function")throw new Error("ماژول برنامه بارگذاری نشده است؛ صفحه را تازه‌سازی کن.");window.C90_SET_START_DATE(profile.start_date)}else{const initialized=await request("/rest/v1/rpc/c90_initialize_start_date",{method:"POST",headers:authHeaders(),body:"{}"});const todayIso=String(initialized);profile.start_date=todayIso;if(typeof window.C90_SET_START_DATE!=="function")throw new Error("ماژول برنامه بارگذاری نشده است؛ صفحه را تازه‌سازی کن.");window.C90_SET_START_DATE(todayIso)}
@@ -1291,10 +1287,8 @@ async function enter(s){
  $("c90AccountOpen").textContent="مدیریت حساب";
  
  await loadCloud();
- KEY="challenge90.v1."+session.user.id;
- S=load();
- ensureLv();
- render();
+ if(typeof window.C90_LOAD_USER_STATE!=="function")throw new Error("ماژول اطلاعات حساب بارگذاری نشده است؛ صفحه را تازه‌سازی کن.");
+ window.C90_LOAD_USER_STATE(session.user.id);
  await ensureSchoolInfo();
  $("C90_AUTH_PANEL").style.display="none";
  if(profile.role==="admin"){
