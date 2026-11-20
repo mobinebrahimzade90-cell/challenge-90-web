@@ -294,6 +294,7 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
   </div>
 
   <div class="card" id="c90AccountCard"><h3>حساب و مشخصات</h3><div id="c90AccountStatus" class="note">بدون حساب هم می‌توانی از برنامه استفاده کنی.</div><button id="c90AccountOpen" style="margin-top:10px">ورود یا ساخت حساب</button></div>
+  <div class="card rank-progress-card" id="c90RankProgress" aria-live="polite"></div>
   <div class="card"><h3>مدال‌های پاکی</h3><div id="c90Medals" class="acts"></div></div>
   <div class="card stats">
     <div><b id="sStreak">۰</b><span>رکورد پیاپی</span></div>
@@ -607,7 +608,7 @@ function render(){
   $("tl").textContent=ti>=1&&ti<=N?"امروز روز "+fa(ti)+" است — "+fmtJ(todayJ()):(ti<1?"شروع: "+fmtJ(j0):"چالش تمام شد");
   drawTrend($("trend"),0,130);
   const pd=Math.max(0,Math.min(ti,N));$("rDay").textContent=ti<1?"—":fa(pd);$("rp").style.strokeDashoffset=326.7*(1-pd/N);
-  firstR=false;applyTheme();patterns();
+  firstR=false;applyTheme();patterns();renderRankProgress();
 }
 
 /* ---------- صفحه‌ی تمام‌صفحه‌ی روز ---------- */
@@ -1063,11 +1064,44 @@ function calcScore(){
   return{total:Math.max(0,main+hypnosis),main,hypnosis};
 }
 let rEdit=false;
+
 let c90RankingTab="class";
+const C90_RANK_LEVELS=[
+ {key:"bronze",name:"برنزی",min:300,tone:"bronze"},
+ {key:"silver",name:"نقره‌ای",min:600,tone:"silver"},
+ {key:"gold",name:"طلایی",min:900,tone:"gold"},
+ {key:"diamond",name:"الماس",min:2000,tone:"diamond"},
+ {key:"champion",name:"قهرمان",min:4000,tone:"champion"},
+ {key:"titan",name:"تایتان",min:7500,tone:"titan"},
+ {key:"legendary",name:"لجندری",min:9000,tone:"legendary"}
+];
+function c90CurrentPoints(){
+ const username=String(profile&&profile.username||window.C90_CURRENT_USERNAME||"").toLowerCase();
+ const rows=window.CHALLENGE_INDIVIDUALS;
+ if(username&&Array.isArray(rows)){const me=rows.find(x=>String(x.username||"").toLowerCase()===username);if(me&&Number.isFinite(Number(me.points)))return Math.max(0,Number(me.points))}
+ const base=typeof calcScore==="function"?Number(calcScore().total)||0:0;
+ const bonus=profile&&profile.initial_days!=null?Number(profile.initial_days)*10:0;
+ return Math.max(0,base+bonus);
+}
+function renderRankProgress(){
+ const box=document.getElementById("c90RankProgress");if(!box)return;
+ const points=c90CurrentPoints();
+ let current=null,next=null;
+ for(const level of C90_RANK_LEVELS){if(points>=level.min)current=level;else{next=level;break}}
+ const pct=next?Math.max(0,Math.min(100,((points-(current?current.min:0))/(next.min-(current?current.min:0)))*100)):100;
+ const active=current||{key:"starter",name:"تازه‌وارد",tone:"starter"};
+ const remaining=next?Math.max(0,next.min-points):0;
+ box.dataset.tier=active.tone;
+ box.innerHTML='<div class="rank-progress-head"><div><small>امتیاز و سطح بازیکن</small><h3>مسیر ارتقا</h3></div><div class="rank-points"><b>'+fa(points)+'</b><span>امتیاز</span></div></div>'+
+ '<div class="rank-current"><img src="assets/ranks/'+active.key+'.webp" alt="'+active.name+'" onerror="this.style.display=\'none\'"><div><small>رتبهٔ فعلی</small><strong>'+active.name+'</strong><span>'+(next?'تا رتبهٔ '+next.name+'، '+fa(remaining)+' امتیاز دیگر':'بالاترین رتبهٔ فعلی')+'</span></div></div>'+
+ '<div class="rank-progress-track"><i style="width:'+pct+'%"></i></div><div class="rank-progress-caption"><span>'+(current?fa(current.min):"۰")+'</span><span>'+(next?fa(next.min):"۹۰۰۰+")+'</span></div>'+
+ '<div class="rank-level-grid">'+C90_RANK_LEVELS.map(level=>{const unlocked=points>=level.min;return '<div class="rank-level '+(unlocked?'unlocked':'')+' '+(current&&current.key===level.key?'current':'')+'" data-tier="'+level.tone+'"><img src="assets/ranks/'+level.key+'.webp" alt="" loading="lazy" onerror="this.style.display=\'none\'"><b>'+level.name+'</b><small>'+fa(level.min)+'+</small></div>'}).join("")+'</div>';
+}
+
 function renderClassRanking(){
  const box=document.getElementById("c90ClassRanking");
  if(!box)return;
- box.innerHTML='<div class="rtab" id="c90RankTabs"><button data-rank="class">کلاسی</button><button data-rank="person">فردی</button></div><div id="c90RankList"></div><div class="note" id="c90RankNote"></div>';
+ box.innerHTML='<div class="rtab" id="c90RankTabs"><button data-rank="person">فردی</button><button data-rank="class">کلاسی</button></div><div id="c90RankList"></div><div class="note" id="c90RankNote"></div>';
  box.querySelectorAll("[data-rank]").forEach(b=>{
   b.classList.toggle("on",b.dataset.rank===c90RankingTab);
   b.setAttribute("aria-pressed",b.dataset.rank===c90RankingTab?"true":"false");
@@ -1097,6 +1131,7 @@ function renderRankingContent(){
   list.appendChild(row);
  });
  note.textContent=classMode?"امتیاز کلاسی: ۵۰٪ میانگین، ۳۰٪ مشارکت، ۲۰٪ استمرار.":"رتبه‌بندی افراد هم‌پایه و هم‌رشته بر اساس امتیاز ثبت‌شده.";
+ renderRankProgress();
 }
 function rrender(){
  const online=!!window.C90_CURRENT_USERNAME;
@@ -1693,5 +1728,61 @@ $("c90AdminSearch").oninput=drawUsers;
 })();
 </script>
 
+
+<style>
+.rank-progress-card{position:relative;overflow:hidden;border:1px solid color-mix(in srgb,var(--gold) 55%,var(--line));background:radial-gradient(ellipse at 100% 0%,color-mix(in srgb,var(--gold) 16%,var(--card)),var(--card) 58%);box-shadow:0 14px 34px #0004}
+.rank-progress-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.rank-progress-head h3{margin:3px 0 0;font-size:1.05rem}
+.rank-progress-head small,.rank-current small{color:var(--mute);font-size:.72rem}
+.rank-points{display:flex;flex-direction:column;align-items:center;min-width:82px;padding:7px 13px;border:1px solid var(--gold);border-radius:14px;background:#0003}
+.rank-points b{font:900 1.3rem Tahoma,sans-serif;color:var(--gt)}
+.rank-points span{font-size:.65rem;color:var(--mute)}
+.rank-current{display:flex;align-items:center;gap:13px;margin:16px 0 12px;padding:10px 12px;border-radius:16px;border:1px solid var(--tier,#a77d3b);background:linear-gradient(110deg,color-mix(in srgb,var(--tier,#a77d3b) 17%,transparent),#08060966)}
+.rank-current img{width:70px;height:70px;object-fit:contain;filter:drop-shadow(0 5px 12px color-mix(in srgb,var(--tier,#a77d3b) 45%,transparent))}
+.rank-current div{display:flex;flex-direction:column;gap:3px}
+.rank-current strong{font-size:1.1rem;color:var(--tier,#f0c35b)}
+.rank-current span{font-size:.72rem;color:var(--mute)}
+.rank-progress-track{height:8px;border-radius:20px;background:#080609aa;overflow:hidden}
+.rank-progress-track i{display:block;height:100%;border-radius:20px;background:linear-gradient(90deg,var(--tier,#a77d3b),#fff0a8);box-shadow:0 0 14px var(--tier,#a77d3b);transition:width .5s}
+.rank-progress-caption{display:flex;justify-content:space-between;color:var(--mute);font-size:.65rem;margin:5px 1px 13px}
+.rank-level-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.rank-level{min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px 3px 7px;border:1px solid #ffffff13;border-radius:13px;background:#05040755;opacity:.42;filter:grayscale(.85);transition:.25s}
+.rank-level img{width:47px;height:47px;object-fit:contain}
+.rank-level b{font-size:.68rem;color:var(--mute)}
+.rank-level small{font:.62rem Tahoma,sans-serif;color:var(--mute)}
+.rank-level.unlocked{opacity:1;filter:none;border-color:color-mix(in srgb,var(--tier) 65%,transparent);background:color-mix(in srgb,var(--tier) 12%,#080609);box-shadow:inset 0 0 15px color-mix(in srgb,var(--tier) 12%,transparent)}
+.rank-level.unlocked b{color:var(--tier)}
+.rank-level.current{transform:translateY(-2px);box-shadow:0 0 18px color-mix(in srgb,var(--tier) 32%,transparent),inset 0 0 15px color-mix(in srgb,var(--tier) 15%,transparent)}
+.rank-progress-card[data-tier="bronze"],.rank-level[data-tier="bronze"]{--tier:#bd7548}
+.rank-progress-card[data-tier="silver"],.rank-level[data-tier="silver"]{--tier:#c4cbd5}
+.rank-progress-card[data-tier="gold"],.rank-level[data-tier="gold"]{--tier:#edbd38}
+.rank-progress-card[data-tier="diamond"],.rank-level[data-tier="diamond"]{--tier:#9d79ff}
+.rank-progress-card[data-tier="champion"],.rank-level[data-tier="champion"]{--tier:#ff9638}
+.rank-progress-card[data-tier="titan"],.rank-level[data-tier="titan"]{--tier:#e45a71}
+.rank-progress-card[data-tier="legendary"],.rank-level[data-tier="legendary"]{--tier:#51bfff}
+.rank-progress-card[data-tier="starter"]{--tier:#9a879b}
+@media(max-width:390px){.rank-level-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.rank-current img{width:60px;height:60px}}
+#c90RankTabs{direction:rtl}
+#c90RankTabs [data-rank="person"]{order:0}
+#c90RankTabs [data-rank="class"]{order:1}
+#C90_AUTH_PANEL{overflow-y:auto;overscroll-behavior:contain;align-items:center;padding:24px 16px;background:radial-gradient(ellipse at 50% 8%,#43202c 0,#1b1018 38%,#08070b 78%);backdrop-filter:blur(12px)}
+#C90_AUTH_PANEL .authbox{position:relative;isolation:isolate;max-width:460px;margin:auto;padding:25px 22px 22px;border:1px solid #76543e;border-radius:25px;background:linear-gradient(150deg,#291a20 0%,#191117 48%,#100d13 100%);box-shadow:0 28px 90px #000c,inset 0 1px #ffffff18;overflow:hidden}
+#C90_AUTH_PANEL .authbox:before{content:"";position:absolute;z-index:-1;top:-95px;left:50%;width:230px;height:230px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle,#e9b84b25,transparent 68%);pointer-events:none}
+#C90_AUTH_PANEL .authbox:after{content:"90";display:block;text-align:center;font:900 2.6rem Georgia,serif;letter-spacing:.18em;color:#f0c45e;text-shadow:0 0 24px #e7a93266;margin:0 auto 8px}
+#C90_AUTH_PANEL .authbox>div:first-child{align-items:center!important;border-bottom:1px solid #ffffff13;padding-bottom:13px;margin-bottom:14px}
+#C90_AUTH_PANEL h2{font-size:1.2rem;letter-spacing:.01em}
+#C90_AUTH_PANEL #c90AuthIntro{color:#c8b8b9;font-size:.83rem;line-height:1.8;margin:0 0 15px}
+#C90_AUTH_PANEL input,#C90_AUTH_PANEL select{box-sizing:border-box;min-height:49px;margin:9px 0;padding:12px 14px;border-radius:13px;border:1px solid #59414a;background:#0d0a0f;color:#fff;outline:none;transition:border-color .2s,box-shadow .2s}
+#C90_AUTH_PANEL input:focus,#C90_AUTH_PANEL select:focus{border-color:#e8b339;box-shadow:0 0 0 3px #e8b33920}
+#C90_AUTH_PANEL .initial-prelogin{margin:13px 0 15px;padding:14px;border:1px solid #80603c;border-radius:16px;background:linear-gradient(135deg,#2b1d1e,#171116)}
+#C90_AUTH_PANEL .initial-pre-row button{border:1px solid #d6a63d;border-radius:11px;background:linear-gradient(135deg,#f4cc68,#d99727);color:#211407;font-weight:900}
+#C90_AUTH_PANEL .authrow{gap:10px;margin-top:10px}
+#C90_AUTH_PANEL .authrow button{min-height:49px;border-radius:13px;font-weight:900}
+#C90_AUTH_PANEL #c90Login{background:linear-gradient(135deg,#f4cb68,#d9982c);color:#211407;border:0}
+#C90_AUTH_PANEL #c90Signup{background:#2a1d27;color:#f2d99a;border:1px solid #76543e}
+#C90_AUTH_PANEL #c90AuthBack{border:1px solid #5e4650;border-radius:10px;background:#ffffff08;color:#cbb9b8}
+#C90_AUTH_PANEL .authmsg{min-height:25px;text-align:center;line-height:1.7}
+@media(max-height:720px){#C90_AUTH_PANEL{align-items:flex-start}#C90_AUTH_PANEL .authbox{margin:4px auto}}
+</style>
 </body>
 </html>
