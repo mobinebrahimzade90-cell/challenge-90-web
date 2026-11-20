@@ -1282,7 +1282,7 @@ async function ensureInitialDays(){
  await new Promise(resolve=>{
   const submit=async()=>{
    const raw=input.value.trim();
-   if(!/^\\d{1,2}$/.test(raw)){message.textContent="فقط عدد صحیح از ۰ تا ۹۰ وارد کن.";return}
+   if(!/^[0-9]{1,2}$/.test(raw)){message.textContent="فقط عدد صحیح از ۰ تا ۹۰ وارد کن.";return}
    const days=Number(raw);
    if(!Number.isInteger(days)||days<0||days>90){message.textContent="عدد باید بین ۰ تا ۹۰ باشد.";return}
    button.disabled=true;message.textContent="در حال ثبت امتیاز آغازین…";
