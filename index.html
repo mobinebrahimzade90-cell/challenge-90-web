@@ -1332,9 +1332,9 @@ async function enter(s){
   $("c90AdminOpen").onclick=openAdmin;
  }
  const out=document.createElement("div");out.className="c90-accountbar";
- out.innerHTML='<span style="color:var(--mute)">حساب: '+String(profile.username||"").replace(/[&<>"]/g,"")+'</span><button id="c90Logout">خروج از حساب</button>';
+ out.innerHTML='<span style="color:var(--mute)">حساب: '+String(profile.username||"").replace(/[&<>"]/g,"")+'</span><button id="c90Logout">ترک حساب</button>';
  document.querySelector(".wrap").prepend(out);
- $("c90Logout").onclick=async()=>{try{await request("/auth/v1/logout",{method:"POST",headers:authHeaders()})}catch(e){}localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");sessionStorage.removeItem("c90.loaded");sessionStorage.removeItem("c90.active_uid");location.reload()};
+ $("c90Logout").onclick=async()=>{const button=$("c90Logout");button.disabled=true;button.textContent="در حال ترک حساب…";try{await request("/auth/v1/logout",{method:"POST",headers:authHeaders()})}catch(e){}clearTimeout(cloudTimer);clearInterval(window.C90_CLASS_RANK_TIMER);if(window.C90_RT_CLIENT&&window.C90_RT_CHANNEL){try{await window.C90_RT_CLIENT.removeChannel(window.C90_RT_CHANNEL)}catch(e){}}localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");sessionStorage.removeItem("c90.loaded");sessionStorage.removeItem("c90.active_uid");session=null;profile=null;location.reload()};
  window.addEventListener("c90save",e=>scheduleSync(e.detail));
  if(navigator.onLine){const local=localStorage.getItem("challenge90.v1."+session.user.id);if(local){try{await syncCloud(JSON.parse(local))}catch(e){console.warn(e)}}}
 }
@@ -1503,7 +1503,7 @@ $("c90AdminSearch").oninput=drawUsers;
 (async()=>{
  try{
   const raw=localStorage.getItem("c90.session");
-  if(!raw){$("C90_AUTH_PANEL").style.display="none";return}
+  if(!raw){$("C90_AUTH_PANEL").style.display="flex";return}
   showLoader("در حال بازیابی حساب…");
   let old=JSON.parse(raw),u;
   try{u=await request("/auth/v1/user",{headers:{apikey:KEY,Authorization:"Bearer "+old.access_token}})}
