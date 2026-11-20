@@ -491,7 +491,7 @@ const N=90;let KEY="challenge90.v1."+(localStorage.getItem("c90.uid")||"guest");
 const fa=n=>Number(n).toLocaleString("fa-IR",{useGrouping:false});
 const MONTHS=["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"];
 const WEEK=["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنجشنبه","جمعه","شنبه"];
-let S=load(),cur=0,t,firstR=true,cryptoKey=null,page=1,busy=false;
+let S=load(),cur=0,t,firstR=true,cryptoKey=null,page=1;
 
 /* ---------- تقویم شمسی (بدون وابستگی به مرورگر) ---------- */
 const div=(a,b)=>Math.trunc(a/b),mod=(a,b)=>a-Math.trunc(a/b)*b;
@@ -946,29 +946,32 @@ function moveInd(){const b=document.querySelector('#nav button[data-p="'+page+'"
 function setPage(n){
   n=Number(n);
   if(![1,2,3].includes(n)||n===page)return;
-  const previous=page;
   page=n;
-  try{
-    [1,2,3].forEach(i=>{const panel=$("pg"+i);if(panel)panel.classList.toggle("hide",i!==n)});
-    moveInd();
-    window.scrollTo({top:0,behavior:"instant"});
-    if(n===2)hrender();
-    else if(n===3){
-      rrender();
-      if(window.C90_LOAD_RANKING)window.C90_LOAD_RANKING().catch(e=>toast("رتبه‌بندی آنلاین در دسترس نیست؛ اتصال را بررسی کن."));
-    }else render();
-    applyTheme();
-  }catch(error){
-    console.error("Page navigation error:",error);
-    toast("نمایش این بخش با خطا روبه‌رو شد؛ دوباره تلاش کن.");
-  }finally{
-    busy=false;
-    const wipe=$("wipe"),blinds=$("blinds");
-    if(wipe){wipe.classList.remove("on");wipe.style.opacity=0}
-    if(blinds)blinds.style.display="none";
-  }
+  [1,2,3].forEach(i=>{const panel=$("pg"+i);if(panel)panel.classList.toggle("hide",i!==n)});
+  moveInd();
+  applyTheme();
+  try{window.scrollTo(0,0)}catch(e){}
+  requestAnimationFrame(()=>{
+    if(page!==n)return;
+    try{
+      if(n===2)hrender();
+      else if(n===3){
+        rrender();
+        if(window.C90_LOAD_RANKING)window.C90_LOAD_RANKING().catch(e=>toast("رتبه‌بندی آنلاین در دسترس نیست؛ اتصال را بررسی کن."));
+      }else render();
+    }catch(error){
+      console.error("Page render error:",error);
+      toast("محتوای این بخش بارگذاری نشد؛ از سربرگ بخش دیگری را انتخاب کن.");
+    }
+  });
 }
-NAVB.forEach(b=>b.addEventListener("click",()=>setPage(b.dataset.p)));
+const NAV=document.getElementById("nav");
+NAV.addEventListener("click",event=>{
+  const button=event.target.closest("button[data-p]");
+  if(!button||!NAV.contains(button))return;
+  event.preventDefault();
+  setPage(button.dataset.p);
+},true);
 
 const HN=20,HID=["hY","hM","hD"];
 function ensureHyp(){if(!S.hyp)S.hyp={start:"",days:{}};if(!S.hyp.start)S.hyp.start=isoOf(d2g(todayJ()))}
@@ -1131,17 +1134,19 @@ function renderRankingContent(){
  const rows=classMode?window.CHALLENGE_CLASSES:window.CHALLENGE_INDIVIDUALS;
  if(!Array.isArray(rows)){note.textContent="برای مشاهده رتبه‌بندی آنلاین وارد حساب کاربری شو.";return}
  if(!rows.length){note.textContent="هنوز اطلاعاتی برای رتبه‌بندی ثبت نشده است.";return}
- rows.forEach((x,i)=>{
+ const fragment=document.createDocumentFragment();
+ rows.slice(0,100).forEach((x,i)=>{
   const row=document.createElement("div");
   row.className="rk"+(i<3?" r"+(i+1):"")+(x.is_my_class||x.is_me?" me":"");
-  row.style.animationDelay=(i*60)+"ms";
   const score=classMode?(+x.ranking_score||0):(+x.points||0);
   row.innerHTML="<u>"+fa(i+1)+"</u><span></span><em>"+fa(score)+"</em>";
   row.children[1].textContent=classMode?x.class_name:(x.display_name||x.username)+(x.is_me?" (تو)":"");
   const level=C90_RANK_LEVELS.reduce((best,item)=>score>=item.min?item:best,null)||{key:"starter",name:"تازه‌وارد",tone:"starter"};
   const badge=document.createElement("span");badge.className="rank-inline-badge";badge.title=level.name;badge.innerHTML=c90RankIcon(level,30);row.children[1].appendChild(badge);
-  list.appendChild(row);
+  fragment.appendChild(row);
  });
+ list.appendChild(fragment);
+ if(rows.length>100)note.textContent="۱۰۰ رتبهٔ اول نمایش داده می‌شود؛ "+note.textContent;
  note.textContent=classMode?"امتیاز کلاسی: ۵۰٪ میانگین، ۳۰٪ مشارکت، ۲۰٪ استمرار.":"رتبه‌بندی افراد هم‌پایه و هم‌رشته بر اساس امتیاز ثبت‌شده.";
  renderRankProgress();
 }
@@ -1162,12 +1167,14 @@ function rrender(){
  $("tl3").textContent=me?"رتبه‌ی تو: "+fa(me)+" از "+fa(arr.length):"";
  $("rEd").classList.toggle("hide",!!ext);$("rForm").classList.toggle("hide",!rEdit||!!ext);
  const L=$("rList");L.innerHTML="";
- arr.forEach((a,k)=>{
-  const r=document.createElement("div");r.className="rk"+(k<3?" r"+(k+1):"")+(a.me?" me":"");r.style.animationDelay=k*60+"ms";
+ const fragment=document.createDocumentFragment();
+ arr.slice(0,100).forEach((a,k)=>{
+  const r=document.createElement("div");r.className="rk"+(k<3?" r"+(k+1):"")+(a.me?" me":"");
   r.innerHTML="<u>"+fa(k+1)+"</u><span></span><em>"+fa(a.s)+"</em>";r.children[1].textContent=a.n+(a.me?" (تو)":"");
   if(rEdit&&!a.me&&!ext){const x=document.createElement("button");x.className="dl";x.textContent="×";x.setAttribute("aria-label","حذف");x.onclick=()=>{S.rank.members.splice(a.i,1);save();rrender()};r.appendChild(x)}
-  L.appendChild(r);
+  fragment.appendChild(r);
  });
+ L.appendChild(fragment);
 }
 window.addEventListener("c90ranking",()=>{if(page===3){if(window.C90_CURRENT_USERNAME)renderRankingContent();else rrender()}});
 function initRank(){
