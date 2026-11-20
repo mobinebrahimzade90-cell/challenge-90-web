@@ -942,29 +942,33 @@ function initName(){
     e.onkeydown=k=>{if(k.key==="Enter")e.blur()};if(id!=="sName")e.onfocus=()=>e.select()});
 }
 const NAVB=document.querySelectorAll("#nav button");
-function moveInd(){const b=document.querySelector('#nav button[data-p="'+page+'"]'),i=$("nvi");i.style.left=b.offsetLeft+"px";i.style.width=b.offsetWidth+"px";NAVB.forEach(x=>x.classList.toggle("on",x===b))}
+function moveInd(){const b=document.querySelector('#nav button[data-p="'+page+'"]'),i=$("nvi");if(!b||!i)return;i.style.left=b.offsetLeft+"px";i.style.width=b.offsetWidth+"px";NAVB.forEach(x=>x.classList.toggle("on",x===b))}
 function setPage(n){
-  if(n===page||busy)return;busy=true;
-  const prev=page,o=n===2?TH2:n===3?TH3:themeFor(S.lv),bg="rgb("+o.bg.join(",")+")";
-  page=n;moveInd();
-  const swap=()=>{[1,2,3].forEach(i=>$("pg"+i).classList.toggle("hide",i!==n));window.scrollTo(0,0);
-    if(n===2)hrender();else if(n===3){rrender();if(window.C90_LOAD_RANKING)window.C90_LOAD_RANKING().catch(e=>toast("رتبه‌بندی آنلاین در دسترس نیست؛ SQL رتبه‌بندی را در Supabase اجرا کن."))}else render();applyTheme()};
-  if(n===3||prev===3){
-    const B=$("blinds"),K=[...B.children];B.style.display="flex";
-    K.forEach((e,i)=>{e.style.background=bg;e.style.transition="none";e.style.transformOrigin=i%2?"bottom":"top";e.style.transform="scaleY(0)"});void B.offsetWidth;
-    K.forEach((e,i)=>{e.style.transition="transform .45s cubic-bezier(.6,0,.3,1) "+i*55+"ms";e.style.transform="scaleY(1)"});
-    setTimeout(()=>{swap();K.forEach((e,i)=>{e.style.transformOrigin=i%2?"top":"bottom";e.style.transition="transform .5s cubic-bezier(.6,0,.3,1) "+(K.length-1-i)*55+"ms";e.style.transform="scaleY(0)"});
-      setTimeout(()=>{B.style.display="none";busy=false},850)},780);
-    return;
+  n=Number(n);
+  if(![1,2,3].includes(n)||n===page)return;
+  const previous=page;
+  page=n;
+  try{
+    [1,2,3].forEach(i=>{const panel=$("pg"+i);if(panel)panel.classList.toggle("hide",i!==n)});
+    moveInd();
+    window.scrollTo({top:0,behavior:"instant"});
+    if(n===2)hrender();
+    else if(n===3){
+      rrender();
+      if(window.C90_LOAD_RANKING)window.C90_LOAD_RANKING().catch(e=>toast("رتبه‌بندی آنلاین در دسترس نیست؛ اتصال را بررسی کن."));
+    }else render();
+    applyTheme();
+  }catch(error){
+    console.error("Page navigation error:",error);
+    toast("نمایش این بخش با خطا روبه‌رو شد؛ دوباره تلاش کن.");
+  }finally{
+    busy=false;
+    const wipe=$("wipe"),blinds=$("blinds");
+    if(wipe){wipe.classList.remove("on");wipe.style.opacity=0}
+    if(blinds)blinds.style.display="none";
   }
-  const b=document.querySelector('#nav button[data-p="'+n+'"]').getBoundingClientRect(),cx=b.left+b.width/2,cy=b.top+b.height/2,w=$("wipe");
-  w.style.transition="none";w.style.opacity=1;w.style.background=bg;
-  w.style.clipPath="circle(0px at "+cx+"px "+cy+"px)";w.classList.add("on");void w.offsetWidth;
-  w.style.transition="clip-path .6s cubic-bezier(.6,0,.3,1)";w.style.clipPath="circle(160% at "+cx+"px "+cy+"px)";
-  setTimeout(()=>{swap();w.style.transition="opacity .55s ease";w.style.opacity=0;
-    setTimeout(()=>{w.classList.remove("on");w.style.transition="none";busy=false},580)},620);
 }
-NAVB.forEach(b=>b.onclick=()=>setPage(+b.dataset.p));
+NAVB.forEach(b=>b.addEventListener("click",()=>setPage(b.dataset.p)));
 
 const HN=20,HID=["hY","hM","hD"];
 function ensureHyp(){if(!S.hyp)S.hyp={start:"",days:{}};if(!S.hyp.start)S.hyp.start=isoOf(d2g(todayJ()))}
@@ -1714,10 +1718,21 @@ $("c90Signup").onclick=async()=>{showLoader("در حال ساخت حساب…");
 $("c90Password").onkeydown=e=>{if(e.key==="Enter")$("c90Login").click()};
 $("c90AdminClose").onclick=()=>$("C90_ADMIN").style.display="none";
 $("c90AdminSearch").oninput=drawUsers;
+(function showLoginForGuest(){
+ const panel=$("C90_AUTH_PANEL");
+ const intro=$("intro"),splashScreen=$("splash"),setupScreen=$("setup"),loader=$("c90Loading");
+ if(intro)intro.classList.remove("on");
+ if(splashScreen)splashScreen.classList.remove("on");
+ if(setupScreen)setupScreen.classList.remove("on");
+ if(loader)loader.classList.remove("on");
+ if(panel)panel.style.display="flex";
+ document.body.style.overflow="hidden";
+})();
 (async()=>{
  try{
   const raw=localStorage.getItem("c90.session");
   if(!raw){$("C90_AUTH_PANEL").style.display="flex";return}
+  $("C90_AUTH_PANEL").style.display="none";
   showLoader("در حال بازیابی حساب…");
   let old=JSON.parse(raw),u;
   try{u=await request("/auth/v1/user",{headers:{apikey:KEY,Authorization:"Bearer "+old.access_token}})}
@@ -1730,6 +1745,7 @@ $("c90AdminSearch").oninput=drawUsers;
  }catch(e){
   localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");
   sessionStorage.removeItem("c90.active_uid");
+  $("intro").classList.remove("on");$("splash").classList.remove("on");$("setup").classList.remove("on");
   $("C90_AUTH_PANEL").style.display="flex";msg("بازیابی ورود ناموفق بود: "+(e&&e.message?e.message:"خطای نامشخص")+"؛ دوباره وارد شو.");
  }finally{hideLoader()}
 })();
