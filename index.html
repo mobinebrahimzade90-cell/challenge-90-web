@@ -180,6 +180,7 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
 .wrap{padding-bottom:100px}
 #pg1:not(.hide),#pg2:not(.hide){animation:pgin .6s ease}
 @keyframes pgin{from{opacity:0;transform:translateY(12px)}}
+#pg1.tab-enter,#pg2.tab-enter,#pg3.tab-enter{animation:pgin .42s cubic-bezier(.2,.7,.2,1) both}
 .gr{font-size:.9rem;color:var(--mute);margin-bottom:6px}
 .gr .di{width:11ch;font:600 .95rem Vazirmatn,Tahoma,sans-serif;color:var(--ink);border-bottom:1px dashed var(--mute);text-align:center}
 .nm{width:70%;max-width:280px;background:transparent;border:0;border-bottom:1px dashed rgba(246,204,96,.5);color:#f6efe8;text-align:center;font:400 1.4rem Lalezar,Vazirmatn,sans-serif;padding:0 0 2px;margin-bottom:8px;border-radius:0}
@@ -295,7 +296,7 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
 
   <div class="card" id="c90AccountCard"><h3>حساب و مشخصات</h3><div id="c90AccountStatus" class="note">بدون حساب هم می‌توانی از برنامه استفاده کنی.</div><button id="c90AccountOpen" style="margin-top:10px">ورود یا ساخت حساب</button></div>
   <div class="card rank-progress-card" id="c90RankProgress" aria-live="polite"></div>
-  <div class="card"><h3>مدال‌های پاکی</h3><div id="c90Medals" class="acts"></div></div>
+  
   <div class="card stats">
     <div><b id="sStreak">۰</b><span>رکورد پیاپی</span></div>
     <div><b id="sClean">۰</b><span>روز پاک</span></div>
@@ -491,7 +492,7 @@ const N=90;let KEY="challenge90.v1."+(localStorage.getItem("c90.uid")||"guest");
 const fa=n=>Number(n).toLocaleString("fa-IR",{useGrouping:false});
 const MONTHS=["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"];
 const WEEK=["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنجشنبه","جمعه","شنبه"];
-let S=load(),cur=0,t,firstR=true,cryptoKey=null,page=1;
+let S=load(),cur=0,t,firstR=true,cryptoKey=null,page=1,mainDirty=true;
 
 /* ---------- تقویم شمسی (بدون وابستگی به مرورگر) ---------- */
 const div=(a,b)=>Math.trunc(a/b),mod=(a,b)=>a-Math.trunc(a/b)*b;
@@ -523,7 +524,7 @@ const fmtJ=j=>{const[y,m,d]=d2j(j);return WEEK[mod(j+1,7)]+" "+fa(d)+" "+MONTHS[
 
 /* ---------- ذخیره‌ی محلی ---------- */
 function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d)return d}catch(e){}return{start:"",days:{},vault:null}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S));window.dispatchEvent(new CustomEvent("c90save",{detail:S}))}catch(e){}}
+function save(){mainDirty=true;try{localStorage.setItem(KEY,JSON.stringify(S));window.dispatchEvent(new CustomEvent("c90save",{detail:S}))}catch(e){}}
 window.C90_SET_START_DATE=function(value){if(!validStartIso(String(value)))throw new Error("تاریخ شروع نامعتبر است");S.start=String(value);save();if(page===1)render()};
 window.C90_LOAD_USER_STATE=function(uid,authoritativeStart){KEY="challenge90.v1."+String(uid);S=load();if(!S||typeof S!=="object")S={days:{},vault:null};if(!S.days||typeof S.days!=="object")S.days={};if(validStartIso(authoritativeStart))S.start=authoritativeStart;else if(!validStartIso(S.start))S.start=isoOf(d2g(todayJ()));save();ensureLv();render()};
 window.addEventListener("c90cloudupdate",e=>{const d=e.detail;if(!d||typeof d!=="object")return;if(JSON.stringify(S)===JSON.stringify(d))return;S=d;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(x){}if(page===2)hrender();else if(page===3)rrender();else render()});
@@ -587,8 +588,9 @@ function applyTheme(){
 
 /* ---------- صفحه‌ی اصلی ---------- */
 function render(){
+  mainDirty=false;
   const ti=todayIdx(),j0=startJ(),g=$("grid");g.innerHTML="";
-  const medals=$("c90Medals");if(medals){medals.innerHTML="";[7,14,30,60,90].forEach(n=>{const b=document.createElement("button"),earned=cleanStreakAt(ti)>=n;b.innerHTML=(earned?'<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z M7 6H4v2a4 4 0 0 0 4 4M17 6h3v2a4 4 0 0 1-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> ':'<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 1 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> ')+fa(n)+" روز";b.disabled=!earned;medals.appendChild(b)})}
+
   let clean=0,fail=0,streak=0;
   for(let i=1;i<=N;i++){
     const d=S.days[i],b=document.createElement("button"),jd=d2j(j0+i-1);
@@ -951,14 +953,16 @@ function setPage(n){
   moveInd();
   applyTheme();
   try{window.scrollTo(0,0)}catch(e){}
+  const activePanel=$("pg"+n);if(activePanel)activePanel.classList.remove("tab-enter");
   requestAnimationFrame(()=>{
     if(page!==n)return;
+    if(activePanel)activePanel.classList.add("tab-enter");
     try{
       if(n===2)hrender();
       else if(n===3){
         rrender();
         if(window.C90_LOAD_RANKING)window.C90_LOAD_RANKING().catch(e=>toast("رتبه‌بندی آنلاین در دسترس نیست؛ اتصال را بررسی کن."));
-      }else render();
+      }else if(mainDirty){firstR=true;render()}
     }catch(error){
       console.error("Page render error:",error);
       toast("محتوای این بخش بارگذاری نشد؛ از سربرگ بخش دیگری را انتخاب کن.");
