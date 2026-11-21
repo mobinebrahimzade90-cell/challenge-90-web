@@ -1819,13 +1819,13 @@ $("c90AdminSearch").oninput=drawUsers;
 </style>
 
 <style>
-/* رتبه‌ها: هر مدال در یک ردیف مستقل؛ نام وسط و امتیازها هم‌تراز در ستون چپ */
-.rank-level-grid{display:flex;flex-direction:column;gap:7px}
-.rank-level{display:grid;grid-template-columns:54px minmax(0,1fr) 76px;direction:rtl;align-items:center;justify-content:initial;gap:10px;width:100%;box-sizing:border-box;padding:7px 10px;text-align:right}
-.rank-level .rank-medal-svg{width:46px;height:46px;justify-self:center}
-.rank-level b{min-width:0;text-align:right;font-size:.78rem}
-.rank-level small{width:100%;text-align:left;white-space:nowrap;font-size:.7rem}
-@media(max-width:390px){.rank-level-grid{grid-template-columns:1fr}.rank-level{grid-template-columns:48px minmax(0,1fr) 68px}.rank-level .rank-medal-svg{width:42px;height:42px}}
+/* چیدمان قطعی رتبه‌ها: هر مدال یک ردیف، نام در مرکز، امتیاز در ستون ثابت چپ */
+.rank-level-grid{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:8px!important;width:100%}
+.rank-level{display:grid!important;grid-template-columns:58px minmax(0,1fr) 78px!important;direction:rtl!important;align-items:center!important;justify-content:stretch!important;gap:12px!important;width:100%!important;min-height:64px;padding:7px 12px!important;margin:0!important;text-align:center!important}
+.rank-level .rank-medal-svg{grid-column:1;grid-row:1;width:46px;height:46px;justify-self:center}
+.rank-level b{grid-column:2;grid-row:1;min-width:0;text-align:center!important;font-size:.82rem;white-space:nowrap}
+.rank-level small{grid-column:3;grid-row:1;width:100%;text-align:left!important;white-space:nowrap;font-size:.72rem;font-variant-numeric:tabular-nums}
+@media(max-width:390px){.rank-level{grid-template-columns:50px minmax(0,1fr) 70px!important;gap:8px!important;padding:7px 8px!important}.rank-level .rank-medal-svg{width:42px;height:42px}}
 </style>
 </body>
 </html>
