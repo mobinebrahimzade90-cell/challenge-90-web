@@ -1067,7 +1067,7 @@ function c90CurrentPoints(){
  return Math.max(0,base+bonus);
 }
 function c90RankIcon(level,size=54){
- const positions={bronze:"0% 0%",silver:"50% 0%",gold:"100% 0%",diamond:"0% 50%",champion:"50% 50%",legendary:"100% 50%",titan:"0% 100%"};
+ const positions={bronze:"100% 0%",silver:"0% 50%",gold:"0% 100%",diamond:"100% 50%",champion:"50% 50%",legendary:"0% 0%",titan:"50% 0%"};
  const pos=positions[level.key]||"50% 100%";
  return "<span class='rank-medal-image' role='img' aria-label='"+(level.name||"مدال")+"' style='width:"+size+"px;height:"+size+"px;background-position:"+pos+"'></span>";
 }
