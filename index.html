@@ -920,6 +920,7 @@ function moveInd(){const b=document.querySelector('#nav button[data-p="'+page+'"
 function setPage(n){
   n=Number(n);
   if(![1,2,3].includes(n)||n===page)return;
+  if(SE&&n!==2)endSess(false);
   page=n;
   [1,2,3].forEach(i=>{const panel=$("pg"+i);if(panel)panel.classList.toggle("hide",i!==n)});
   moveInd();
@@ -953,7 +954,30 @@ const HN=20,HID=["hY","hM","hD"];
 function ensureHyp(){if(!S.hyp)S.hyp={start:"",days:{}};if(!S.hyp.start)S.hyp.start=isoOf(d2g(todayJ()))}
 const hStartJ=()=>{ensureHyp();const[a,b,c]=S.hyp.start.split("-").map(Number);return g2d(a,b,c)};
 function hday(i){ensureHyp();return S.hyp.days[i]||(S.hyp.days[i]={st:"",min:0,b:0,a:0,sug:"",note:""})}
-let hcur=0,SE=null;
+let hcur=0,SE=null,SE_END=0,SE_AUDIO=null;
+function unlockHypAudio(){
+  const AC=window.AudioContext||window.webkitAudioContext;
+  if(!AC)return;
+  try{if(!SE_AUDIO)SE_AUDIO=new AC();if(SE_AUDIO.state==="suspended")SE_AUDIO.resume().catch(()=>{})}catch(e){}
+}
+function playHypCompletionCue(){
+  try{if(navigator.vibrate)navigator.vibrate([120,70,180,70,260])}catch(e){}
+  if(!SE_AUDIO)return;
+  try{
+    SE_AUDIO.resume().then(()=>{
+      const ctx=SE_AUDIO,base=ctx.currentTime;
+      [659.25,783.99,987.77].forEach((hz,i)=>{
+        const start=base+i*.16,osc=ctx.createOscillator(),gain=ctx.createGain();
+        osc.type="sine";osc.frequency.setValueAtTime(hz,start);
+        gain.gain.setValueAtTime(.0001,start);
+        gain.gain.exponentialRampToValueAtTime(.045,start+.035);
+        gain.gain.exponentialRampToValueAtTime(.0001,start+.72);
+        osc.connect(gain);gain.connect(ctx.destination);
+        osc.start(start);osc.stop(start+.75);
+      });
+    }).catch(()=>{});
+  }catch(e){}
+}
 function hrender(){
   ensureHyp();const j0=hStartJ(),ti=todayJ()-j0+1,g=$("hx");g.innerHTML="";
   let done=0,streak=0,mins=0,rs=0,rc=0;
@@ -999,22 +1023,28 @@ function startSess(){
   const entered=Math.floor(Number($("hDuration").value)||0);
   if(!Number.isFinite(entered)||entered<1||entered>180){toast("مدت جلسه باید بین ۱ تا ۱۸۰ دقیقه باشد.");return}
   d.min=entered;save();
-  const end=Date.now()+entered*60000,P=[["دم",4000,1],["نگه دار",2000,1],["بازدم",6000,.6]];
+  SE_END=Date.now()+entered*60000;
+  const P=[["دم",4000,1],["نگه دار",2000,1],["بازدم",6000,.6]];
   let ph=0,pt=Date.now();
+  unlockHypAudio();
   const setPh=()=>{const p=P[ph],dm=$("dm");$("sc").textContent=p[0];dm.style.transitionDuration=p[1]+"ms";dm.style.transform="rotate(45deg) scale("+p[2]+")"};
   $("dm").style.transitionDuration="0ms";$("dm").style.transform="rotate(45deg) scale(.6)";$("sess").classList.add("on");
   const tick=()=>{
-    const now=Date.now(),left=Math.max(0,end-now),sec=Math.ceil(left/1000);
+    if(!SE)return;
+    const now=Date.now(),left=Math.max(0,SE_END-now),sec=Math.ceil(left/1000);
     $("stm").textContent=fa(Math.floor(sec/60))+":"+fa(String(sec%60).padStart(2,"0"));
     if(now-pt>=P[ph][1]){ph=(ph+1)%P.length;pt=now;setPh()}
     if(left<=0)endSess(true);
   };
-  clearInterval(SE);setPh();tick();SE=setInterval(tick,200);
+  clearInterval(SE);setPh();tick();SE=setInterval(tick,250);
 }
 function endSess(ok){
-  clearInterval(SE);SE=null;$("sess").classList.remove("on");
-  if(ok){const d=hday(hcur);d.st="done";d.min=Math.max(1,Math.floor(Number(d.min)||5));save();hpaint();hrender();if(navigator.vibrate)navigator.vibrate([200,100,200]);toast("جلسه کامل شد؛ امتیاز ثبت شد")}
-  else {toast("جلسه متوقف شد؛ تایمر از ابتدا شروع می‌شود.")}
+  if(!SE&&!$("sess").classList.contains("on"))return;
+  clearInterval(SE);SE=null;SE_END=0;$("sess").classList.remove("on");
+  if(ok){
+    const d=hday(hcur);d.st="done";d.min=Math.max(1,Math.floor(Number(d.min)||5));save();hpaint();hrender();
+    playHypCompletionCue();toast("جلسه کامل شد؛ امتیاز ثبت شد")
+  }else{toast("جلسه متوقف شد؛ تایمر از ابتدا شروع می‌شود.")}
 }
 function initHyp(){
   initName();
@@ -1027,7 +1057,7 @@ function initHyp(){
   $("hBack").onclick=hc;
   $("hOk").onclick=async()=>{save();try{await syncCloud(S);hc();toast("اطلاعات جلسه در حساب کاربری ذخیره شد ✔")}catch(e){hc();toast("همگام‌سازی انجام نشد؛ اتصال را بررسی کن.")}};
   $("hStart").onclick=startSess;$("sEnd").onclick=()=>endSess(false);
-  document.addEventListener("visibilitychange",()=>{if(document.hidden&&SE)endSess(false)});
+  // Screen locking/background throttling must not cancel or pause the session.
   window.addEventListener("pagehide",()=>{if(SE)endSess(false)});
   moveInd();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(moveInd);window.addEventListener("resize",moveInd);
 }
