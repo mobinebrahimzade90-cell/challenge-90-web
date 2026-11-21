@@ -1067,10 +1067,9 @@ function c90CurrentPoints(){
  return Math.max(0,base+bonus);
 }
 function c90RankIcon(level,size=54){
- const p={bronze:["#f7bb78","#8e4828","#3c1d18"],silver:["#fff","#8995a6","#333d50"],gold:["#fff0a0","#c27a13","#5b3508"],diamond:["#e9e4ff","#8c50ff","#1d3a83"],champion:["#fff2b0","#f0a62c","#8c202b"],titan:["#e2f7ff","#43a9ed","#253d72"],legendary:["#fff0d2","#f23b80","#6d155e"],starter:["#d4c4b6","#77636e","#30232c"]};
- const c=p[level.key]||p.starter,star=level.key==="diamond"||level.key==="legendary";
- const center=star?"<path d='M50 27 72 50 50 73 28 50Z' fill='url(#g"+level.key+")' stroke='"+c[0]+"' stroke-width='2'/>":"<path d='m50 29 6.5 14 15.5 2-11.5 10.5 3.2 15L50 63l-13.7 7.5 3.2-15L28 45l15.5-2Z' fill='url(#g"+level.key+")' stroke='"+c[0]+"' stroke-width='1.8' stroke-linejoin='round'/>";
- return "<svg class='rank-medal-svg' width='"+size+"' height='"+size+"' viewBox='0 0 100 100' aria-hidden='true'><defs><linearGradient id='m"+level.key+"' x1='0' y1='0' x2='1' y2='1'><stop stop-color='"+c[0]+"'/><stop offset='.48' stop-color='"+c[1]+"'/><stop offset='1' stop-color='"+c[2]+"'/></linearGradient><linearGradient id='g"+level.key+"' x1='0' y1='0' x2='1' y2='1'><stop stop-color='"+c[0]+"'/><stop offset='.5' stop-color='"+c[1]+"'/><stop offset='1' stop-color='"+c[2]+"'/></linearGradient></defs><path d='M50 4 61 15 78 13 82 29 96 40 88 55 91 73 73 79 62 94 50 87 38 94 27 79 9 73 12 55 4 40 18 29 22 13 39 15Z' fill='url(#m"+level.key+")' stroke='"+c[0]+"' stroke-width='2'/><path d='M50 17 77 29 83 58 69 80 50 88 31 80 17 58 23 29Z' fill='"+c[2]+"' stroke='url(#m"+level.key+")' stroke-width='4'/><path d='M50 22 74 34 78 57 66 75 50 82 34 75 22 57 26 34Z' fill='none' stroke='"+c[0]+"' stroke-opacity='.75' stroke-width='1.6'/>"+center+"<path d='M50 7v12M50 81v11' stroke='"+c[0]+"' stroke-width='2' opacity='.8'/></svg>";
+ const positions={bronze:"0% 0%",silver:"50% 0%",gold:"100% 0%",diamond:"0% 50%",champion:"50% 50%",legendary:"100% 50%",titan:"0% 100%"};
+ const pos=positions[level.key]||"50% 100%";
+ return "<span class='rank-medal-image' role='img' aria-label='"+(level.name||"مدال")+"' style='width:"+size+"px;height:"+size+"px;background-position:"+pos+"'></span>";
 }
 function c90RankForPoints(points){let rank=null;for(const level of C90_RANK_LEVELS){if(points>=level.min)rank=level;else break}return rank||{key:"starter",name:"تازه‌وارد",min:0,tone:"starter"}}
 function renderRankProgress(){
@@ -1850,6 +1849,12 @@ $("c90AdminSearch").oninput=drawUsers;
  #c90RankList.individual .rk .rank-inline-badge{width:34px;height:34px}
 }
 
+
+/* مدال‌های اصلی رتبه‌بندی؛ ترتیب اسپرایت: برنزی، نقره‌ای، طلایی، دایمند، چمپیون، لجندری، تایتان */
+.rank-medal-image{display:inline-block;flex:0 0 auto;background-image:url('assets/rank-medals.webp');background-repeat:no-repeat;background-size:300% 300%;background-color:transparent;vertical-align:middle}
+.rank-inline-badge .rank-medal-image{width:100%!important;height:100%!important}
+.rank-level .rank-medal-image{width:48px!important;height:48px!important}
+.rank-current-medal .rank-medal-image{width:82px!important;height:82px!important}
 </style>
 </body>
 </html>
