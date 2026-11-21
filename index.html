@@ -1484,14 +1484,6 @@ async function enter(s){
  const shownName=profile.display_name||profile.username||"کاربر";
  const shownClass=(profile.grade?"پایه "+profile.grade:"پایه ثبت نشده")+(profile.major?" · "+profile.major:"");
  setLoaderStage(2,"پروفایل شناسایی شد","اطلاعات حساب دریافت شد",shownName,shownClass);
- const nativeApp=!!(window.NativeDevice&&typeof window.NativeDevice.getDeviceHash==="function");
- if(nativeApp){
-  let deviceHash="";
-  try{deviceHash=window.NativeDevice.getDeviceHash()}catch(e){}
-  if(!/^[a-f0-9]{64}$/.test(deviceHash)){session=null;throw new Error("شناسه امن دستگاه در دسترس نیست.");}
-  const deviceBound=await request("/rest/v1/rpc/bind_device",{method:"POST",headers:authHeaders(),body:JSON.stringify({p_device_hash:deviceHash})});
-  if(deviceBound!==true){session=null;throw new Error("این دستگاه به حساب دیگری متصل شده است.");}
- }
  localStorage.setItem("c90.session",JSON.stringify(s));localStorage.setItem("c90.uid",s.user.id);
  if(sessionStorage.getItem("c90.active_uid")!==s.user.id){
   sessionStorage.setItem("c90.active_uid",s.user.id);
