@@ -1817,5 +1817,15 @@ $("c90AdminSearch").oninput=drawUsers;
 @media(max-width:390px){.rank-level-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.rank-current-medal{width:70px;height:70px;flex-basis:70px}}
 @media(max-height:720px){#C90_AUTH_PANEL{align-items:flex-start}#C90_AUTH_PANEL .authbox{margin:4px auto}}
 </style>
+
+<style>
+/* رتبه‌ها: هر مدال در یک ردیف مستقل؛ نام وسط و امتیازها هم‌تراز در ستون چپ */
+.rank-level-grid{display:flex;flex-direction:column;gap:7px}
+.rank-level{display:grid;grid-template-columns:54px minmax(0,1fr) 76px;direction:rtl;align-items:center;justify-content:initial;gap:10px;width:100%;box-sizing:border-box;padding:7px 10px;text-align:right}
+.rank-level .rank-medal-svg{width:46px;height:46px;justify-self:center}
+.rank-level b{min-width:0;text-align:right;font-size:.78rem}
+.rank-level small{width:100%;text-align:left;white-space:nowrap;font-size:.7rem}
+@media(max-width:390px){.rank-level-grid{grid-template-columns:1fr}.rank-level{grid-template-columns:48px minmax(0,1fr) 68px}.rank-level .rank-medal-svg{width:42px;height:42px}}
+</style>
 </body>
 </html>
