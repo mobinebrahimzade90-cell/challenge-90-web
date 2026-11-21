@@ -1024,6 +1024,7 @@ function startSess(){
   if(!Number.isFinite(entered)||entered<1||entered>180){toast("مدت جلسه باید بین ۱ تا ۱۸۰ دقیقه باشد.");return}
   d.min=entered;save();
   SE_END=Date.now()+entered*60000;
+  try{if(window.NativeDevice&&NativeDevice.scheduleHypnosisCompletion)NativeDevice.scheduleHypnosisCompletion(SE_END)}catch(e){}
   const P=[["دم",4000,1],["نگه دار",2000,1],["بازدم",6000,.6]];
   let ph=0,pt=Date.now();
   unlockHypAudio();
@@ -1041,11 +1042,13 @@ function startSess(){
 function endSess(ok){
   if(!SE&&!$("sess").classList.contains("on"))return;
   clearInterval(SE);SE=null;SE_END=0;$("sess").classList.remove("on");
+  try{if(window.NativeDevice&&NativeDevice.cancelHypnosisCompletion)NativeDevice.cancelHypnosisCompletion()}catch(e){}
   if(ok){
     const d=hday(hcur);d.st="done";d.min=Math.max(1,Math.floor(Number(d.min)||5));save();hpaint();hrender();
     playHypCompletionCue();toast("جلسه کامل شد؛ امتیاز ثبت شد")
   }else{toast("جلسه متوقف شد؛ تایمر از ابتدا شروع می‌شود.")}
 }
+window.C90_STOP_HYPN_TIMER=()=>{if(SE||$("sess").classList.contains("on")){endSess(false);return true}return false};
 function initHyp(){
   initName();
   HID.forEach(id=>{const e=$(id);e.onfocus=()=>e.select();e.onkeydown=k=>{if(k.key==="Enter")e.blur()};
