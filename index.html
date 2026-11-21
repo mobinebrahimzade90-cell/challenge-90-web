@@ -513,17 +513,18 @@ function d2j(jdn){
   return[jy,7+div(k,30),mod(k,30)+1];
 }
 const isoOf=g=>g[0]+"-"+String(g[1]).padStart(2,"0")+"-"+String(g[2]).padStart(2,"0");
+const C90_FIXED_START="2026-11-21";
 const validStartIso=v=>{if(typeof v!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(v))return false;const[y,m,d]=v.split("-").map(Number),x=new Date(Date.UTC(y,m-1,d));return x.getUTCFullYear()===y&&x.getUTCMonth()+1===m&&x.getUTCDate()===d};
-const startJ=()=>{if(!validStartIso(S.start)){S.start=isoOf(d2g(todayJ()));save()}const[a,b,c]=S.start.split("-").map(Number);return g2d(a,b,c)};
+const startJ=()=>{if(S.start!==C90_FIXED_START){S.start=C90_FIXED_START;save()}const[a,b,c]=C90_FIXED_START.split("-").map(Number);return g2d(a,b,c)};
 const todayJ=()=>{const n=new Date();return g2d(n.getFullYear(),n.getMonth()+1,n.getDate())};
 const fmtJ=j=>{const[y,m,d]=d2j(j);return WEEK[mod(j+1,7)]+" "+fa(d)+" "+MONTHS[m-1]+" "+fa(y)};
 
 /* ---------- ذخیره‌ی محلی ---------- */
 function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d)return d}catch(e){}return{start:"",days:{},vault:null}}
 function save(){mainDirty=true;try{localStorage.setItem(KEY,JSON.stringify(S));window.dispatchEvent(new CustomEvent("c90save",{detail:S}))}catch(e){}}
-window.C90_SET_START_DATE=function(value){if(!validStartIso(String(value)))throw new Error("تاریخ شروع نامعتبر است");S.start=String(value);save();if(page===1)render()};
-window.C90_LOAD_USER_STATE=function(uid,authoritativeStart){KEY="challenge90.v1."+String(uid);S=load();if(!S||typeof S!=="object")S={days:{},vault:null};if(!S.days||typeof S.days!=="object")S.days={};if(validStartIso(authoritativeStart))S.start=authoritativeStart;else if(!validStartIso(S.start))S.start=isoOf(d2g(todayJ()));save();ensureLv();render()};
-window.addEventListener("c90cloudupdate",e=>{const d=e.detail;if(!d||typeof d!=="object")return;if(JSON.stringify(S)===JSON.stringify(d))return;S=d;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(x){}if(page===2)hrender();else if(page===3)rrender();else render()});
+window.C90_SET_START_DATE=function(value){if(String(value)!==C90_FIXED_START)throw new Error("تاریخ شروع چالش ثابت است: شنبه ۳۰ آبان ۱۴۰۵");S.start=C90_FIXED_START;save();if(page===1)render()};
+window.C90_LOAD_USER_STATE=function(uid,authoritativeStart){KEY="challenge90.v1."+String(uid);S=load();if(!S||typeof S!=="object")S={days:{},vault:null};if(!S.days||typeof S.days!=="object")S.days={};S.start=C90_FIXED_START;save();ensureLv();render()};
+window.addEventListener("c90cloudupdate",e=>{const d=e.detail;if(!d||typeof d!=="object")return;if(JSON.stringify(S)===JSON.stringify(d))return;S=d;S.start=C90_FIXED_START;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(x){}if(page===2)hrender();else if(page===3)rrender();else render()});
 function later(){clearTimeout(t);t=setTimeout(save,300)}
 function toast(m){const e=$("toast");e.textContent=m;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",4000)}
 function day(i){const d=S.days[i]||(S.days[i]={st:"",pray:"",how:"",tasks:[],sec:"",why:"",tr:[]});if(!d.tr)d.tr=[];if(d.why==null)d.why="";if(d.pos==null)d.pos="";if(!d.tasks)d.tasks=[];d.tasks.forEach(x=>{if(x.s==null)x.s=x.d?"y":""});return d}
@@ -1067,7 +1068,7 @@ function c90CurrentPoints(){
  return Math.max(0,base+bonus);
 }
 function c90RankIcon(level,size=54){
- const positions={bronze:"100% 88.4%",silver:"100% 77.6%",gold:"100% 12.7%",diamond:"100% 27.8%",champion:"50% 50%",legendary:"100% 52.8%",titan:"100% 38.8%"};
+ const positions={bronze:"0% 0%",silver:"50% 0%",gold:"100% 0%",diamond:"0% 50%",champion:"50% 50%",legendary:"100% 50%",titan:"0% 100%"};
  const pos=positions[level.key]||"50% 100%";
  return "<span class='rank-medal-image' role='img' aria-label='"+(level.name||"مدال")+"' style='width:"+size+"px;height:"+size+"px;background-position:"+pos+"'></span>";
 }
