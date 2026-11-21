@@ -1443,7 +1443,8 @@ $("c90PreSave").onclick=()=>{
 };
 refreshPreInitialDays();
 async function syncCloud(data){
- if(!session||!data||cloudReadFailed||cloudReadInProgress)return;
+ if(!session||!data)throw new Error("برای ذخیره آنلاین باید وارد حساب کاربری شوی.");
+ if(cloudReadFailed||cloudReadInProgress)throw new Error("بازیابی اطلاعات حساب هنوز کامل نشده است؛ دوباره تلاش کن.");
  const payload={user_id:session.user.id,report_date:"2000-01-01",payload:data,updated_at:new Date().toISOString()};
  await request("/rest/v1/daily_reports?on_conflict=user_id,report_date",{method:"POST",headers:{...authHeaders(),Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(payload)});
 }
