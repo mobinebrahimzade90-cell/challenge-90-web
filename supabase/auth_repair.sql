@@ -78,6 +78,28 @@ create trigger on_auth_user_created_90days
   after insert on auth.users
   for each row execute procedure public.handle_new_auth_user();
 
+-- Repair any Auth account created earlier whose profile trigger failed.
+insert into public.profiles
+  (user_id, username, display_name, role, grade, major, class_name, start_date)
+select
+  u.id,
+  lower(coalesce(nullif(trim(u.raw_user_meta_data->>'username'), ''), split_part(u.email, '@', 1))),
+  coalesce(nullif(trim(u.raw_user_meta_data->>'display_name'), ''),
+           nullif(trim(u.raw_user_meta_data->>'username'), ''),
+           split_part(u.email, '@', 1)),
+  'participant',
+  case when u.raw_user_meta_data->>'grade' in ('10','11','12')
+       then (u.raw_user_meta_data->>'grade')::smallint else null end,
+  case when u.raw_user_meta_data->>'major' in ('کامپیوتر','گرافیک','معماری')
+       then u.raw_user_meta_data->>'major' else null end,
+  nullif(trim(u.raw_user_meta_data->>'class_name'), ''),
+  date '2026-11-21'
+from auth.users u
+where not exists (
+  select 1 from public.profiles p where p.user_id = u.id
+)
+on conflict (user_id) do nothing;
+
 create or replace function public.c90_initialize_start_date()
 returns date
 language plpgsql
