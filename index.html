@@ -1351,8 +1351,16 @@ async function request(path,opts={}){
  }finally{clearTimeout(timer)}
 }
 async function getProfile(){
- const a=await request("/rest/v1/profiles?select=user_id,username,display_name,role,grade,major,class_name,start_date,initial_days&user_id=eq."+encodeURIComponent(session.user.id),{headers:authHeaders()});
- if(!a.length)throw new Error("پروفایل حساب پیدا نشد؛ تنظیمات پایگاه داده را بررسی کنیم.");
+ let a;
+ try{
+  a=await request("/rest/v1/profiles?select=user_id,username,display_name,role,grade,major,class_name,start_date,initial_days&user_id=eq."+encodeURIComponent(session.user.id),{headers:authHeaders()});
+ }catch(e){
+  if(/column .* does not exist|schema cache|could not find .* column/i.test(String(e.message||e))){
+   throw new Error("ساختار جدول پروفایل کامل نیست. فایل supabase/auth_repair.sql را در SQL Editor اجرا کن و دوباره وارد شو.");
+  }
+  throw e;
+ }
+ if(!a.length)throw new Error("حساب ساخته شده، اما پروفایل آن وجود ندارد. باید Trigger ساخت پروفایل در Supabase اصلاح شود.");
  profile=a[0];
  window.C90_CURRENT_PROFILE=profile;
 }
@@ -1576,8 +1584,24 @@ async function signup(){
  if(p.length<8){msg("رمز عبور باید حداقل ۸ نویسه باشد.");return}
  if(![10,11,12].includes(grade)||!["کامپیوتر","گرافیک","معماری"].includes(major)){msg("پایه و رشته را انتخاب کن.");return}
  msg("در حال ساخت حساب…");
- const d=await request("/auth/v1/signup",{method:"POST",body:JSON.stringify({email:internalEmail(u),password:p,data:{username:u,display_name:n||u,grade,major,class_name:"پایه "+grade+" - "+major}})});
- if(!d.access_token){msg("حساب ایجاد شد؛ اگر تأیید ایمیل خاموش نیست، ابتدا تنظیمات تأیید ایمیل را بررسی کنیم.");return}
+ let d;
+ try{
+  d=await request("/auth/v1/signup",{method:"POST",body:JSON.stringify({email:internalEmail(u),password:p,data:{username:u,display_name:n||u,grade,major,class_name:"پایه "+grade+" - "+major}})});
+ }catch(e){
+  if(!/user already registered|already exists/i.test(String(e.message||e)))throw e;
+  msg("این نام کاربری قبلاً ایجاد شده؛ در حال بررسی ورود با همین رمز…");
+  try{
+   d=await request("/auth/v1/token?grant_type=password",{method:"POST",body:JSON.stringify({email:internalEmail(u),password:p})});
+  }catch(loginError){
+   if(/invalid login credentials|invalid_grant/i.test(String(loginError.message||loginError))){
+    throw new Error("این نام کاربری قبلاً ثبت شده، اما رمز واردشده با آن مطابقت ندارد. از دکمهٔ ورود استفاده کن و رمز درست را وارد کن.");
+   }
+   throw loginError;
+  }
+ }
+ if(!d.access_token){
+  throw new Error("حساب در سرور ایجاد شده، اما تأیید ایمیل فعال است. چون برنامه ایمیل واقعی نمی‌گیرد، در Supabase بخش Authentication ← Sign In / Providers ← Email گزینهٔ Confirm email را خاموش کن؛ سپس حساب آزمایشی را پاک و دوباره ثبت‌نام کن.");
+ }
  await enter(d);
 }
 async function openAdmin(){
@@ -1689,10 +1713,28 @@ async function showUser(u){
   dateWrap.append(startInput,setStart);tools.append(dateWrap);
  }catch(e){$("c90AdminViewer").textContent="خطا: "+e.message}
 }
-$("c90Login").onclick=async()=>{showLoader("در حال ورود به حساب…");try{await login()}catch(e){msg(e.message)}finally{hideLoader()}};
+let c90AuthBusy=false;
+async function runC90Auth(action,loadingText){
+ if(c90AuthBusy)return;
+ c90AuthBusy=true;
+ const loginButton=$("c90Login"),signupButton=$("c90Signup");
+ loginButton.disabled=true;signupButton.disabled=true;msg("");
+ showLoader(loadingText);
+ try{await action()}
+ catch(e){
+  let error=String(e&&e.message||e||"خطای نامشخص");
+  if(/invalid login credentials|invalid_grant/i.test(error))error="نام کاربری یا رمز عبور اشتباه است.";
+  else if(/email not confirmed/i.test(error))error="تأیید ایمیل Supabase روشن است؛ برای این برنامه باید خاموش باشد.";
+  else if(/user already registered/i.test(error))error="این نام کاربری قبلاً ثبت شده است؛ برای ورود از دکمهٔ ورود استفاده کن.";
+  msg(error);
+ }finally{
+  hideLoader();c90AuthBusy=false;loginButton.disabled=false;signupButton.disabled=false;
+ }
+}
+$("c90Login").onclick=()=>runC90Auth(login,"در حال ورود به حساب…");
 $("c90AccountOpen").onclick=()=>{$("C90_AUTH_PANEL").style.display="flex"};
 $("c90AuthBack").onclick=()=>{$("C90_AUTH_PANEL").style.display="none";msg("");};
-$("c90Signup").onclick=async()=>{showLoader("در حال ساخت حساب…");try{await signup()}catch(e){msg(e.message)}finally{hideLoader()}};
+$("c90Signup").onclick=()=>runC90Auth(signup,"در حال ساخت حساب…");
 $("c90Password").onkeydown=e=>{if(e.key==="Enter")$("c90Login").click()};
 $("c90AdminClose").onclick=()=>$("C90_ADMIN").style.display="none";
 $("c90AdminSearch").oninput=drawUsers;
