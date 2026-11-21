@@ -325,12 +325,8 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
 
   <div class="card hide" id="pat"><h3>بیشترین دلیل‌های زدن</h3><div id="patL"></div></div>
 
-  <div class="card acts">
-    <button class="g" id="saveFile">ذخیره در پوشه</button>
-    <button id="imp">بازیابی</button>
-    <button id="pick">تغییر محل ذخیره</button>
-    <button id="help">راهنما</button>
-    <input type="file" id="file" accept=".json" class="hide">
+  <div class="card" style="padding:10px 14px;text-align:center">
+    <button class="g" id="help" style="width:100%">راهنما</button>
   </div>
 </div>
 
@@ -453,7 +449,7 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
     <div class="ii"><i>۰۴</i><div><b>جمله‌ی مثبت</b><p>هر روز یک جمله‌ی انگیزه‌بخش و جمله‌ی خودت.</p></div></div>
     <div class="ii"><i>۰۵</i><div><b>خاطره‌ی روز</b><p>بنویس امروز چطور گذشت.</p></div></div>
     <div class="ii"><i>۰۶</i><div><b>صندوقچه اسرار</b><p>نوشته‌های خصوصی؛ فقط با رمز خودت باز می‌شود.</p></div></div>
-    <div class="ii"><i>۰۷</i><div><b>ذخیره</b><p>«اوکی، ذخیره» هر روز را در پوشه‌ی «90» نگه می‌دارد.</p></div></div>
+    <div class="ii"><i>۰۷</i><div><b>ذخیره‌سازی امن</b><p>اطلاعات پس از ثبت، در حساب کاربری و پایگاه دادهٔ آنلاین ذخیره و همگام‌سازی می‌شود.</p></div></div>
   <div class="ii"><i>۰۸</i><div><b>خودهیپنوتیزم</b><p>چالش بیست‌روزه با جلسه‌ی هدایت‌شده؛ از نوار پایین جابه‌جا شو.</p></div></div>
   <div class="ii"><i>۰۹</i><div><b>رنکینگ</b><p>جدول امتیاز همه؛ سه نفر اول با رنگ‌های جدا.</p></div></div>
   </div></div>
@@ -488,7 +484,7 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
 
 <script>
 (()=>{
-const N=90;let KEY="challenge90.v1."+(localStorage.getItem("c90.uid")||"guest");const FOLDER="90",FNAME="90.json",$=id=>document.getElementById(id);
+const N=90;let KEY="challenge90.v1."+(localStorage.getItem("c90.uid")||"guest");const $=id=>document.getElementById(id);
 const fa=n=>Number(n).toLocaleString("fa-IR",{useGrouping:false});
 const MONTHS=["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"];
 const WEEK=["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنجشنبه","جمعه","شنبه"];
@@ -685,37 +681,12 @@ async function flushSec(){if(cryptoKey&&cur){const v=$("sec").value;day(cur).sec
 $("sec").oninput=async()=>{await flushSec();later()};
 $("how").oninput=e=>{day(cur).how=e.target.value;later()};
 
-/* ---------- ذخیره در پوشه ---------- */
-function idb(mode,fn){return new Promise((res,rej)=>{const r=indexedDB.open("c90",1);r.onupgradeneeded=()=>r.result.createObjectStore("h");r.onsuccess=()=>{const tx=r.result.transaction("h",mode),q=fn(tx.objectStore("h"));tx.oncomplete=()=>res(q&&q.result);tx.onerror=()=>rej(tx.error)};r.onerror=()=>rej(r.error)})}
-async function getDir(force){
-  let h=null;
-  if(!force){try{h=await idb("readonly",s=>s.get("dir"))}catch(e){}}
-  if(h){try{if(await h.queryPermission({mode:"readwrite"})!=="granted"&&await h.requestPermission({mode:"readwrite"})!=="granted")h=null}catch(e){h=null}}
-  if(!h){h=await window.showDirectoryPicker({mode:"readwrite"});try{await idb("readwrite",s=>s.put(h,"dir"))}catch(e){}}
-  return h;
-}
-async function writeFolder(force){
-  if(!window.showDirectoryPicker)return false;
-  try{
-    const root=await getDir(force),dir=await root.getDirectoryHandle(FOLDER,{create:true});
-    const f=await dir.getFileHandle(FNAME,{create:true}),w=await f.createWritable();
-    await w.write(JSON.stringify(S,null,1));await w.close();return true;
-  }catch(e){return false}
-}
-async function saveFileBtn(force){
-  save();
-  if(await writeFolder(force)){toast("ذخیره شد ✔");return}
-  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,1)],{type:"application/json"}));a.download=FNAME;a.click();
-  toast("فایل دانلود شد؛ آن را در پوشه‌ی «"+FOLDER+"» بگذار.");
-}
-$("saveFile").onclick=()=>saveFileBtn(false);
-$("pick").onclick=()=>window.showDirectoryPicker?saveFileBtn(true):toast("این مرورگر انتخاب پوشه ندارد.");
+/* ---------- ذخیره‌سازی حساب کاربری ---------- */
 $("okSave").onclick=async()=>{
-  const n=cur;await flushSec();save();await writeFolder(false);
-  closeDay();toast("روز "+fa(n)+" ذخیره شد ✔");
+  const n=cur;await flushSec();save();
+  try{await syncCloud(S);closeDay();toast("روز "+fa(n)+" در حساب کاربری ذخیره شد ✔")}
+  catch(e){closeDay();toast("اطلاعات روی دستگاه نگه داشته شد؛ همگام‌سازی آنلاین انجام نشد. اتصال را بررسی کن.")}
 };
-$("imp").onclick=()=>$("file").click();
-$("file").onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(x=>{try{const d=JSON.parse(x);if(!d.days)throw 0;S=d;if(!S.start)S.start=isoOf(d2g(todayJ()));S.setup=true;ensureLv();save();render();toast("بازیابی شد ✔")}catch(err){toast("فایل معتبر نیست.")}})};
 
 /* ---------- رویدادها ---------- */
 $("pray").oninput=e=>{day(cur).pray=e.target.value;later()};
@@ -1053,7 +1024,7 @@ function initHyp(){
   $("hNote").oninput=e=>{hday(hcur).note=e.target.value;later()};
   const hc=()=>{save();$("hday").classList.remove("on");hrender()};
   $("hBack").onclick=hc;
-  $("hOk").onclick=async()=>{const n=hcur;save();await writeFolder(false);hc();toast("روز "+fa(n)+" ذخیره شد")};
+  $("hOk").onclick=async()=>{save();try{await syncCloud(S);hc();toast("اطلاعات جلسه در حساب کاربری ذخیره شد ✔")}catch(e){hc();toast("همگام‌سازی انجام نشد؛ اتصال را بررسی کن.")}};
   $("hStart").onclick=startSess;$("sEnd").onclick=()=>endSess(false);
   document.addEventListener("visibilitychange",()=>{if(document.hidden&&SE)endSess(false)});
   window.addEventListener("pagehide",()=>{if(SE)endSess(false)});
