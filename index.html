@@ -1787,10 +1787,10 @@ async function showUser(u){
    if(!confirm("تاریخ شروع این کاربر تغییر کند؟ شماره روزهای چالش نیز بر اساس تاریخ جدید محاسبه می‌شود."))return;
    setStart.disabled=true;
    try{
-    await request("/rest/v1/profiles?user_id=eq."+encodeURIComponent(u.user_id),{method:"PATCH",headers:{...authHeaders(),Prefer:"return=representation"},body:JSON.stringify({start_date:startInput.value})});
-    if(viewedState){viewedState.start=startInput.value;await request("/rest/v1/daily_reports?user_id=eq."+encodeURIComponent(u.user_id)+"&report_date=eq.2000-01-01",{method:"PATCH",headers:{...authHeaders(),Prefer:"return=minimal"},body:JSON.stringify({payload:viewedState})})}
+    await request("/rest/v1/rpc/c90_admin_set_start_date",{method:"POST",headers:authHeaders(),body:JSON.stringify({p_user_id:u.user_id,p_start_date:startInput.value})});
+    if(viewedState)viewedState.start=startInput.value;
     u.start_date=startInput.value;
-    alert("تاریخ شروع به‌روزرسانی شد.");
+    alert("تاریخ شروع و محاسبات رتبه‌بندی به‌صورت یکپارچه به‌روزرسانی شد.");
    }catch(e){alert("تغییر تاریخ انجام نشد: "+e.message)}
    finally{setStart.disabled=false}
   };
