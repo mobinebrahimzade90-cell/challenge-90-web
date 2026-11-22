@@ -1694,15 +1694,15 @@ async function enter(s){
  $("c90Logout").onclick=async()=>{
   const button=$("c90Logout");button.disabled=true;button.textContent="در حال ذخیره و خروج…";
   let syncError=null;
-  try{const flushed=window.C90_FLUSH_LOCAL?window.C90_FLUSH_LOCAL():null;const local=parseStored(localStorage.getItem(userStateKey()))||flushed;if(local)await syncCloud(local)}catch(e){syncError=e}
+  try{const flushed=window.C90_FLUSH_LOCAL?window.C90_FLUSH_LOCAL():null;let local=null;try{local=parseStored(localStorage.getItem(userStateKey()))}catch(storageError){window.C90_STORAGE_FAILED=true}local=local||flushed;if(local)await syncCloud(local)}catch(e){syncError=e}
   if(syncError&&!confirm("همگام‌سازی آنلاین انجام نشد. اطلاعات محلی روی همین دستگاه حفظ می‌شود، اما ممکن است هنوز روی سرور نباشد. با خروج محلی ادامه می‌دهی؟\n"+String(syncError.message||syncError))){
     button.disabled=false;button.textContent="ترک حساب";return;
   }
   try{await request("/auth/v1/logout",{method:"POST",headers:authHeaders()})}catch(e){}
   clearTimeout(cloudTimer);clearInterval(window.C90_CLASS_RANK_TIMER);
   if(window.C90_RT_CLIENT&&window.C90_RT_CHANNEL){try{await window.C90_RT_CLIENT.removeChannel(window.C90_RT_CHANNEL)}catch(e){}}
-  localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");
-  sessionStorage.removeItem("c90.loaded");sessionStorage.removeItem("c90.active_uid");
+  try{localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid")}catch(storageError){}
+  try{sessionStorage.removeItem("c90.loaded");sessionStorage.removeItem("c90.active_uid")}catch(storageError){}
   session=null;profile=null;window.C90_CURRENT_PROFILE=null;window.C90_CURRENT_USERNAME=null;location.reload()
 };
  window.addEventListener("c90save",e=>scheduleSync(e.detail));
