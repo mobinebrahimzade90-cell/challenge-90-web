@@ -10,26 +10,51 @@ language sql
 immutable
 set search_path = pg_catalog
 as $c90_day_map$
-  select coalesce(jsonb_object_agg(e.key,
-    case when jsonb_typeof(e.value) = 'object' then
-      jsonb_set(
-        jsonb_set(e.value,'{tasks}',
-          coalesce((
-            select jsonb_agg(t.value order by t.ordinality)
-            from jsonb_array_elements(
-              case when jsonb_typeof(e.value->'tasks') = 'array'
-                then e.value->'tasks' else '[]'::jsonb end
-            ) with ordinality as t(value, ordinality)
-            where t.ordinality <= 50
-          ), '[]'::jsonb), true),
-        '{min}',
-        to_jsonb(case
-          when coalesce(e.value->>'min', '') ~ '^[0-9]{1,3}
-        true)
-    else '{}'::jsonb end), '{}'::jsonb)
-  from jsonb_each(case when jsonb_typeof(p_map) = 'object' then p_map else '{}'::jsonb end) e
-  where case
-    when length(e.key) <= 2 and e.key ~ '^[1-9][0-9]?
+  select coalesce(
+    jsonb_object_agg(
+      e.key,
+      case
+        when jsonb_typeof(e.value) = 'object' then
+          jsonb_set(
+            jsonb_set(
+              e.value,
+              '{tasks}',
+              coalesce((
+                select jsonb_agg(t.value order by t.ordinality)
+                from jsonb_array_elements(
+                  case
+                    when jsonb_typeof(e.value->'tasks') = 'array'
+                    then e.value->'tasks'
+                    else '[]'::jsonb
+                  end
+                ) with ordinality as t(value, ordinality)
+                where t.ordinality <= 50
+              ), '[]'::jsonb),
+              true
+            ),
+            '{min}',
+            to_jsonb(
+              case
+                when coalesce(e.value->>'min', '') ~ '^[0-9]{1,3}$'
+                 and (e.value->>'min')::integer <= 180
+                then (e.value->>'min')::integer
+                else 0
+              end
+            ),
+            true
+          )
+        else '{}'::jsonb
+      end
+    ),
+    '{}'::jsonb
+  )
+  from jsonb_each(
+    case when jsonb_typeof(p_map) = 'object'
+      then p_map else '{}'::jsonb end
+  ) as e(key, value)
+  where length(e.key) <= 2
+    and e.key ~ '^[1-9][0-9]?$'
+    and e.key::integer between 1 and greatest(1, least(coalesce(p_max_day, 90), 90))
 $c90_day_map$;
 revoke all on function public.c90_valid_day_map(jsonb, integer) from public;
 grant execute on function public.c90_valid_day_map(jsonb, integer) to authenticated;
