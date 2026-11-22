@@ -432,7 +432,9 @@ begin
         count(*) filter (where x.value->>'st' = 'done') as sessions_done,
         coalesce(sum(
           case when x.value->>'st' = 'done'
-            and coalesce(x.value->>'min', '') ~ '^[0-9]{1,3}
+            and coalesce(x.value->>'min', '') ~ '^[0-9]{1,3}$'
+            and (x.value->>'min')::integer <= 180
+            then greatest(0, (x.value->>'min')::integer)
             else 0 end
         ), 0) as minutes_done
       from jsonb_each(public.c90_valid_day_map(r.payload->'hyp'->'days', 20)) x(key, value)
