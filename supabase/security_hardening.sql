@@ -78,6 +78,92 @@ $c90_safe_date$;
 revoke all on function public.c90_safe_date(text) from public;
 grant execute on function public.c90_safe_date(text) to authenticated;
 
+-- Enforce owner/admin boundaries at the database layer, not only in client filters.
+create or replace function public.c90_is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = pg_catalog, public, pg_temp
+set row_security = off
+as $c90_is_admin$
+  select exists (
+    select 1
+    from public.profiles p
+    where p.user_id = auth.uid()
+      and p.role = 'admin'
+  )
+$c90_is_admin$;
+revoke all on function public.c90_is_admin() from public;
+grant execute on function public.c90_is_admin() to authenticated;
+
+alter table public.profiles enable row level security;
+alter table public.daily_reports enable row level security;
+
+-- Profiles: participants see their own row; administrators may list profiles.
+drop policy if exists c90_profiles_read_owner_admin on public.profiles;
+create policy c90_profiles_read_owner_admin
+on public.profiles for select to authenticated
+using (user_id = auth.uid() or public.c90_is_admin());
+
+drop policy if exists c90_profiles_select_guard on public.profiles;
+create policy c90_profiles_select_guard
+on public.profiles as restrictive for select to authenticated
+using (user_id = auth.uid() or public.c90_is_admin());
+
+-- Participants may update only their own allowed school fields.
+drop policy if exists c90_profiles_update_owner on public.profiles;
+create policy c90_profiles_update_owner
+on public.profiles for update to authenticated
+using (user_id = auth.uid())
+with check (user_id = auth.uid());
+
+drop policy if exists c90_profiles_update_guard on public.profiles;
+create policy c90_profiles_update_guard
+on public.profiles as restrictive for update to authenticated
+using (user_id = auth.uid() or public.c90_is_admin())
+with check (user_id = auth.uid() or public.c90_is_admin());
+
+-- Daily reports: private to their owner, with read-only cross-account access for admins.
+drop policy if exists c90_reports_read_owner_admin on public.daily_reports;
+create policy c90_reports_read_owner_admin
+on public.daily_reports for select to authenticated
+using (user_id = auth.uid() or public.c90_is_admin());
+
+drop policy if exists c90_reports_select_guard on public.daily_reports;
+create policy c90_reports_select_guard
+on public.daily_reports as restrictive for select to authenticated
+using (user_id = auth.uid() or public.c90_is_admin());
+
+drop policy if exists c90_reports_insert_owner on public.daily_reports;
+create policy c90_reports_insert_owner
+on public.daily_reports for insert to authenticated
+with check (user_id = auth.uid());
+
+drop policy if exists c90_reports_insert_guard on public.daily_reports;
+create policy c90_reports_insert_guard
+on public.daily_reports as restrictive for insert to authenticated
+with check (user_id = auth.uid());
+
+drop policy if exists c90_reports_update_owner on public.daily_reports;
+create policy c90_reports_update_owner
+on public.daily_reports for update to authenticated
+using (user_id = auth.uid())
+with check (user_id = auth.uid());
+
+drop policy if exists c90_reports_update_guard on public.daily_reports;
+create policy c90_reports_update_guard
+on public.daily_reports as restrictive for update to authenticated
+using (user_id = auth.uid())
+with check (user_id = auth.uid());
+
+grant usage on schema public to authenticated;
+grant select on public.profiles to authenticated;
+revoke update on public.profiles from authenticated;
+grant update (grade, major, class_name) on public.profiles to authenticated;
+grant select, insert, update on public.daily_reports to authenticated;
+revoke delete on public.daily_reports from authenticated;
+
 -- New profiles use the server date. Existing profiles are not reset.
 create or replace function public.handle_new_auth_user()
 returns trigger language plpgsql security definer
