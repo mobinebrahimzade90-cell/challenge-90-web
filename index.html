@@ -590,7 +590,13 @@ const fmtJ=j=>{const[y,m,d]=d2j(j);return WEEK[mod(j+1,7)]+" "+fa(d)+" "+MONTHS[
 
 /* ---------- ذخیره‌ی محلی ---------- */
 function load(){let raw=null;try{raw=localStorage.getItem(KEY);const d=raw?JSON.parse(raw):null;if(isPlainObject(d))return normalizeState(d)}catch(e){try{if(raw)localStorage.setItem(KEY+".recovery",raw)}catch(x){}}return{start:"",days:{},vault:null}}
-function save(){mainDirty=true;try{localStorage.setItem(KEY,JSON.stringify(S));window.C90_STORAGE_FAILED=false;window.dispatchEvent(new CustomEvent("c90save",{detail:S}))}catch(e){window.C90_STORAGE_FAILED=true;console.error("Local save failed:",e)}}
+function save(){
+ mainDirty=true;
+ try{localStorage.setItem(KEY,JSON.stringify(S));window.C90_STORAGE_FAILED=false}
+ catch(e){window.C90_STORAGE_FAILED=true;console.error("Local save failed:",e)}
+ // Keep cloud persistence active even when the browser storage quota is exhausted.
+ window.dispatchEvent(new CustomEvent("c90save",{detail:S}));
+}
 window.C90_SET_START_DATE=function(value){if(!validStartIso(String(value)))throw new Error("تاریخ شروع معتبر نیست.");C90_FIXED_START=String(value);S.start=C90_FIXED_START;save();if(page===1)render()};
 window.C90_LOAD_USER_STATE=function(uid,authoritativeStart){KEY="challenge90.v1."+String(uid);S=normalizeState(load());C90_FIXED_START=validStartIso(authoritativeStart)?String(authoritativeStart):(validStartIso(S.start)?S.start:C90_FIXED_START);S.start=C90_FIXED_START;save();ensureLv();render()};
 window.addEventListener("c90cloudupdate",e=>{const d=normalizeState(e.detail);const base=window.C90_SYNC_BASE||undefined,merged=normalizeState(mergeState(S,d,base));if(sameState(S,merged))return;S=merged;S.start=C90_FIXED_START;save();if(page===2)hrender();else if(page===3)rrender();else render()});
@@ -1576,14 +1582,14 @@ async function syncCloud(data){
    const restored=await loadCloud();
    if(!restored)throw new Error("بازیابی اطلاعات از سرور ناموفق بود: "+String(cloudReadError&&cloudReadError.message||"خطای ناشناخته"));
   }
-  const rawLatest=parseStored(localStorage.getItem(userStateKey()))||cloudMergedState||data;
+  const rawLatest=window.C90_STORAGE_FAILED?data:(parseStored(localStorage.getItem(userStateKey()))||cloudMergedState||data);
   const latest=window.C90_NORMALIZE_STATE(rawLatest);
   if(!latest||typeof latest!=="object")throw new Error("اطلاعات محلی معتبر نیست و برای جلوگیری از بازنویسی، ارسال متوقف شد.");
   const payload={user_id:session.user.id,report_date:"2000-01-01",payload:latest,updated_at:new Date().toISOString()};
   await request("/rest/v1/daily_reports?on_conflict=user_id,report_date",{method:"POST",headers:{...authHeaders(),Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(payload)});
-  localStorage.setItem(syncedStateKey(),JSON.stringify(latest));
+  try{localStorage.setItem(syncedStateKey(),JSON.stringify(latest))}catch(storageError){window.C90_STORAGE_FAILED=true}
   window.C90_SYNC_BASE=latest;cloudMergedState=latest;
-  const after=localStorage.getItem(userStateKey());
+  let after=null;try{after=localStorage.getItem(userStateKey())}catch(storageError){window.C90_STORAGE_FAILED=true}
   if(after&&after!==JSON.stringify(latest)){const newer=parseStored(after);if(newer)scheduleSync(newer)}
   return true;
  });
@@ -1688,7 +1694,7 @@ async function enter(s){
  $("c90Logout").onclick=async()=>{
   const button=$("c90Logout");button.disabled=true;button.textContent="در حال ذخیره و خروج…";
   let syncError=null;
-  try{if(window.C90_FLUSH_LOCAL)window.C90_FLUSH_LOCAL();const local=parseStored(localStorage.getItem(userStateKey()));if(local)await syncCloud(local)}catch(e){syncError=e}
+  try{const flushed=window.C90_FLUSH_LOCAL?window.C90_FLUSH_LOCAL():null;const local=parseStored(localStorage.getItem(userStateKey()))||flushed;if(local)await syncCloud(local)}catch(e){syncError=e}
   if(syncError&&!confirm("همگام‌سازی آنلاین انجام نشد. اطلاعات محلی روی همین دستگاه حفظ می‌شود، اما ممکن است هنوز روی سرور نباشد. با خروج محلی ادامه می‌دهی؟\n"+String(syncError.message||syncError))){
     button.disabled=false;button.textContent="ترک حساب";return;
   }
