@@ -1488,14 +1488,15 @@ async function loadCloud(){
   try{
    const rows=await request("/rest/v1/daily_reports?select=payload&report_date=eq.2000-01-01&user_id=eq."+encodeURIComponent(session.user.id),{headers:authHeaders(),timeoutMs:12000});
    const remote=rows.length&&rows[0].payload&&typeof rows[0].payload==="object"?window.C90_NORMALIZE_STATE(rows[0].payload):null;
-   const localRaw=parseStored(localStorage.getItem(userStateKey()));
+   let localRaw=null,baseRaw=null;
+   try{localRaw=parseStored(localStorage.getItem(userStateKey()));baseRaw=parseStored(localStorage.getItem(syncedStateKey()))}
+   catch(storageError){window.C90_STORAGE_FAILED=true}
    const local=localRaw?window.C90_NORMALIZE_STATE(localRaw):null;
-   const baseRaw=parseStored(localStorage.getItem(syncedStateKey()));
    const base=baseRaw?window.C90_NORMALIZE_STATE(baseRaw):null;
    cloudMergedState=remote?window.C90_NORMALIZE_STATE(window.C90_MERGE_STATE(local,remote,base)):(local||window.C90_NORMALIZE_STATE({}));
-   if(remote){window.C90_SYNC_BASE=remote;localStorage.setItem(syncedStateKey(),JSON.stringify(remote))}
-   else{window.C90_SYNC_BASE=null;localStorage.removeItem(syncedStateKey())}
-   localStorage.setItem(userStateKey(),JSON.stringify(cloudMergedState));
+   if(remote){window.C90_SYNC_BASE=remote;try{localStorage.setItem(syncedStateKey(),JSON.stringify(remote))}catch(storageError){window.C90_STORAGE_FAILED=true}}
+   else{window.C90_SYNC_BASE=null;try{localStorage.removeItem(syncedStateKey())}catch(storageError){window.C90_STORAGE_FAILED=true}}
+   try{localStorage.setItem(userStateKey(),JSON.stringify(cloudMergedState))}catch(storageError){window.C90_STORAGE_FAILED=true}
    if(JSON.stringify(local)!==JSON.stringify(cloudMergedState))window.dispatchEvent(new CustomEvent("c90cloudupdate",{detail:cloudMergedState}));
    cloudReadSucceeded=true;
    if(cloudMergedState&&((remote&&JSON.stringify(cloudMergedState)!==JSON.stringify(remote))||(!remote&&local)))scheduleSync(cloudMergedState);
