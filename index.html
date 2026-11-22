@@ -546,7 +546,7 @@ function mergeState(local,remote,base){
    const hasL=Object.prototype.hasOwnProperty.call(local,key),hasR=Object.prototype.hasOwnProperty.call(remote,key),hasB=isPlainObject(base)&&Object.prototype.hasOwnProperty.call(base,key);
    if(hasL&&hasR)out[key]=mergeState(local[key],remote[key],hasB?base[key]:undefined);
    else if(hasL){if(!(hasB&&sameState(local[key],base[key])))out[key]=cloneState(local[key])}
-   else if(hasR)out[key]=cloneState(remote[key]);
+   else if(hasR){if(!(hasB&&sameState(remote[key],base[key])))out[key]=cloneState(remote[key])}
   }
   return out;
  }
@@ -1492,7 +1492,7 @@ async function loadCloud(){
    localStorage.setItem(userStateKey(),JSON.stringify(cloudMergedState));
    if(JSON.stringify(local)!==JSON.stringify(cloudMergedState))window.dispatchEvent(new CustomEvent("c90cloudupdate",{detail:cloudMergedState}));
    cloudReadSucceeded=true;
-   if(remote&&JSON.stringify(cloudMergedState)!==JSON.stringify(remote))scheduleSync(cloudMergedState);
+   if(cloudMergedState&&((remote&&JSON.stringify(cloudMergedState)!==JSON.stringify(remote))||(!remote&&local)))scheduleSync(cloudMergedState);
    return true;
   }catch(e){cloudReadFailed=true;cloudReadError=e;console.warn("Cloud restore:",e.message);return false}
   finally{cloudReadInProgress=false;cloudReadPromise=null}
