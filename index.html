@@ -1559,7 +1559,8 @@ async function ensureInitialDays(){
 function refreshPreInitialDays(){
  const user=String($("c90Username").value||"").trim().toLowerCase();
  const input=$("c90PreDays"),button=$("c90PreSave"),note=$("c90PreMsg");
- let saved=null;try{saved=localStorage.getItem("c90.pendingInitialDays."+user)}catch(storageError){}
+ let saved=window.C90_PENDING_INITIAL_DAYS&&window.C90_PENDING_INITIAL_DAYS.user===user?String(window.C90_PENDING_INITIAL_DAYS.days):null;
+ try{saved=saved??localStorage.getItem("c90.pendingInitialDays."+user)}catch(storageError){}
  if(saved!==null){
   input.value=saved;input.disabled=true;button.disabled=true;
   note.textContent="روزهای آغازین برای این نام کاربری ثبت شده و انتخاب قفل است.";
