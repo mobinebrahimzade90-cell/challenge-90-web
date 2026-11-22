@@ -211,7 +211,7 @@ begin
 
   return query
   with cohort as (
-    select p.user_id, p.class_name, coalesce(p.initial_days, 0) as initial_days
+    select p.user_id, p.class_name, coalesce(p.initial_days, 0) as initial_days, p.start_date
     from public.profiles as p
     where p.grade = v_grade
       and p.major = v_major
@@ -219,7 +219,7 @@ begin
       and btrim(p.class_name) <> ''
   ),
   report_data as (
-    select c.user_id, c.class_name, c.initial_days, dr.payload
+    select c.user_id, c.class_name, c.initial_days, c.start_date, dr.payload
     from cohort as c
     left join public.daily_reports as dr
       on dr.user_id = c.user_id
@@ -246,8 +246,8 @@ begin
         least(
           90::numeric,
           coalesce(
-            (current_date - public.c90_safe_date(rd.payload->>'start') + 1)::numeric,
-            90::numeric
+            (current_date - rd.start_date + 1)::numeric,
+            1::numeric
           )
         )
       ) as elapsed_days
@@ -298,7 +298,7 @@ begin
             case when task.value->>'d' = 'true' then 'y' else '' end
           ) = 'n'
         )), 0)::integer as tasks_missed
-      from jsonb_each(public.c90_valid_day_map(rd.payload->'days', 90)) as d(key, value)
+      from jsonb_each(public.c90_valid_day_map(rd.payload->'days', least(90, greatest(1, coalesce(current_date - rd.start_date + 1, 1))::integer))) as d(key, value)
     ) as st on true
     left join lateral (
       select
@@ -378,12 +378,12 @@ begin
 
   return query
   with cohort as (
-    select p.user_id, p.username, p.display_name, coalesce(p.initial_days, 0) as initial_days
+    select p.user_id, p.username, p.display_name, coalesce(p.initial_days, 0) as initial_days, p.start_date
     from public.profiles p
     where p.grade = v_grade and p.major = v_major
   ),
   reports as (
-    select c.user_id, c.username, c.display_name, c.initial_days, dr.payload
+    select c.user_id, c.username, c.display_name, c.initial_days, c.start_date, dr.payload
     from cohort c
     left join public.daily_reports dr
       on dr.user_id = c.user_id
@@ -425,7 +425,7 @@ begin
           where coalesce(task.value->>'s',
             case when task.value->>'d' = 'true' then 'y' else '' end) = 'n'
         )), 0) as tasks_missed
-      from jsonb_each(public.c90_valid_day_map(r.payload->'days', 90)) x(key, value)
+      from jsonb_each(public.c90_valid_day_map(r.payload->'days', least(90, greatest(1, coalesce(current_date - r.start_date + 1, 1))::integer))) x(key, value)
     ) d on true
     left join lateral (
       select
