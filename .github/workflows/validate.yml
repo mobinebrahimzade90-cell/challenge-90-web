@@ -78,6 +78,7 @@ jobs:
           PGPASSWORD: postgres
         run: |
           psql -h localhost -U postgres -d challenge90_test -v ON_ERROR_STOP=1 <<'SQL'
+          create role anon nologin;
           create role authenticated nologin;
           create schema auth;
           create table auth.users (
@@ -103,12 +104,18 @@ jobs:
             updated_at timestamptz,
             unique(user_id, report_date)
           );
+          -- Simulate legacy permissive policies and PUBLIC grants that must be neutralized.
+          alter table public.profiles enable row level security;
+          alter table public.daily_reports enable row level security;
+          create policy legacy_public_profiles_read on public.profiles for select to public using (true);
+          create policy legacy_public_reports_read on public.daily_reports for select to public using (true);
+          grant all on public.profiles, public.daily_reports to public;
           create function auth.uid() returns uuid
           language sql stable
           as $auth_uid$
             select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
           $auth_uid$;
-          grant usage on schema auth to authenticated;
+          grant usage on schema auth to anon, authenticated;
           SQL
       - name: Apply hardening migration
         env:
@@ -154,6 +161,18 @@ jobs:
               raise exception 'Day-map sanitization test failed: %', v;
             end if;
           end $$;
+          set role anon;
+          do $c90_anon_test$
+          declare denied boolean := false;
+          begin
+            begin
+              perform count(*) from public.profiles;
+              perform count(*) from public.daily_reports;
+            exception when insufficient_privilege then denied := true;
+            end;
+            if not denied then raise exception 'Anonymous role accessed private account data'; end if;
+          end $c90_anon_test$;
+          reset role;
           set role authenticated;
           select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',false);
           do $c90_rls_participant$
