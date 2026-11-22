@@ -1533,6 +1533,7 @@ async function loadCloud(){
    const local=localRaw?window.C90_NORMALIZE_STATE(localRaw):(memoryState?window.C90_NORMALIZE_STATE(memoryState):null);
    const base=baseRaw?window.C90_NORMALIZE_STATE(baseRaw):null;
    cloudMergedState=remote?window.C90_NORMALIZE_STATE(window.C90_MERGE_STATE(local,remote,base)):(local||window.C90_NORMALIZE_STATE({}));
+   if(profile&&validStartIso(profile.start_date))cloudMergedState.start=profile.start_date;
    if(remote){window.C90_SYNC_BASE=remote;try{localStorage.setItem(syncedStateKey(),JSON.stringify(remote))}catch(storageError){window.C90_STORAGE_FAILED=true}}
    else{window.C90_SYNC_BASE=null;try{localStorage.removeItem(syncedStateKey())}catch(storageError){window.C90_STORAGE_FAILED=true}}
    try{localStorage.setItem(userStateKey(),JSON.stringify(cloudMergedState))}catch(storageError){window.C90_STORAGE_FAILED=true}
@@ -1654,6 +1655,7 @@ function scheduleSync(data){
 window.addEventListener("online",()=>{
  if(!session)return;
  let local=null;try{local=parseStored(localStorage.getItem(userStateKey()))}catch(storageError){window.C90_STORAGE_FAILED=true}
+ if(!local&&typeof window.C90_GET_STATE==="function")local=window.C90_GET_STATE();
  if(local)syncCloud(local).catch(e=>console.warn("Online retry:",e.message));
 });
 
@@ -1706,6 +1708,7 @@ async function enter(s){
       const memoryState=typeof window.C90_GET_STATE==="function"?window.C90_GET_STATE():null;
       const localState=local||memoryState;
       const remote=window.C90_NORMALIZE_STATE(row.payload),merged=window.C90_NORMALIZE_STATE(window.C90_MERGE_STATE?window.C90_MERGE_STATE(localState,remote,base):Object.assign({},remote||{},localState||{}));
+      if(profile&&validStartIso(profile.start_date))merged.start=profile.start_date;
       window.C90_SYNC_BASE=remote;
       try{localStorage.setItem("challenge90.synced.v1."+session.user.id,JSON.stringify(remote));localStorage.setItem(key,JSON.stringify(merged))}
       catch(storageError){window.C90_STORAGE_FAILED=true}
