@@ -161,6 +161,11 @@ grant usage on schema public to authenticated;
 -- Remove legacy broad table grants before granting the minimum client permissions.
 revoke all on public.profiles from public, anon, authenticated;
 revoke all on public.daily_reports from public, anon, authenticated;
+-- Remove legacy column-level grants as well as table-level grants.
+revoke select (user_id, username, display_name, role, grade, major, class_name, initial_days, start_date)
+  on public.profiles from public, anon, authenticated;
+revoke select (user_id, report_date, payload, updated_at)
+  on public.daily_reports from public, anon, authenticated;
 -- Table-level REVOKE does not remove old column-level grants (notably start_date).
 revoke update (user_id, username, display_name, role, grade, major, class_name, initial_days, start_date)
   on public.profiles from public, anon, authenticated;
