@@ -181,7 +181,19 @@ begin
   v_display_name := nullif(btrim(coalesce(new.raw_user_meta_data->>'display_name', '')), '');
   v_grade := nullif(new.raw_user_meta_data->>'grade', '')::smallint;
   v_major := nullif(btrim(coalesce(new.raw_user_meta_data->>'major', '')), '');
-  if v_username = '' or v_username !~ '^[a-z0-9][a-z0-9._-]{2,29}
+  if v_username = '' or v_username !~ '^[a-z0-9][a-z0-9._-]{2,29}$' then
+    raise exception 'نام کاربری نامعتبر است';
+  end if;
+  if v_grade is null or v_grade not in (10,11,12) then
+    raise exception 'پایه تحصیلی نامعتبر است';
+  end if;
+  if v_major is null or v_major not in ('کامپیوتر','گرافیک','معماری') then
+    raise exception 'رشته تحصیلی نامعتبر است';
+  end if;
+  -- Never trust the client-supplied class_name; derive the cohort key on the server.
+  v_class_name := 'پایه ' || v_grade::text || ' - ' || v_major;
+  insert into public.profiles(user_id,username,display_name,role,grade,major,class_name,start_date)
+  values(new.id,v_username,coalesce(v_display_name,v_username),'participant',v_grade,v_major,v_class_name,current_date);
   return new;
 end;
 $c90_signup_hardened$;
