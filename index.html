@@ -1499,6 +1499,8 @@ async function syncCloud(data){
  const payload={user_id:session.user.id,report_date:"2000-01-01",payload:data,updated_at:new Date().toISOString()};
  await request("/rest/v1/daily_reports?on_conflict=user_id,report_date",{method:"POST",headers:{...authHeaders(),Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(payload)});
 }
+// Expose the authenticated sync function to the main app script, which runs outside this IIFE.
+window.syncCloud=syncCloud;
 function scheduleSync(data){
  if(!session)return;
  clearTimeout(cloudTimer);
