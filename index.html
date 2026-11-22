@@ -486,7 +486,7 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
 
 <script>
 (()=>{
-const N=90;let KEY="challenge90.v1."+(localStorage.getItem("c90.uid")||"guest");const $=id=>document.getElementById(id);
+const N=90;let KEY="challenge90.v1.guest";try{KEY="challenge90.v1."+(localStorage.getItem("c90.uid")||"guest")}catch(e){}const $=id=>document.getElementById(id);
 const fa=n=>Number(n).toLocaleString("fa-IR",{useGrouping:false});
 const MONTHS=["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"];
 const WEEK=["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنجشنبه","جمعه","شنبه"];
@@ -1509,16 +1509,19 @@ async function loadCloud(){
 async function saveInitialDays(days){
  const result=await request("/rest/v1/rpc/c90_set_initial_days",{method:"POST",headers:authHeaders(),body:JSON.stringify({p_days:days})});
  profile.initial_days=Number(result.initial_days);
- localStorage.removeItem("c90.pendingInitialDays."+String(profile.username||"").toLowerCase());
+ try{localStorage.removeItem("c90.pendingInitialDays."+String(profile.username||"").toLowerCase())}catch(storageError){}
+ if(window.C90_PENDING_INITIAL_DAYS&&window.C90_PENDING_INITIAL_DAYS.user===String(profile.username||"").toLowerCase())window.C90_PENDING_INITIAL_DAYS=null;
  return result;
 }
 async function ensureInitialDays(){
  const username=String(profile.username||"").toLowerCase();
  if(profile.initial_days!==null&&profile.initial_days!==undefined){
-  localStorage.removeItem("c90.pendingInitialDays."+username);
+  try{localStorage.removeItem("c90.pendingInitialDays."+username)}catch(storageError){}
   return;
  }
- const pending=localStorage.getItem("c90.pendingInitialDays."+username);
+ let pending=window.C90_PENDING_INITIAL_DAYS&&window.C90_PENDING_INITIAL_DAYS.user===username?String(window.C90_PENDING_INITIAL_DAYS.days):null;
+ try{pending=pending??localStorage.getItem("c90.pendingInitialDays."+username)}catch(storageError){}
+
  if(pending!==null){
   const days=Number(pending);
   if(Number.isInteger(days)&&days>=0&&days<=90){
@@ -1556,7 +1559,7 @@ async function ensureInitialDays(){
 function refreshPreInitialDays(){
  const user=String($("c90Username").value||"").trim().toLowerCase();
  const input=$("c90PreDays"),button=$("c90PreSave"),note=$("c90PreMsg");
- const saved=localStorage.getItem("c90.pendingInitialDays."+user);
+ let saved=null;try{saved=localStorage.getItem("c90.pendingInitialDays."+user)}catch(storageError){}
  if(saved!==null){
   input.value=saved;input.disabled=true;button.disabled=true;
   note.textContent="روزهای آغازین برای این نام کاربری ثبت شده و انتخاب قفل است.";
@@ -1571,7 +1574,8 @@ $("c90PreSave").onclick=()=>{
  const raw=$("c90PreDays").value.trim();
  if(!/^[a-z0-9][a-z0-9._-]{2,29}$/.test(user)){ $("c90PreMsg").textContent="ابتدا نام کاربری معتبر را وارد کن.";return}
  if(!/^[0-9]{1,2}$/.test(raw)||Number(raw)>90){$("c90PreMsg").textContent="عدد صحیح بین ۰ تا ۹۰ وارد کن.";return}
- localStorage.setItem("c90.pendingInitialDays."+user,String(Number(raw)));
+ window.C90_PENDING_INITIAL_DAYS={user,days:Number(raw)};
+ try{localStorage.setItem("c90.pendingInitialDays."+user,String(Number(raw)))}catch(storageError){}
  refreshPreInitialDays();
  $("c90PreMsg").textContent="انتخاب ذخیره شد؛ پس از ورود به همین حساب، امتیاز آغازین ثبت می‌شود.";
 };
@@ -1711,7 +1715,7 @@ async function enter(s){
   session=null;profile=null;window.C90_CURRENT_PROFILE=null;window.C90_CURRENT_USERNAME=null;location.reload()
 };
  window.addEventListener("c90save",e=>scheduleSync(e.detail));
- if(navigator.onLine){const local=localStorage.getItem("challenge90.v1."+session.user.id);if(local){try{await syncCloud(JSON.parse(local))}catch(e){console.warn(e)}}}
+ if(navigator.onLine){let local=null;try{local=localStorage.getItem("challenge90.v1."+session.user.id)}catch(storageError){window.C90_STORAGE_FAILED=true}if(local){try{await syncCloud(JSON.parse(local))}catch(e){console.warn(e)}}}
 }
 async function ensureSchoolInfo(){
  if(profile.grade&&profile.major){
@@ -1924,8 +1928,8 @@ $("c90AdminSearch").oninput=drawUsers;
   }
   old.user=u;await enter(old);
  }catch(e){
-  localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");
-  sessionStorage.removeItem("c90.active_uid");
+  try{localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid")}catch(storageError){}
+  try{sessionStorage.removeItem("c90.active_uid")}catch(storageError){}
   $("intro").classList.remove("on");$("splash").classList.remove("on");$("setup").classList.remove("on");
   $("C90_AUTH_PANEL").style.display="flex";msg("بازیابی ورود ناموفق بود: "+(e&&e.message?e.message:"خطای نامشخص")+"؛ دوباره وارد شو.");
  }finally{hideLoader()}
