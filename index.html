@@ -513,18 +513,41 @@ function d2j(jdn){
   return[jy,7+div(k,30),mod(k,30)+1];
 }
 const isoOf=g=>g[0]+"-"+String(g[1]).padStart(2,"0")+"-"+String(g[2]).padStart(2,"0");
-const C90_FIXED_START="2026-11-21";
+let C90_FIXED_START="2026-11-21";
 const validStartIso=v=>{if(typeof v!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(v))return false;const[y,m,d]=v.split("-").map(Number),x=new Date(Date.UTC(y,m-1,d));return x.getUTCFullYear()===y&&x.getUTCMonth()+1===m&&x.getUTCDate()===d};
-const startJ=()=>{if(S.start!==C90_FIXED_START){S.start=C90_FIXED_START;save()}const[a,b,c]=C90_FIXED_START.split("-").map(Number);return g2d(a,b,c)};
+const startJ=()=>{const value=validStartIso(S.start)?S.start:C90_FIXED_START;const[a,b,c]=value.split("-").map(Number);return g2d(a,b,c)};
+const isPlainObject=v=>!!v&&typeof v==="object"&&!Array.isArray(v);
+const cloneState=v=>v===undefined?undefined:JSON.parse(JSON.stringify(v));
+const sameState=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+function mergeState(local,remote,base){
+ if(local===undefined)return cloneState(remote);
+ if(remote===undefined)return cloneState(local);
+ if(sameState(local,remote))return cloneState(local);
+ if(base!==undefined&&sameState(local,base))return cloneState(remote);
+ if(base!==undefined&&sameState(remote,base))return cloneState(local);
+ if(isPlainObject(local)&&isPlainObject(remote)){
+  const out={},keys=new Set([...Object.keys(local),...Object.keys(remote)]);
+  for(const key of keys){
+   if(key==="__proto__"||key==="prototype"||key==="constructor")continue;
+   const hasL=Object.prototype.hasOwnProperty.call(local,key),hasR=Object.prototype.hasOwnProperty.call(remote,key),hasB=isPlainObject(base)&&Object.prototype.hasOwnProperty.call(base,key);
+   if(hasL&&hasR)out[key]=mergeState(local[key],remote[key],hasB?base[key]:undefined);
+   else if(hasL){if(!(hasB&&sameState(local[key],base[key])))out[key]=cloneState(local[key])}
+   else if(hasR)out[key]=cloneState(remote[key]);
+  }
+  return out;
+ }
+ return cloneState(local);
+}
+window.C90_MERGE_STATE=mergeState;
 const todayJ=()=>{const n=new Date();return g2d(n.getFullYear(),n.getMonth()+1,n.getDate())};
 const fmtJ=j=>{const[y,m,d]=d2j(j);return WEEK[mod(j+1,7)]+" "+fa(d)+" "+MONTHS[m-1]+" "+fa(y)};
 
 /* ---------- ذخیره‌ی محلی ---------- */
 function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d)return d}catch(e){}return{start:"",days:{},vault:null}}
 function save(){mainDirty=true;try{localStorage.setItem(KEY,JSON.stringify(S));window.dispatchEvent(new CustomEvent("c90save",{detail:S}))}catch(e){}}
-window.C90_SET_START_DATE=function(value){if(String(value)!==C90_FIXED_START)throw new Error("تاریخ شروع چالش ثابت است: شنبه ۳۰ آبان ۱۴۰۵");S.start=C90_FIXED_START;save();if(page===1)render()};
-window.C90_LOAD_USER_STATE=function(uid,authoritativeStart){KEY="challenge90.v1."+String(uid);S=load();if(!S||typeof S!=="object")S={days:{},vault:null};if(!S.days||typeof S.days!=="object")S.days={};S.start=C90_FIXED_START;save();ensureLv();render()};
-window.addEventListener("c90cloudupdate",e=>{const d=e.detail;if(!d||typeof d!=="object")return;if(JSON.stringify(S)===JSON.stringify(d))return;S=d;S.start=C90_FIXED_START;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(x){}if(page===2)hrender();else if(page===3)rrender();else render()});
+window.C90_SET_START_DATE=function(value){if(!validStartIso(String(value)))throw new Error("تاریخ شروع معتبر نیست.");C90_FIXED_START=String(value);S.start=C90_FIXED_START;save();if(page===1)render()};
+window.C90_LOAD_USER_STATE=function(uid,authoritativeStart){KEY="challenge90.v1."+String(uid);S=load();if(!S||typeof S!=="object")S={days:{},vault:null};if(!S.days||typeof S.days!=="object")S.days={};C90_FIXED_START=validStartIso(authoritativeStart)?String(authoritativeStart):(validStartIso(S.start)?S.start:C90_FIXED_START);S.start=C90_FIXED_START;save();ensureLv();render()};
+window.addEventListener("c90cloudupdate",e=>{const d=e.detail;if(!d||typeof d!=="object")return;const base=window.C90_SYNC_BASE||undefined,merged=mergeState(S,d,base);if(sameState(S,merged))return;S=merged;S.start=C90_FIXED_START;save();if(page===2)hrender();else if(page===3)rrender();else render()});
 function later(){clearTimeout(t);t=setTimeout(save,300)}
 function toast(m){const e=$("toast");e.textContent=m;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",4000)}
 function day(i){const d=S.days[i]||(S.days[i]={st:"",pray:"",how:"",tasks:[],sec:"",why:"",tr:[]});if(!d.tr)d.tr=[];if(d.why==null)d.why="";if(d.pos==null)d.pos="";if(!d.tasks)d.tasks=[];d.tasks.forEach(x=>{if(x.s==null)x.s=x.d?"y":""});return d}
@@ -669,7 +692,7 @@ async function vaultUI(){
   if(open){const d=day(cur),want=cur;let v="";try{v=d.sec?await decT(d.sec):""}catch(e){}if(want===cur)$("sec").value=v}
 }
 $("vGo").onclick=async()=>{
-  const pw=$("pw").value;if(pw.length<4){$("vMsg").textContent="رمز دست‌کم ۴ نویسه باشد.";return}
+  const pw=$("pw").value;if(!S.vault&&pw.length<12){$("vMsg").textContent="برای ساخت صندوقچه، رمز دست‌کم ۱۲ نویسه انتخاب کن.";return}
   try{
     if(!S.vault){const salt=crypto.getRandomValues(new Uint8Array(16));cryptoKey=await derive(pw,salt);S.vault={salt:b64(salt),chk:await encT("ok")};save()}
     else{cryptoKey=await derive(pw,unb(S.vault.salt));if(await decT(S.vault.chk)!=="ok")throw 0}
@@ -1358,7 +1381,7 @@ function hideLoader(){const e=document.getElementById("c90Loading");if(e)e.class
  if(layer&&layer.parentElement!==document.body)document.body.appendChild(layer);
 });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0"></script>
 <script>
 (()=>{
 const URL="https://ghklgfvifqlsmlkpcpqi.supabase.co";
@@ -1397,26 +1420,29 @@ async function getProfile(){
  profile=a[0];
  window.C90_CURRENT_PROFILE=profile;
 }
-let cloudReadFailed=false,cloudReadInProgress=false,cloudReadSucceeded=false,cloudReadPromise=null,cloudReadError=null;
-async function loadCloud(options={}){
+let cloudReadFailed=false,cloudReadInProgress=false,cloudReadSucceeded=false,cloudReadPromise=null,cloudReadError=null,cloudMergedState=null,cloudWriteQueue=Promise.resolve();
+const userStateKey=()=> "challenge90.v1."+session.user.id;
+const syncedStateKey=()=> "challenge90.synced.v1."+session.user.id;
+const parseStored=value=>{try{return value?JSON.parse(value):null}catch(e){return null}};
+async function loadCloud(){
  if(cloudReadPromise)return cloudReadPromise;
  cloudReadFailed=false;cloudReadSucceeded=false;cloudReadError=null;cloudReadInProgress=true;
  cloudReadPromise=(async()=>{
   try{
-   const a=await request("/rest/v1/daily_reports?select=payload&report_date=eq.2000-01-01&user_id=eq."+encodeURIComponent(session.user.id),{headers:authHeaders(),timeoutMs:12000});
-   if(a.length&&a[0].payload&&typeof a[0].payload==="object"&&options.apply!==false){
-    localStorage.setItem("challenge90.v1."+session.user.id,JSON.stringify(a[0].payload));
-    window.dispatchEvent(new CustomEvent("c90cloudupdate",{detail:a[0].payload}));
-   }
+   const rows=await request("/rest/v1/daily_reports?select=payload&report_date=eq.2000-01-01&user_id=eq."+encodeURIComponent(session.user.id),{headers:authHeaders(),timeoutMs:12000});
+   const remote=rows.length&&rows[0].payload&&typeof rows[0].payload==="object"?rows[0].payload:null;
+   const local=parseStored(localStorage.getItem(userStateKey()));
+   const base=parseStored(localStorage.getItem(syncedStateKey()));
+   cloudMergedState=remote?(window.C90_MERGE_STATE?window.C90_MERGE_STATE(local,remote,base):Object.assign({},remote||{},local||{})):(local||{});
+   if(remote){window.C90_SYNC_BASE=remote;localStorage.setItem(syncedStateKey(),JSON.stringify(remote))}
+   else{window.C90_SYNC_BASE=null;localStorage.removeItem(syncedStateKey())}
+   localStorage.setItem(userStateKey(),JSON.stringify(cloudMergedState));
+   if(JSON.stringify(local)!==JSON.stringify(cloudMergedState))window.dispatchEvent(new CustomEvent("c90cloudupdate",{detail:cloudMergedState}));
    cloudReadSucceeded=true;
+   if(remote&&JSON.stringify(cloudMergedState)!==JSON.stringify(remote))scheduleSync(cloudMergedState);
    return true;
-  }catch(e){
-   cloudReadFailed=true;cloudReadError=e;
-   console.warn("Cloud restore:",e.message);
-   return false;
-  }finally{
-   cloudReadInProgress=false;cloudReadPromise=null;
-  }
+  }catch(e){cloudReadFailed=true;cloudReadError=e;console.warn("Cloud restore:",e.message);return false}
+  finally{cloudReadInProgress=false;cloudReadPromise=null}
  })();
  return cloudReadPromise;
 }
@@ -1492,12 +1518,23 @@ $("c90PreSave").onclick=()=>{
 refreshPreInitialDays();
 async function syncCloud(data){
  if(!session||!data)throw new Error("برای ذخیره آنلاین باید وارد حساب کاربری شوی.");
- if(!cloudReadSucceeded){
-  const restored=await loadCloud({apply:false});
-  if(!restored)throw new Error("بازیابی اطلاعات از سرور ناموفق بود: "+String(cloudReadError&&cloudReadError.message||"خطای ناشناخته"));
- }
- const payload={user_id:session.user.id,report_date:"2000-01-01",payload:data,updated_at:new Date().toISOString()};
- await request("/rest/v1/daily_reports?on_conflict=user_id,report_date",{method:"POST",headers:{...authHeaders(),Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(payload)});
+ const job=cloudWriteQueue.catch(()=>{}).then(async()=>{
+  if(!cloudReadSucceeded){
+   const restored=await loadCloud();
+   if(!restored)throw new Error("بازیابی اطلاعات از سرور ناموفق بود: "+String(cloudReadError&&cloudReadError.message||"خطای ناشناخته"));
+  }
+  const latest=parseStored(localStorage.getItem(userStateKey()))||cloudMergedState||data;
+  if(!latest||typeof latest!=="object")throw new Error("اطلاعات محلی معتبر نیست و برای جلوگیری از بازنویسی، ارسال متوقف شد.");
+  const payload={user_id:session.user.id,report_date:"2000-01-01",payload:latest,updated_at:new Date().toISOString()};
+  await request("/rest/v1/daily_reports?on_conflict=user_id,report_date",{method:"POST",headers:{...authHeaders(),Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(payload)});
+  localStorage.setItem(syncedStateKey(),JSON.stringify(latest));
+  window.C90_SYNC_BASE=latest;cloudMergedState=latest;
+  const after=localStorage.getItem(userStateKey());
+  if(after&&after!==JSON.stringify(latest)){const newer=parseStored(after);if(newer)scheduleSync(newer)}
+  return true;
+ });
+ cloudWriteQueue=job;
+ return job;
 }
 // Expose the authenticated sync function to the main app script, which runs outside this IIFE.
 window.syncCloud=syncCloud;
@@ -1548,10 +1585,14 @@ async function enter(s){
     .on("postgres_changes",{event:"*",schema:"public",table:"daily_reports"},()=>window.C90_LOAD_RANKING().catch(()=>{}))
     .on("postgres_changes",{event:"*",schema:"public",table:"profiles"},()=>window.C90_LOAD_RANKING().catch(()=>{}))
     .on("postgres_changes",{event:"*",schema:"public",table:"daily_reports",filter:"user_id=eq."+session.user.id},payload=>{
-      const row=payload.new;
-      if(!row||row.report_date!=="2000-01-01"||!row.payload)return;
-      const local=localStorage.getItem("challenge90.v1."+session.user.id);
-      try{if(JSON.stringify(JSON.parse(local||"null"))!==JSON.stringify(row.payload))window.dispatchEvent(new CustomEvent("c90cloudupdate",{detail:row.payload}))}catch(e){}
+      const row=payload.new;if(!row||row.report_date!=="2000-01-01"||!row.payload)return;
+      const key="challenge90.v1."+session.user.id,base=window.C90_SYNC_BASE||parseStored(localStorage.getItem("challenge90.synced.v1."+session.user.id)),local=parseStored(localStorage.getItem(key));
+      const merged=window.C90_MERGE_STATE?window.C90_MERGE_STATE(local,row.payload,base):Object.assign({},row.payload||{},local||{});
+      window.C90_SYNC_BASE=row.payload;localStorage.setItem("challenge90.synced.v1."+session.user.id,JSON.stringify(row.payload));localStorage.setItem(key,JSON.stringify(merged));
+      if(JSON.stringify(local)!==JSON.stringify(merged))window.dispatchEvent(new CustomEvent("c90cloudu
+pd
+ate",{detail:merged}));
+      if(JSON.stringify(merged)!==JSON.stringify(row.payload))scheduleSync(merged);
     })
     .subscribe();
   }
@@ -1583,7 +1624,7 @@ async function enter(s){
  const out=document.createElement("div");out.className="c90-accountbar";
  out.innerHTML='<span style="color:var(--mute)">حساب: '+String(profile.username||"").replace(/[&<>"]/g,"")+'</span><button id="c90Logout">ترک حساب</button>';
  document.querySelector(".wrap").prepend(out);
- $("c90Logout").onclick=async()=>{const button=$("c90Logout");button.disabled=true;button.textContent="در حال ترک حساب…";try{await request("/auth/v1/logout",{method:"POST",headers:authHeaders()})}catch(e){}clearTimeout(cloudTimer);clearInterval(window.C90_CLASS_RANK_TIMER);if(window.C90_RT_CLIENT&&window.C90_RT_CHANNEL){try{await window.C90_RT_CLIENT.removeChannel(window.C90_RT_CHANNEL)}catch(e){}}localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");sessionStorage.removeItem("c90.loaded");sessionStorage.removeItem("c90.active_uid");session=null;profile=null;window.C90_CURRENT_PROFILE=null;window.C90_CURRENT_USERNAME=null;location.reload()};
+ $("c90Logout").onclick=async()=>{const button=$("c90Logout");button.disabled=true;button.textContent="در حال ذخیره و خروج…";try{const local=parseStored(localStorage.getItem(userStateKey()));if(local)await syncCloud(local);await request("/auth/v1/logout",{method:"POST",headers:authHeaders()})}catch(e){button.disabled=false;button.textContent="ترک حساب";alert("برای جلوگیری از گم‌شدن اطلاعات، خروج انجام نشد. ابتدا اتصال را بررسی کن و دوباره تلاش کن.\n"+String(e&&e.message||e));return}clearTimeout(cloudTimer);clearInterval(window.C90_CLASS_RANK_TIMER);if(window.C90_RT_CLIENT&&window.C90_RT_CHANNEL){try{await window.C90_RT_CLIENT.removeChannel(window.C90_RT_CHANNEL)}catch(e){}}localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");sessionStorage.removeItem("c90.loaded");sessionStorage.removeItem("c90.active_uid");session=null;profile=null;window.C90_CURRENT_PROFILE=null;window.C90_CURRENT_USERNAME=null;location.reload()};
  window.addEventListener("c90save",e=>scheduleSync(e.detail));
  if(navigator.onLine){const local=localStorage.getItem("challenge90.v1."+session.user.id);if(local){try{await syncCloud(JSON.parse(local))}catch(e){console.warn(e)}}}
 }
