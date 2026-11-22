@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://ghklgfvifqlsmlkpcpqi.supabase.co wss://ghklgfvifqlsmlkpcpqi.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>90</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1338,6 +1340,7 @@ function hideLoader(){const e=document.getElementById("c90Loading");if(e)e.class
  <div class="authbox">
   <div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><h2>۹۰ روز | حساب کاربری</h2><button type="button" id="c90AuthBack" style="flex:0 0 auto;padding:7px 14px">بازگشت</button></div>
   <div id="c90AuthIntro">برای ذخیره‌ی امن اطلاعات، وارد حساب خودت شو یا حساب جدید بساز.</div>
+  <div class="privacy-consent"><input id="c90PrivacyConsent" type="checkbox"><label for="c90PrivacyConsent">با ثبت‌نام موافقم اطلاعات و گزارش‌های این برنامه روی سرور ذخیره شود. مدیر سامانه می‌تواند گزارش‌های ثبت‌شده را برای مدیریت چالش مشاهده کند. صندوقچه اسرار رمزگذاری می‌شود، اما سایر یادداشت‌ها رمزنگاری سرتاسری نیستند.</label></div>
   <input id="c90Username" autocomplete="username" placeholder="نام کاربری (انگلیسی، ۳ تا ۳۰ نویسه)" maxlength="30">
   <div class="initial-prelogin">
    <label for="c90PreDays">روزهای پاکی پیش از شروع چالش</label>
@@ -1683,6 +1686,7 @@ async function signup(){
  if(!/^[a-z0-9][a-z0-9._-]{2,29}$/.test(u)){msg("نام کاربری باید ۳ تا ۳۰ نویسه و فقط شامل حروف انگلیسی کوچک، عدد، نقطه، خط تیره یا زیرخط باشد.");return}
  if(p.length<8){msg("رمز عبور باید حداقل ۸ نویسه باشد.");return}
  if(![10,11,12].includes(grade)||!["کامپیوتر","گرافیک","معماری"].includes(major)){msg("پایه و رشته را انتخاب کن.");return}
+ if(!$("c90PrivacyConsent").checked){msg("برای ثبت‌نام، ابتدا اطلاعیه حریم خصوصی را بخوان و تأیید کن.");return}
  msg("در حال ساخت حساب…");
  let d;
  try{
@@ -1926,6 +1930,9 @@ $("c90AdminSearch").oninput=drawUsers;
 #C90_AUTH_PANEL #c90Signup{background:#2a1d27;color:#f2d99a;border:1px solid #76543e}
 #C90_AUTH_PANEL #c90AuthBack{border:1px solid #5e4650;border-radius:10px;background:#ffffff08;color:#cbb9b8}
 #C90_AUTH_PANEL .authmsg{min-height:25px;text-align:center;line-height:1.7}
+#C90_AUTH_PANEL .privacy-consent{display:flex;align-items:flex-start;gap:9px;margin:12px 0;padding:11px;border:1px solid #59414a;border-radius:12px;background:#0d0a0f;color:#c8b8b9;font-size:.72rem;line-height:1.8}
+#C90_AUTH_PANEL .privacy-consent input[type=checkbox]{flex:0 0 19px;width:19px;height:19px;min-height:19px;margin:3px 0 0;accent-color:#e8b339}
+#C90_AUTH_PANEL .privacy-consent label{cursor:pointer}
 @media(max-height:720px){#C90_AUTH_PANEL{align-items:flex-start}#C90_AUTH_PANEL .authbox{margin:4px auto}}
 </style>
 <style>
