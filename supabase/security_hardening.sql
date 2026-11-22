@@ -34,10 +34,12 @@ as $c90_day_map$
             ),
             '{min}',
             to_jsonb(
-              case
-                when coalesce(e.value->>'min', '') ~ '^[0-9]{1,3}$'
-                 and (e.value->>'min')::integer <= 180
-                then (e.value->>'min')::integer
+                when length(coalesce(e.value->>'min', '')) between 1 and 3 then
+                  case
+                    when coalesce(e.value->>'min', '') ~ '^[0-9]{1,3}$'
+                    then least((e.value->>'min')::integer, 180)
+                    else 0
+                  end
                 else 0
               end
             ),
@@ -52,9 +54,13 @@ as $c90_day_map$
     case when jsonb_typeof(p_map) = 'object'
       then p_map else '{}'::jsonb end
   ) as e(key, value)
-  where length(e.key) <= 2
-    and e.key ~ '^[1-9][0-9]?$'
-    and e.key::integer between 1 and greatest(1, least(coalesce(p_max_day, 90), 90))
+  where (
+    case
+      when length(e.key) <= 2 and e.key ~ '^[1-9][0-9]?$'
+      then e.key::integer
+      else 0
+    end
+  ) between 1 and greatest(1, least(coalesce(p_max_day, 90), 90))
 $c90_day_map$;
 revoke all on function public.c90_valid_day_map(jsonb, integer) from public;
 grant execute on function public.c90_valid_day_map(jsonb, integer) to authenticated;
