@@ -81,7 +81,7 @@ grant execute on function public.c90_safe_date(text) to authenticated;
 -- New profiles use the server date. Existing profiles are not reset.
 create or replace function public.handle_new_auth_user()
 returns trigger language plpgsql security definer
-set search_path = public, pg_temp set row_security = off
+set search_path = pg_catalog, public, pg_temp set row_security = off
 as $c90_signup_hardened$
 declare
   v_username text;
@@ -110,7 +110,7 @@ for each row execute function public.handle_new_auth_user();
 
 create or replace function public.c90_guard_start_date()
 returns trigger language plpgsql security definer
-set search_path = public, pg_temp set row_security = off
+set search_path = pg_catalog, public, pg_temp set row_security = off
 as $c90_guard$
 declare v_is_admin boolean := false;
 begin
@@ -133,7 +133,7 @@ grant update (grade, major, class_name) on public.profiles to authenticated;
 
 create or replace function public.c90_initialize_start_date()
 returns date language plpgsql security definer
-set search_path = public, pg_temp set row_security = off
+set search_path = pg_catalog, public, pg_temp set row_security = off
 as $c90_init_date$
 declare v_date date;
 begin
@@ -149,7 +149,7 @@ grant execute on function public.c90_initialize_start_date() to authenticated;
 
 create or replace function public.c90_admin_set_start_date(p_user_id uuid,p_start_date date)
 returns date language plpgsql security definer
-set search_path = public, pg_temp set row_security = off
+set search_path = pg_catalog, public, pg_temp set row_security = off
 as $c90_admin_date$
 begin
   if auth.uid() is null or not exists(select 1 from public.profiles where user_id=auth.uid() and role='admin') then
@@ -184,7 +184,7 @@ returns table (
 )
 language plpgsql
 security definer
-set search_path = public, pg_temp
+set search_path = pg_catalog, public, pg_temp
 set row_security = off
 as $c90_ranking$
 declare
@@ -363,7 +363,7 @@ returns table (
 )
 language plpgsql
 security definer
-set search_path = public, pg_temp
+set search_path = pg_catalog, public, pg_temp
 set row_security = off
 as $c90_individual$
 declare
