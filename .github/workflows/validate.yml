@@ -1,0 +1,142 @@
+name: Validate Challenge 90
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  javascript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Parse every inline JavaScript block
+        run: |
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          class Scripts(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.active = False
+                  self.external = False
+                  self.parts = []
+                  self.blocks = []
+              def handle_starttag(self, tag, attrs):
+                  if tag.lower() == "script":
+                      self.active = True
+                      self.external = any(k.lower() == "src" for k, _ in attrs)
+                      self.parts = []
+              def handle_data(self, data):
+                  if self.active and not self.external:
+                      self.parts.append(data)
+              def handle_endtag(self, tag):
+                  if tag.lower() == "script" and self.active:
+                      if not self.external:
+                          self.blocks.append("".join(self.parts))
+                      self.active = False
+          parser = Scripts()
+          parser.feed(Path("index.html").read_text(encoding="utf-8"))
+          for i, block in enumerate(parser.blocks):
+              Path(f"/tmp/c90-inline-{i}.js").write_text(block, encoding="utf-8")
+          print(f"Extracted {len(parser.blocks)} inline script blocks")
+          if not parser.blocks:
+              raise SystemExit("No inline scripts were found")
+          PY
+          for file in /tmp/c90-inline-*.js; do
+            echo "Checking $file"
+            node --check "$file"
+          done
+  database:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: challenge90_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d challenge90_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+      - name: Create minimal Supabase-compatible test schema
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d challenge90_test -v ON_ERROR_STOP=1 <<'SQL'
+          create role authenticated nologin;
+          create schema auth;
+          create table auth.users (
+            id uuid primary key,
+            email text,
+            raw_user_meta_data jsonb
+          );
+          create table public.profiles (
+            user_id uuid primary key,
+            username text unique,
+            display_name text,
+            role text not null default 'participant',
+            grade smallint,
+            major text,
+            class_name text,
+            initial_days integer,
+            start_date date
+          );
+          create table public.daily_reports (
+            user_id uuid not null references public.profiles(user_id),
+            report_date date not null,
+            payload jsonb,
+            updated_at timestamptz,
+            unique(user_id, report_date)
+          );
+          create function auth.uid() returns uuid
+          language sql stable
+          as $$
+            select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
+          $$;
+          SQL
+      - name: Apply hardening migration
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d challenge90_test -v ON_ERROR_STOP=1 -f supabase/security_hardening.sql
+      - name: Exercise day validation and ranking RPCs
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d challenge90_test -v ON_ERROR_STOP=1 <<'SQL'
+          insert into public.profiles(user_id, username, display_name, role, grade, major, class_name, initial_days, start_date)
+          values
+            ('00000000-0000-0000-0000-000000000001','admin90','Admin','admin',12,'کامپیوتر','کلاس الف',0,current_date),
+            ('00000000-0000-0000-0000-000000000002','user90','User','participant',12,'کامپیوتر','کلاس الف',3,current_date);
+          insert into public.daily_reports(user_id, report_date, payload, updated_at)
+          values
+            ('00000000-0000-0000-0000-000000000002',date '2000-01-01',
+             '{"start":"2026-11-21","days":{"1":{"st":"clean","tasks":[{"s":"y"},{"s":"n"}]},"91":{"st":"clean"}},"hyp":{"days":{"1":{"st":"done","min":"180"},"21":{"st":"done","min":"999999999"}}}}'::jsonb,now());
+          do $$
+          declare v jsonb;
+          begin
+            v := public.c90_valid_day_map('{"1":{"st":"clean","min":"999999999"},"91":{"st":"clean"},"999999999999999999999999":{"st":"clean"}}'::jsonb,90);
+            if jsonb_object_length(v) <> 1 or v->'1'->>'min' <> '0' then
+              raise exception 'Day-map sanitization test failed: %', v;
+            end if;
+          end $$;
+          select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',false);
+          select * from public.class_ranking();
+          select * from public.individual_ranking();
+          select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',false);
+          select public.c90_admin_set_start_date('00000000-0000-0000-0000-000000000002',current_date);
+          SQL
