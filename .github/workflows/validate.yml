@@ -86,6 +86,13 @@ jobs:
             email text,
             raw_user_meta_data jsonb
           );
+          -- Seed a legacy trigger name to ensure hardening removes duplicate profile creators.
+          create function public.handle_new_auth_user() returns trigger
+          language plpgsql as $legacy_signup$
+          begin return new; end;
+          $legacy_signup$;
+          create trigger legacy_profile_creator after insert on auth.users
+          for each row execute function public.handle_new_auth_user();
           create table public.profiles (
             user_id uuid primary key,
             username text unique,
