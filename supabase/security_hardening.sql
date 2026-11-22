@@ -158,11 +158,12 @@ using (user_id = auth.uid())
 with check (user_id = auth.uid());
 
 grant usage on schema public to authenticated;
+-- Remove legacy broad table grants before granting the minimum client permissions.
+revoke all on public.profiles from public, anon, authenticated;
+revoke all on public.daily_reports from public, anon, authenticated;
 grant select on public.profiles to authenticated;
-revoke update on public.profiles from authenticated;
 grant update (grade, major, class_name) on public.profiles to authenticated;
 grant select, insert, update on public.daily_reports to authenticated;
-revoke delete on public.daily_reports from authenticated;
 
 -- New profiles use the server date. Existing profiles are not reset.
 create or replace function public.handle_new_auth_user()
