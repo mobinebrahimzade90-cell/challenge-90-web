@@ -223,7 +223,25 @@ begin
   return new;
 end;
 $c90_signup_hardened$;
-drop trigger if exists on_auth_user_created_90days on auth.users;
+-- Remove any older trigger names that invoke this profile-creation function,
+-- otherwise two signup triggers can attempt to insert the same profile.
+do $c90_drop_legacy_signup_triggers$
+declare v_trigger record;
+begin
+  for v_trigger in
+    select t.tgname
+    from pg_trigger t
+    join pg_proc p on p.oid = t.tgfoid
+    join pg_namespace n on n.oid = p.pronamespace
+    where t.tgrelid = 'auth.users'::regclass
+      and not t.tgisinternal
+      and n.nspname = 'public'
+      and p.proname = 'handle_new_auth_user'
+  loop
+    execute format('drop trigger %I on auth.users', v_trigger.tgname);
+  end loop;
+end;
+$c90_drop_legacy_signup_triggers$;
 create trigger on_auth_user_created_90days after insert on auth.users
 for each row execute function public.handle_new_auth_user();
 
