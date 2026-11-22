@@ -770,8 +770,8 @@ $("okSave").onclick=async()=>{
 };
 
 /* ---------- رویدادها ---------- */
-$("pray").oninput=e=>{day(cur).pray=e.target.value;later()};
-$("pos").oninput=e=>{day(cur).pos=e.target.value;later()};
+$("pray").oninput=e=>{e.target.value=e.target.value.slice(0,4000);day(cur).pray=e.target.value;later()};
+$("pos").oninput=e=>{e.target.value=e.target.value.slice(0,4000);day(cur).pos=e.target.value;later()};
 const VAL={clean:.06,fail:-.12,"":0};
 function flash(st){if(!st)return;const e=$("flash");e.style.background="radial-gradient(circle at 50% 70%,"+(st==="clean"?"rgba(255,214,120,.65)":"rgba(190,20,35,.7)")+",transparent 70%)";e.classList.remove("go");void e.offsetWidth;e.classList.add("go")}
 function patterns(){const c={};for(const k in S.days)(S.days[k].tr||[]).forEach(x=>c[x]=(c[x]||0)+1);const a=Object.entries(c).sort((x,y)=>y[1]-x[1]).slice(0,4),L=$("patL");$("pat").classList.toggle("hide",!a.length);L.innerHTML="";a.forEach(([n,v])=>{const r=document.createElement("div");r.className="pr";r.innerHTML="<span></span><div><i style='width:"+Math.round(v/a[0][1]*100)+"%'></i></div><em>"+fa(v)+"</em>";r.firstChild.textContent=n;L.appendChild(r)})}
@@ -782,8 +782,8 @@ document.querySelectorAll(".choice button").forEach(b=>b.onclick=()=>{
   if(navigator.vibrate)navigator.vibrate(nw==="fail"?[30,40,30]:20);
   if(nw==="fail")setTimeout(()=>$("reason").scrollIntoView({behavior:"smooth",block:"center"}),120);
 });
-$("why").oninput=e=>{day(cur).why=e.target.value;later()};
-function addT(){const v=$("newTask").value.trim();if(!v)return;day(cur).tasks.push({t:v,s:""});$("newTask").value="";save();paint()}
+$("why").oninput=e=>{e.target.value=e.target.value.slice(0,4000);day(cur).why=e.target.value;later()};
+function addT(){const input=$("newTask"),v=input.value.trim().slice(0,300);if(!v)return;const tasks=day(cur).tasks;if(tasks.length>=50){toast("برای هر روز حداکثر ۵۰ کار می‌توان ثبت کرد.");return}tasks.push({t:v,s:""});input.value="";save();paint()}
 $("addTask").onclick=addT;$("newTask").onkeydown=e=>{if(e.key==="Enter")addT()};
 $("back").onclick=()=>{save();closeDay()};
 document.onkeydown=e=>{if(e.key==="Escape"&&$("day").classList.contains("on")){save();closeDay()}};
@@ -1134,8 +1134,8 @@ function initHyp(){
   HID.forEach(id=>{const e=$(id);e.onfocus=()=>e.select();e.onkeydown=k=>{if(k.key==="Enter")e.blur()};
     e.onchange=()=>{const v=readTrio(HID);if(!v){toast("تاریخ درست نیست");hrender();return}ensureHyp();S.hyp.start=isoOf(d2g(j2d(v.y,v.m,v.d)));save();hrender()}});
   $("hDuration").onchange=e=>{const v=Math.max(1,Math.min(180,Math.floor(Number(e.target.value)||5)));e.target.value=String(v);hday(hcur).min=v;save()};
-  $("hSug").oninput=e=>{hday(hcur).sug=e.target.value;later()};
-  $("hNote").oninput=e=>{hday(hcur).note=e.target.value;later()};
+  $("hSug").oninput=e=>{e.target.value=e.target.value.slice(0,4000);hday(hcur).sug=e.target.value;later()};
+  $("hNote").oninput=e=>{e.target.value=e.target.value.slice(0,4000);hday(hcur).note=e.target.value;later()};
   const hc=()=>{save();$("hday").classList.remove("on");hrender()};
   $("hBack").onclick=hc;
   $("hOk").onclick=async()=>{save();try{await syncCloud(S);hc();toast("اطلاعات جلسه در حساب کاربری ذخیره شد ✔")}catch(e){hc();toast("همگام‌سازی انجام نشد؛ اتصال را بررسی کن.")}};
