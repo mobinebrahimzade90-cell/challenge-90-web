@@ -127,10 +127,11 @@ jobs:
             ('00000000-0000-0000-0000-000000000002',date '2000-01-01',
              '{"start":"2026-11-21","days":{"1":{"st":"clean","tasks":[{"s":"y"},{"s":"n"}]},"91":{"st":"clean"}},"hyp":{"days":{"1":{"st":"done","min":"180"},"21":{"st":"done","min":"999999999"}}}}'::jsonb,now());
           do $$
-          declare v jsonb;
+          declare v jsonb; v_count integer;
           begin
             v := public.c90_valid_day_map('{"1":{"st":"clean","min":"999999999"},"91":{"st":"clean"},"999999999999999999999999":{"st":"clean"}}'::jsonb,90);
-            if jsonb_object_length(v) <> 1 or v->'1'->>'min' <> '0' then
+            select count(*) into v_count from jsonb_object_keys(v);
+            if v_count <> 1 or v->'1'->>'min' <> '0' then
               raise exception 'Day-map sanitization test failed: %', v;
             end if;
           end $$;
