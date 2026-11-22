@@ -1843,18 +1843,7 @@ async function showUser(u){
   const a=await request("/rest/v1/daily_reports?select=payload,updated_at&user_id=eq."+encodeURIComponent(u.user_id)+"&order=updated_at.desc&limit=1",{headers:authHeaders()});
   viewedState=a.length?a[0].payload:null;renderAdminViewer();
   const tools=$("c90DeviceTools");tools.innerHTML="";tools.style.display="block";
-  tools.append(adminText("div","adminmuted","مدیریت اتصال دستگاه این حساب"));
-  const release=adminText("button","","آزادسازی دستگاه برای ورود به گوشی جدید");
-  release.onclick=async()=>{
-   if(!confirm("اتصال دستگاه قبلی این حساب آزاد شود؟ اطلاعات و گزارش‌های کاربر حذف نمی‌شوند."))return;
-   release.disabled=true;release.textContent="در حال آزادسازی…";
-   try{
-    const done=await request("/rest/v1/rpc/admin_release_device",{method:"POST",headers:authHeaders(),body:JSON.stringify({p_user_id:u.user_id})});
-    alert(done===true?"اتصال دستگاه آزاد شد. کاربر اکنون می‌تواند با همان نام کاربری و رمز عبور روی گوشی جدید وارد شود.":"برای این حساب اتصال دستگاهی ثبت نشده بود.");
-   }catch(e){alert("آزادسازی انجام نشد: "+e.message)}
-   finally{release.disabled=false;release.textContent="آزادسازی دستگاه برای ورود به گوشی جدید"}
-  };
-  tools.append(release);
+  tools.append(adminText("div","adminmuted","قفل و آزادسازی دستگاه در سرور این نسخه پیاده‌سازی نشده است؛ برای جلوگیری از نمایش کنترل غیرعملیاتی، دکمهٔ آزادسازی حذف شده است."));
   const dateWrap=adminText("div","adminsection","");
   dateWrap.append(adminText("div","adminmuted","تغییر تاریخ شروع چالش (فقط مدیر)"));
   const startInput=document.createElement("input");startInput.type="date";startInput.value=u.start_date||((viewedState&&viewedState.start)||"");
