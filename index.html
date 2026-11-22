@@ -555,6 +555,7 @@ window.C90_FLUSH_LOCAL=()=>{clearTimeout(t);save();return S};
 window.addEventListener("pagehide",()=>{try{clearTimeout(t);save()}catch(e){}});
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){try{clearTimeout(t);save()}catch(e){}}});
 function toast(m){const e=$("toast");e.textContent=m;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",4000)}
+window.C90_TOAST=toast;
 function day(i){const d=S.days[i]||(S.days[i]={st:"",pray:"",how:"",tasks:[],sec:"",why:"",tr:[]});if(!d.tr)d.tr=[];if(d.why==null)d.why="";if(d.pos==null)d.pos="";if(!d.tasks)d.tasks=[];d.tasks.forEach(x=>{if(x.s==null)x.s=x.d?"y":""});return d}
 function dayHasSavedData(d){
  if(!d)return false;
@@ -1547,8 +1548,17 @@ window.syncCloud=syncCloud;
 function scheduleSync(data){
  if(!session)return;
  clearTimeout(cloudTimer);
- cloudTimer=setTimeout(()=>syncCloud(data).catch(e=>console.warn("Cloud sync:",e.message)),1000);
+ cloudTimer=setTimeout(()=>syncCloud(data).catch(e=>{
+  console.warn("Cloud sync:",e.message);
+  if(window.C90_TOAST)window.C90_TOAST("ذخیره آنلاین ناموفق بود؛ اطلاعات روی دستگاه باقی ماند. "+String(e.message||"").slice(0,70));
+ }),1000);
 }
+window.addEventListener("online",()=>{
+ if(!session)return;
+ const local=parseStored(localStorage.getItem(userStateKey()));
+ if(local)syncCloud(local).catch(e=>console.warn("Online retry:",e.message));
+});
+
 async function enter(s){
  session=s;
  setLoaderStage(1,"در حال شناسایی حساب","اعتبارسنجی نشست کاربری");
