@@ -1589,9 +1589,7 @@ async function enter(s){
       const key="challenge90.v1."+session.user.id,base=window.C90_SYNC_BASE||parseStored(localStorage.getItem("challenge90.synced.v1."+session.user.id)),local=parseStored(localStorage.getItem(key));
       const merged=window.C90_MERGE_STATE?window.C90_MERGE_STATE(local,row.payload,base):Object.assign({},row.payload||{},local||{});
       window.C90_SYNC_BASE=row.payload;localStorage.setItem("challenge90.synced.v1."+session.user.id,JSON.stringify(row.payload));localStorage.setItem(key,JSON.stringify(merged));
-      if(JSON.stringify(local)!==JSON.stringify(merged))window.dispatchEvent(new CustomEvent("c90cloudu
-pd
-ate",{detail:merged}));
+      if(JSON.stringify(local)!==JSON.stringify(merged))window.dispatchEvent(new CustomEvent("c90cloudupdate",{detail:merged}));
       if(JSON.stringify(merged)!==JSON.stringify(row.payload))scheduleSync(merged);
     })
     .subscribe();
