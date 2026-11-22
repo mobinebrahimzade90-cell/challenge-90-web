@@ -1469,10 +1469,12 @@ async function loadCloud(){
  cloudReadPromise=(async()=>{
   try{
    const rows=await request("/rest/v1/daily_reports?select=payload&report_date=eq.2000-01-01&user_id=eq."+encodeURIComponent(session.user.id),{headers:authHeaders(),timeoutMs:12000});
-   const remote=rows.length&&rows[0].payload&&typeof rows[0].payload==="object"?rows[0].payload:null;
-   const local=parseStored(localStorage.getItem(userStateKey()));
-   const base=parseStored(localStorage.getItem(syncedStateKey()));
-   cloudMergedState=remote?(window.C90_MERGE_STATE?window.C90_MERGE_STATE(local,remote,base):Object.assign({},remote||{},local||{})):(local||{});
+   const remote=rows.length&&rows[0].payload&&typeof rows[0].payload==="object"?window.C90_NORMALIZE_STATE(rows[0].payload):null;
+   const localRaw=parseStored(localStorage.getItem(userStateKey()));
+   const local=localRaw?window.C90_NORMALIZE_STATE(localRaw):null;
+   const baseRaw=parseStored(localStorage.getItem(syncedStateKey()));
+   const base=baseRaw?window.C90_NORMALIZE_STATE(baseRaw):null;
+   cloudMergedState=remote?window.C90_NORMALIZE_STATE(window.C90_MERGE_STATE(local,remote,base)):(local||window.C90_NORMALIZE_STATE({}));
    if(remote){window.C90_SYNC_BASE=remote;localStorage.setItem(syncedStateKey(),JSON.stringify(remote))}
    else{window.C90_SYNC_BASE=null;localStorage.removeItem(syncedStateKey())}
    localStorage.setItem(userStateKey(),JSON.stringify(cloudMergedState));
@@ -1562,7 +1564,8 @@ async function syncCloud(data){
    const restored=await loadCloud();
    if(!restored)throw new Error("بازیابی اطلاعات از سرور ناموفق بود: "+String(cloudReadError&&cloudReadError.message||"خطای ناشناخته"));
   }
-  const latest=parseStored(localStorage.getItem(userStateKey()))||cloudMergedState||data;
+  const rawLatest=parseStored(localStorage.getItem(userStateKey()))||cloudMergedState||data;
+  const latest=window.C90_NORMALIZE_STATE(rawLatest);
   if(!latest||typeof latest!=="object")throw new Error("اطلاعات محلی معتبر نیست و برای جلوگیری از بازنویسی، ارسال متوقف شد.");
   const payload={user_id:session.user.id,report_date:"2000-01-01",payload:latest,updated_at:new Date().toISOString()};
   await request("/rest/v1/daily_reports?on_conflict=user_id,report_date",{method:"POST",headers:{...authHeaders(),Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(payload)});
@@ -1635,8 +1638,8 @@ async function enter(s){
     .on("postgres_changes",{event:"*",schema:"public",table:"daily_reports",filter:"user_id=eq."+session.user.id},payload=>{
       const row=payload.new;if(!row||row.report_date!=="2000-01-01"||!row.payload)return;
       const key="challenge90.v1."+session.user.id,base=window.C90_SYNC_BASE||parseStored(localStorage.getItem("challenge90.synced.v1."+session.user.id)),local=parseStored(localStorage.getItem(key));
-      const merged=window.C90_MERGE_STATE?window.C90_MERGE_STATE(local,row.payload,base):Object.assign({},row.payload||{},local||{});
-      window.C90_SYNC_BASE=row.payload;localStorage.setItem("challenge90.synced.v1."+session.user.id,JSON.stringify(row.payload));localStorage.setItem(key,JSON.stringify(merged));
+      const remote=window.C90_NORMALIZE_STATE(row.payload),merged=window.C90_NORMALIZE_STATE(window.C90_MERGE_STATE?window.C90_MERGE_STATE(local,remote,base):Object.assign({},remote||{},local||{}));
+      window.C90_SYNC_BASE=remote;localStorage.setItem("challenge90.synced.v1."+session.user.id,JSON.stringify(remote));localStorage.setItem(key,JSON.stringify(merged));
       if(JSON.stringify(local)!==JSON.stringify(merged))window.dispatchEvent(new CustomEvent("c90cloudupdate",{detail:merged}));
       if(JSON.stringify(merged)!==JSON.stringify(row.payload))scheduleSync(merged);
     })
