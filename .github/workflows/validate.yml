@@ -110,6 +110,7 @@ jobs:
           create policy legacy_public_profiles_read on public.profiles for select to public using (true);
           create policy legacy_public_reports_read on public.daily_reports for select to public using (true);
           grant all on public.profiles, public.daily_reports to public;
+          grant update (start_date) on public.profiles to authenticated;
           create function auth.uid() returns uuid
           language sql stable
           as $auth_uid$
@@ -185,6 +186,9 @@ jobs:
             select count(*) into report_count from public.daily_reports;
             if profile_count <> 1 or report_count <> 1 then
               raise exception 'Participant RLS isolation failed: profiles %, reports %', profile_count, report_count;
+            end if;
+            if has_column_privilege('authenticated','public.profiles','start_date','UPDATE') then
+              raise exception 'Legacy column-level start_date UPDATE privilege was not revoked';
             end if;
             begin
               insert into public.daily_reports(user_id, report_date, payload)
