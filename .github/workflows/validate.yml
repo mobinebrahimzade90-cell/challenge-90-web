@@ -138,7 +138,7 @@ jobs:
           select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',false);
           select * from public.class_ranking();
           select * from public.individual_ranking();
-          do $
+          do $c90_test$
           declare denied boolean := false;
           begin
             begin
@@ -151,7 +151,7 @@ jobs:
             if not denied then
               raise exception 'Participant was able to change protected start_date';
             end if;
-          end $;
+          end $c90_test$;
           select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',false);
           select public.c90_admin_set_start_date('00000000-0000-0000-0000-000000000002',current_date);
           SQL
