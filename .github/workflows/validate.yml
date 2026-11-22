@@ -119,6 +119,23 @@ jobs:
           PGPASSWORD: postgres
         run: |
           psql -h localhost -U postgres -d challenge90_test -v ON_ERROR_STOP=1 <<'SQL'
+          insert into auth.users(id,email,raw_user_meta_data)
+          values (
+            '00000000-0000-0000-0000-000000000003',
+            'signup90@example.com',
+            '{"username":"signup90","display_name":"Signup","grade":12,"major":"کامپیوتر","class_name":"کلاس الف","role":"admin"}'::jsonb
+          );
+          do $c90_signup_test$
+          begin
+            if not exists(
+              select 1 from public.profiles
+              where user_id='00000000-0000-0000-0000-000000000003'
+                and role='participant'
+                and start_date=current_date
+            ) then
+              raise exception 'Signup trigger accepted wrong role or failed to set server start date';
+            end if;
+          end $c90_signup_test$;
           insert into public.profiles(user_id, username, display_name, role, grade, major, class_name, initial_days, start_date)
           values
             ('00000000-0000-0000-0000-000000000001','admin90','Admin','admin',12,'کامپیوتر','کلاس الف',0,current_date),
@@ -176,7 +193,7 @@ jobs:
           begin
             select count(*) into profile_count from public.profiles;
             select count(*) into report_count from public.daily_reports;
-            if profile_count <> 2 or report_count <> 2 then
+            if profile_count <> 3 or report_count <> 2 then
               raise exception 'Admin RLS access failed: profiles %, reports %', profile_count, report_count;
             end if;
           end $c90_rls_admin$;
