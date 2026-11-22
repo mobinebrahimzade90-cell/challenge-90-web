@@ -111,6 +111,7 @@ jobs:
           create policy legacy_public_reports_read on public.daily_reports for select to public using (true);
           grant all on public.profiles, public.daily_reports to public;
           grant update (start_date) on public.profiles to authenticated;
+          grant select (username) on public.profiles to anon;
           create function auth.uid() returns uuid
           language sql stable
           as $auth_uid$
@@ -189,6 +190,9 @@ jobs:
             end if;
             if has_column_privilege('authenticated','public.profiles','start_date','UPDATE') then
               raise exception 'Legacy column-level start_date UPDATE privilege was not revoked';
+            end if;
+            if has_column_privilege('anon','public.profiles','username','SELECT') then
+              raise exception 'Legacy column-level username SELECT privilege was not revoked';
             end if;
             begin
               insert into public.daily_reports(user_id, report_date, payload)
