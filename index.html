@@ -1398,13 +1398,13 @@ async function getProfile(){
  window.C90_CURRENT_PROFILE=profile;
 }
 let cloudReadFailed=false,cloudReadInProgress=false,cloudReadSucceeded=false,cloudReadPromise=null,cloudReadError=null;
-async function loadCloud(){
+async function loadCloud(options={}){
  if(cloudReadPromise)return cloudReadPromise;
  cloudReadFailed=false;cloudReadSucceeded=false;cloudReadError=null;cloudReadInProgress=true;
  cloudReadPromise=(async()=>{
   try{
    const a=await request("/rest/v1/daily_reports?select=payload&report_date=eq.2000-01-01&user_id=eq."+encodeURIComponent(session.user.id),{headers:authHeaders(),timeoutMs:12000});
-   if(a.length&&a[0].payload&&typeof a[0].payload==="object"){
+   if(a.length&&a[0].payload&&typeof a[0].payload==="object"&&options.apply!==false){
     localStorage.setItem("challenge90.v1."+session.user.id,JSON.stringify(a[0].payload));
     window.dispatchEvent(new CustomEvent("c90cloudupdate",{detail:a[0].payload}));
    }
@@ -1493,7 +1493,7 @@ refreshPreInitialDays();
 async function syncCloud(data){
  if(!session||!data)throw new Error("برای ذخیره آنلاین باید وارد حساب کاربری شوی.");
  if(!cloudReadSucceeded){
-  const restored=await loadCloud();
+  const restored=await loadCloud({apply:false});
   if(!restored)throw new Error("بازیابی اطلاعات از سرور ناموفق بود: "+String(cloudReadError&&cloudReadError.message||"خطای ناشناخته"));
  }
  const payload={user_id:session.user.id,report_date:"2000-01-01",payload:data,updated_at:new Date().toISOString()};
