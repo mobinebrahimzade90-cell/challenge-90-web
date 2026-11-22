@@ -527,6 +527,18 @@ function mergeState(local,remote,base){
  if(sameState(local,remote))return cloneState(local);
  if(base!==undefined&&sameState(local,base))return cloneState(remote);
  if(base!==undefined&&sameState(remote,base))return cloneState(local);
+ if(Array.isArray(local)&&Array.isArray(remote)){
+  const keyed=arr=>{const counts=new Map(),map=new Map(),order=[];arr.forEach((value,index)=>{const core=isPlainObject(value)?(value.id!=null?"id:"+String(value.id):typeof value.t==="string"?"task:"+value.t:"obj:"+JSON.stringify(value)):"val:"+JSON.stringify(value);const n=counts.get(core)||0;counts.set(core,n+1);const key=core+"#"+n;map.set(key,value);order.push(key)});return{map,order}};
+  const l=keyed(local),r=keyed(remote),b=Array.isArray(base)?keyed(base):{map:new Map(),order:[]};
+  const order=[...b.order.filter(k=>l.map.has(k)||r.map.has(k)),...l.order.filter(k=>!b.map.has(k)),...r.order.filter(k=>!b.map.has(k)&&!l.map.has(k))],out=[];
+  for(const key of order){
+   const hasL=l.map.has(key),hasR=r.map.has(key),hasB=b.map.has(key);
+   if(hasL&&hasR)out.push(mergeState(l.map.get(key),r.map.get(key),hasB?b.map.get(key):undefined));
+   else if(hasL){if(!(hasB&&sameState(l.map.get(key),b.map.get(key))))out.push(cloneState(l.map.get(key)))}
+   else if(hasR){if(!(hasB&&sameState(r.map.get(key),b.map.get(key))))out.push(cloneState(r.map.get(key)))}
+  }
+  return out;
+ }
  if(isPlainObject(local)&&isPlainObject(remote)){
   const out={},keys=new Set([...Object.keys(local),...Object.keys(remote)]);
   for(const key of keys){
