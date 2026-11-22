@@ -100,6 +100,18 @@ grant execute on function public.c90_is_admin() to authenticated;
 alter table public.profiles enable row level security;
 alter table public.daily_reports enable row level security;
 
+-- Defense in depth: even if a later migration accidentally grants anon table access,
+-- restrictive policies still deny anonymous reads and writes despite legacy PUBLIC policies.
+drop policy if exists c90_profiles_anon_deny on public.profiles;
+create policy c90_profiles_anon_deny
+on public.profiles as restrictive for all to anon
+using (false) with check (false);
+
+drop policy if exists c90_reports_anon_deny on public.daily_reports;
+create policy c90_reports_anon_deny
+on public.daily_reports as restrictive for all to anon
+using (false) with check (false);
+
 -- Profiles: participants see their own row; administrators may list profiles.
 drop policy if exists c90_profiles_read_owner_admin on public.profiles;
 create policy c90_profiles_read_owner_admin
