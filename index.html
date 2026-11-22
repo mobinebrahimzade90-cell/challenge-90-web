@@ -1609,7 +1609,7 @@ function scheduleSync(data){
 }
 window.addEventListener("online",()=>{
  if(!session)return;
- const local=parseStored(localStorage.getItem(userStateKey()));
+ let local=null;try{local=parseStored(localStorage.getItem(userStateKey()))}catch(storageError){window.C90_STORAGE_FAILED=true}
  if(local)syncCloud(local).catch(e=>console.warn("Online retry:",e.message));
 });
 
@@ -1620,10 +1620,10 @@ async function enter(s){
  const shownName=profile.display_name||profile.username||"کاربر";
  const shownClass=(profile.grade?"پایه "+profile.grade:"پایه ثبت نشده")+(profile.major?" · "+profile.major:"");
  setLoaderStage(2,"پروفایل شناسایی شد","اطلاعات حساب دریافت شد",shownName,shownClass);
- localStorage.setItem("c90.session",JSON.stringify(s));localStorage.setItem("c90.uid",s.user.id);
- if(sessionStorage.getItem("c90.active_uid")!==s.user.id){
-  sessionStorage.setItem("c90.active_uid",s.user.id);
- }
+ try{localStorage.setItem("c90.session",JSON.stringify(s));localStorage.setItem("c90.uid",s.user.id)}
+ catch(storageError){window.C90_SESSION_STORAGE_FAILED=true;console.warn("Session persistence unavailable:",storageError)}
+ try{if(sessionStorage.getItem("c90.active_uid")!==s.user.id)sessionStorage.setItem("c90.active_uid",s.user.id)}
+ catch(storageError){console.warn("Session tab marker unavailable:",storageError)}
  window.C90_CURRENT_USERNAME=profile.username;
  setLoaderStage(2,"در حال آماده‌سازی پروفایل","بررسی وضعیت حساب",shownName,shownClass);
  if(profile.start_date){if(typeof window.C90_SET_START_DATE!=="function")throw new Error("ماژول برنامه بارگذاری نشده است؛ صفحه را تازه‌سازی کن.");window.C90_SET_START_DATE(profile.start_date)}else{const initialized=await request("/rest/v1/rpc/c90_initialize_start_date",{method:"POST",headers:authHeaders(),body:"{}"});const candidates=[initialized,initialized&&initialized.c90_initialize_start_date,initialized&&initialized.start_date,Array.isArray(initialized)&&initialized[0],Array.isArray(initialized)&&initialized[0]&&initialized[0].c90_initialize_start_date];const todayIso=candidates.find(v=>typeof v==="string"&&validStartIso(v));if(!todayIso)throw new Error("تاریخ شروع حساب از سرور با قالب معتبر دریافت نشد؛ تاریخ حساب باید بررسی شود.");profile.start_date=todayIso;if(typeof window.C90_SET_START_DATE!=="function")throw new Error("ماژول برنامه بارگذاری نشده است؛ صفحه را تازه‌سازی کن.");window.C90_SET_START_DATE(todayIso)}
@@ -1656,9 +1656,13 @@ async function enter(s){
     .on("postgres_changes",{event:"*",schema:"public",table:"profiles"},()=>window.C90_LOAD_RANKING().catch(()=>{}))
     .on("postgres_changes",{event:"*",schema:"public",table:"daily_reports",filter:"user_id=eq."+session.user.id},payload=>{
       const row=payload.new;if(!row||row.report_date!=="2000-01-01"||!row.payload)return;
-      const key="challenge90.v1."+session.user.id,base=window.C90_SYNC_BASE||parseStored(localStorage.getItem("challenge90.synced.v1."+session.user.id)),local=parseStored(localStorage.getItem(key));
+      const key="challenge90.v1."+session.user.id;let base=window.C90_SYNC_BASE||null,local=null;
+      try{base=base||parseStored(localStorage.getItem("challenge90.synced.v1."+session.user.id));local=parseStored(localStorage.getItem(key))}
+      catch(storageError){window.C90_STORAGE_FAILED=true}
       const remote=window.C90_NORMALIZE_STATE(row.payload),merged=window.C90_NORMALIZE_STATE(window.C90_MERGE_STATE?window.C90_MERGE_STATE(local,remote,base):Object.assign({},remote||{},local||{}));
-      window.C90_SYNC_BASE=remote;localStorage.setItem("challenge90.synced.v1."+session.user.id,JSON.stringify(remote));localStorage.setItem(key,JSON.stringify(merged));
+      window.C90_SYNC_BASE=remote;
+      try{localStorage.setItem("challenge90.synced.v1."+session.user.id,JSON.stringify(remote));localStorage.setItem(key,JSON.stringify(merged))}
+      catch(storageError){window.C90_STORAGE_FAILED=true}
       if(JSON.stringify(local)!==JSON.stringify(merged))window.dispatchEvent(new CustomEvent("c90cloudupdate",{detail:merged}));
       if(JSON.stringify(merged)!==JSON.stringify(row.payload))scheduleSync(merged);
     })
