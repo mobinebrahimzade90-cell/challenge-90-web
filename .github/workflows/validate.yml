@@ -186,6 +186,8 @@ jobs:
             end if;
           end $c90_anon_test$;
           reset role;
+          -- Remove the temporary table-level grant, then verify the original column grant is gone too.
+          revoke select on public.profiles, public.daily_reports from anon;
           set role authenticated;
           select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',false);
           do $c90_rls_participant$
