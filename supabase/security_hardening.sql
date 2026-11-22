@@ -104,7 +104,12 @@ declare v_is_admin boolean := false;
 begin
   if new.start_date is distinct from old.start_date then
     select exists(select 1 from public.profiles p where p.user_id=auth.uid() and p.role='admin') into v_is_admin;
-    if not v_is_admin and not (auth.uid()=old.user_id and old.start_date is null and new.start_date=current_date) then
+    if not v_is_admin and not (
+      auth.uid() is not null
+      and auth.uid()=old.user_id
+      and old.start_date is null
+      and new.start_date=current_date
+    ) then
       raise exception 'تغییر تاریخ شروع فقط برای مدیر مجاز است';
     end if;
   end if;
@@ -114,6 +119,11 @@ $c90_guard$;
 drop trigger if exists c90_immutable_start_date on public.profiles;
 create trigger c90_immutable_start_date before update of start_date on public.profiles
 for each row execute function public.c90_guard_start_date();
+
+-- Participants may edit only their own school metadata through the table API.
+-- Start-date changes are restricted to the administrator RPC below.
+revoke update on public.profiles from authenticated;
+grant update (grade, major, class_name) on public.profiles to authenticated;
 
 create or replace function public.c90_initialize_start_date()
 returns date
