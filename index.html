@@ -1480,7 +1480,18 @@ async function request(path,opts={}){
   const r=await fetch(URL+path,{...fetchOpts,signal:controller.signal,headers});
   const d=await r.json().catch(()=>({}));
   if(r.status===401&&!_authRetried&&headers.Authorization&&session&&session.refresh_token){
-   await refreshSession();
+   try{await refreshSession()}
+   catch(refreshError){
+    if(/invalid_grant|invalid refresh token|refresh_token_not_found|refresh token.*(expired|invalid)/i.test(String(refreshError.message||refreshError))){
+     session=null;profile=null;window.C90_CURRENT_PROFILE=null;window.C90_CURRENT_USERNAME=null;
+     clearTimeout(cloudTimer);clearInterval(window.C90_CLASS_RANK_TIMER);
+     try{localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid")}catch(storageError){}
+     if(window.C90_RT_CLIENT&&window.C90_RT_CHANNEL)window.C90_RT_CLIENT.removeChannel(window.C90_RT_CHANNEL).catch(()=>{});
+     const panel=$("C90_AUTH_PANEL");if(panel)panel.style.display="flex";
+     msg("نشست حساب منقضی شده است؛ دوباره وارد شو. اطلاعات ذخیره‌نشدهٔ محلی پاک نشده‌اند.");
+    }
+    throw refreshError;
+   }
    return await request(path,{...opts,headers:{...(opts.headers||{}),Authorization:"Bearer "+session.access_token},_authRetried:true});
   }
   if(!r.ok)throw new Error(d.msg||d.message||d.error_description||d.error||"خطا در ارتباط با سرور");
