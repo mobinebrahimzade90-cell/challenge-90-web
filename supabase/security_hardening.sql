@@ -348,7 +348,7 @@ grant execute on function public.class_ranking() to authenticated;
 drop function if exists public.individual_ranking();
 create function public.individual_ranking()
 returns table (
-  position integer,
+  rank_no integer,
   username text,
   display_name text,
   points numeric,
@@ -433,6 +433,48 @@ begin
         coalesce(sum(
           case when x.value->>'st' = 'done'
             and coalesce(x.value->>'min', '') ~ '^[0-9]{1,3}
+            else 0 end
+        ), 0) as minutes_done
+      from jsonb_each(public.c90_valid_day_map(r.payload->'hyp'->'days', 20)) x(key, value)
+    ) h on true
+  )
+  select
+    row_number() over (order by s.score desc, s.username asc)::integer,
+    s.username::text,
+    s.display_name::text,
+    s.score,
+    s.user_id = auth.uid()
+  from scores s
+  order by s.score desc, s.username asc;
+end;
+$c90_individual$;
+            and (x.value->>'min')::integer <= 180
+
+            then greatest(0, (x.value->>'min')::integer)
+            else 0 end
+        ), 0) as minutes_done
+      from jsonb_each(
+        case when jsonb_typeof(r.payload->'hyp'->'days') = 'object'
+          then r.payload->'hyp'->'days' else '{}'::jsonb end
+      ) x(key, value)
+    ) h on true
+  )
+  select
+    row_number() over (order by s.score desc, s.username asc)::integer,
+    s.username::text,
+    s.display_name::text,
+    s.score,
+    s.user_id = auth.uid()
+  from scores s
+  order by s.score desc, s.username asc;
+end;
+$c90_individual$;
+revoke all on function public.individual_ranking() from public;
+grant execute on function public.individual_ranking() to authenticated;
+
+commit;
+
+            and (x.value->>'min')::integer <= 180
             then greatest(0, (x.value->>'min')::integer)
             else 0 end
         ), 0) as minutes_done
