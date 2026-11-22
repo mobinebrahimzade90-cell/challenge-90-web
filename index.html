@@ -686,7 +686,7 @@ $("how").oninput=e=>{day(cur).how=e.target.value;later()};
 $("okSave").onclick=async()=>{
   const n=cur;await flushSec();save();
   try{await syncCloud(S);closeDay();toast("روز "+fa(n)+" در حساب کاربری ذخیره شد ✔")}
-  catch(e){closeDay();toast("اطلاعات روی دستگاه نگه داشته شد؛ همگام‌سازی آنلاین انجام نشد. اتصال را بررسی کن.")}
+  catch(e){closeDay();toast("اطلاعات روی دستگاه ذخیره شد؛ همگام‌سازی ناموفق: "+String(e&&e.message||"خطای ناشناخته").slice(0,105))}
 };
 
 /* ---------- رویدادها ---------- */
@@ -1397,22 +1397,28 @@ async function getProfile(){
  profile=a[0];
  window.C90_CURRENT_PROFILE=profile;
 }
-let cloudReadFailed=false,cloudReadInProgress=false;
+let cloudReadFailed=false,cloudReadInProgress=false,cloudReadSucceeded=false,cloudReadPromise=null,cloudReadError=null;
 async function loadCloud(){
- cloudReadFailed=false;cloudReadInProgress=true;
- try{
-  const a=await request("/rest/v1/daily_reports?select=payload&report_date=eq.2000-01-01&user_id=eq."+encodeURIComponent(session.user.id),{headers:authHeaders(),timeoutMs:12000});
-  if(a.length&&a[0].payload&&typeof a[0].payload==="object"){
-   localStorage.setItem("challenge90.v1."+session.user.id,JSON.stringify(a[0].payload));
-   window.dispatchEvent(new CustomEvent("c90cloudupdate",{detail:a[0].payload}));
+ if(cloudReadPromise)return cloudReadPromise;
+ cloudReadFailed=false;cloudReadSucceeded=false;cloudReadError=null;cloudReadInProgress=true;
+ cloudReadPromise=(async()=>{
+  try{
+   const a=await request("/rest/v1/daily_reports?select=payload&report_date=eq.2000-01-01&user_id=eq."+encodeURIComponent(session.user.id),{headers:authHeaders(),timeoutMs:12000});
+   if(a.length&&a[0].payload&&typeof a[0].payload==="object"){
+    localStorage.setItem("challenge90.v1."+session.user.id,JSON.stringify(a[0].payload));
+    window.dispatchEvent(new CustomEvent("c90cloudupdate",{detail:a[0].payload}));
+   }
+   cloudReadSucceeded=true;
    return true;
+  }catch(e){
+   cloudReadFailed=true;cloudReadError=e;
+   console.warn("Cloud restore:",e.message);
+   return false;
+  }finally{
+   cloudReadInProgress=false;cloudReadPromise=null;
   }
-  return false;
- }catch(e){
-  cloudReadFailed=true;
-  console.warn("Cloud restore:",e.message);
-  return false;
- }finally{cloudReadInProgress=false}
+ })();
+ return cloudReadPromise;
 }
 async function saveInitialDays(days){
  const result=await request("/rest/v1/rpc/c90_set_initial_days",{method:"POST",headers:authHeaders(),body:JSON.stringify({p_days:days})});
@@ -1486,7 +1492,10 @@ $("c90PreSave").onclick=()=>{
 refreshPreInitialDays();
 async function syncCloud(data){
  if(!session||!data)throw new Error("برای ذخیره آنلاین باید وارد حساب کاربری شوی.");
- if(cloudReadFailed||cloudReadInProgress)throw new Error("بازیابی اطلاعات حساب هنوز کامل نشده است؛ دوباره تلاش کن.");
+ if(!cloudReadSucceeded){
+  const restored=await loadCloud();
+  if(!restored)throw new Error("بازیابی اطلاعات از سرور ناموفق بود: "+String(cloudReadError&&cloudReadError.message||"خطای ناشناخته"));
+ }
  const payload={user_id:session.user.id,report_date:"2000-01-01",payload:data,updated_at:new Date().toISOString()};
  await request("/rest/v1/daily_reports?on_conflict=user_id,report_date",{method:"POST",headers:{...authHeaders(),Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(payload)});
 }
@@ -1558,7 +1567,8 @@ async function enter(s){
  showLoader("در حال تکمیل ورود…");
  setLoaderStage(3,"در حال تکمیل اطلاعات","بررسی مشخصات و امتیازها",shownName,shownClass);
  await ensureSchoolInfo();
- loadCloud().catch(e=>console.warn("Cloud restore:",e.message));
+ const cloudRestored=await loadCloud();
+ if(!cloudRestored)console.warn("Cloud restore needs retry:",cloudReadError&&cloudReadError.message);
  const finalClass=(profile.grade?"پایه "+profile.grade:"پایه ثبت نشده")+(profile.major?" · "+profile.major:"");
  setLoaderStage(4,"حساب آماده است","اطلاعات حساب با موفقیت بازیابی شد",shownName,finalClass);
  $("C90_AUTH_PANEL").style.display="none";
