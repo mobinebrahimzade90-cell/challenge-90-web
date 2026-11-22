@@ -1507,7 +1507,7 @@ async function getProfile(){
   a=await request("/rest/v1/profiles?select=user_id,username,display_name,role,grade,major,class_name,start_date,initial_days&user_id=eq."+encodeURIComponent(session.user.id),{headers:authHeaders()});
  }catch(e){
   if(/column .* does not exist|schema cache|could not find .* column/i.test(String(e.message||e))){
-   throw new Error("ساختار جدول پروفایل کامل نیست. فایل supabase/auth_repair.sql را در SQL Editor اجرا کن و دوباره وارد شو.");
+   throw new Error("ساختار جدول پروفایل کامل نیست. طبق supabase/README-hardening.md ساختار را تعمیر کن؛ اگر auth_repair.sql اجرا شد، حتماً پس از آن security_hardening.sql را دوباره اجرا کن.");
   }
   throw e;
  }
