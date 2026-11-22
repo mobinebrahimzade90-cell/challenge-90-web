@@ -585,6 +585,7 @@ function normalizeState(value){
  return out;
 }
 window.C90_NORMALIZE_STATE=normalizeState;
+window.C90_GET_STATE=()=>S;
 const todayJ=()=>{const n=new Date();return g2d(n.getFullYear(),n.getMonth()+1,n.getDate())};
 const fmtJ=j=>{const[y,m,d]=d2j(j);return WEEK[mod(j+1,7)]+" "+fa(d)+" "+MONTHS[m-1]+" "+fa(y)};
 
@@ -1517,7 +1518,8 @@ async function loadCloud(){
    let localRaw=null,baseRaw=null;
    try{localRaw=parseStored(localStorage.getItem(userStateKey()));baseRaw=parseStored(localStorage.getItem(syncedStateKey()))}
    catch(storageError){window.C90_STORAGE_FAILED=true}
-   const local=localRaw?window.C90_NORMALIZE_STATE(localRaw):null;
+   const memoryState=typeof window.C90_GET_STATE==="function"?window.C90_GET_STATE():null;
+   const local=localRaw?window.C90_NORMALIZE_STATE(localRaw):(memoryState?window.C90_NORMALIZE_STATE(memoryState):null);
    const base=baseRaw?window.C90_NORMALIZE_STATE(baseRaw):null;
    cloudMergedState=remote?window.C90_NORMALIZE_STATE(window.C90_MERGE_STATE(local,remote,base)):(local||window.C90_NORMALIZE_STATE({}));
    if(remote){window.C90_SYNC_BASE=remote;try{localStorage.setItem(syncedStateKey(),JSON.stringify(remote))}catch(storageError){window.C90_STORAGE_FAILED=true}}
@@ -1690,7 +1692,9 @@ async function enter(s){
       const key="challenge90.v1."+session.user.id;let base=window.C90_SYNC_BASE||null,local=null;
       try{base=base||parseStored(localStorage.getItem("challenge90.synced.v1."+session.user.id));local=parseStored(localStorage.getItem(key))}
       catch(storageError){window.C90_STORAGE_FAILED=true}
-      const remote=window.C90_NORMALIZE_STATE(row.payload),merged=window.C90_NORMALIZE_STATE(window.C90_MERGE_STATE?window.C90_MERGE_STATE(local,remote,base):Object.assign({},remote||{},local||{}));
+      const memoryState=typeof window.C90_GET_STATE==="function"?window.C90_GET_STATE():null;
+      const localState=local||memoryState;
+      const remote=window.C90_NORMALIZE_STATE(row.payload),merged=window.C90_NORMALIZE_STATE(window.C90_MERGE_STATE?window.C90_MERGE_STATE(localState,remote,base):Object.assign({},remote||{},localState||{}));
       window.C90_SYNC_BASE=remote;
       try{localStorage.setItem("challenge90.synced.v1."+session.user.id,JSON.stringify(remote));localStorage.setItem(key,JSON.stringify(merged))}
       catch(storageError){window.C90_STORAGE_FAILED=true}
