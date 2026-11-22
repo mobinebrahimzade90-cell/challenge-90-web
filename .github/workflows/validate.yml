@@ -166,16 +166,17 @@ jobs:
               raise exception 'Day-map sanitization test failed: %', v;
             end if;
           end $$;
+          -- Simulate an accidental future SELECT grant: restrictive anon RLS must still deny rows.
+          grant select on public.profiles, public.daily_reports to anon;
           set role anon;
           do $c90_anon_test$
-          declare denied boolean := false;
+          declare profile_count integer; report_count integer;
           begin
-            begin
-              perform count(*) from public.profiles;
-              perform count(*) from public.daily_reports;
-            exception when insufficient_privilege then denied := true;
-            end;
-            if not denied then raise exception 'Anonymous role accessed private account data'; end if;
+            select count(*) into profile_count from public.profiles;
+            select count(*) into report_count from public.daily_reports;
+            if profile_count <> 0 or report_count <> 0 then
+              raise exception 'Anonymous role accessed private account data: profiles %, reports %', profile_count, report_count;
+            end if;
           end $c90_anon_test$;
           reset role;
           set role authenticated;
