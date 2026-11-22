@@ -10,49 +10,35 @@ language sql
 immutable
 set search_path = pg_catalog
 as $c90_day_map$
-  select coalesce(
-    jsonb_object_agg(
-      e.key,
-      case when jsonb_typeof(e.value) = 'object' then
-        jsonb_set(
-          jsonb_set(
-            e.value,
-            '{tasks}',
-            coalesce((
-              select jsonb_agg(t.value order by t.ordinality)
-              from jsonb_array_elements(
-                case when jsonb_typeof(e.value->'tasks') = 'array'
-                  then e.value->'tasks' else '[]'::jsonb end
-              ) with ordinality as t(value, ordinality)
-              where t.ordinality <= 50
-            ), '[]'::jsonb),
-            true
-          ),
-          '{min}',
-          to_jsonb(case
-            when coalesce(e.value->>'min', '') ~ '^[0-9]{1,3}$'
-             and (e.value->>'min')::integer <= 180
-            then (e.value->>'min')::integer else 0 end),
-          true
-        )
-      else '{}'::jsonb end
-    ),
-    '{}'::jsonb
-  )
+  select coalesce(jsonb_object_agg(e.key,
+    case when jsonb_typeof(e.value) = 'object' then
+      jsonb_set(
+        jsonb_set(e.value,'{tasks}',
+          coalesce((
+            select jsonb_agg(t.value order by t.ordinality)
+            from jsonb_array_elements(
+              case when jsonb_typeof(e.value->'tasks') = 'array'
+                then e.value->'tasks' else '[]'::jsonb end
+            ) with ordinality as t(value, ordinality)
+            where t.ordinality <= 50
+          ), '[]'::jsonb), true),
+        '{min}',
+        to_jsonb(case
+          when coalesce(e.value->>'min', '') ~ '^[0-9]{1,3}$'
+           and (e.value->>'min')::integer <= 180
+          then (e.value->>'min')::integer else 0 end),
+        true)
+    else '{}'::jsonb end), '{}'::jsonb)
   from jsonb_each(case when jsonb_typeof(p_map) = 'object' then p_map else '{}'::jsonb end) e
   where length(e.key) <= 2
     and e.key ~ '^[1-9][0-9]?$'
     and e.key::integer between 1 and greatest(1, least(coalesce(p_max_day, 90), 90))
 $c90_day_map$;
-
 revoke all on function public.c90_valid_day_map(jsonb, integer) from public;
 grant execute on function public.c90_valid_day_map(jsonb, integer) to authenticated;
 
 create or replace function public.c90_safe_date(p_value text)
-returns date
-language plpgsql
-immutable
-set search_path = pg_catalog
+returns date language plpgsql immutable set search_path = pg_catalog
 as $c90_safe_date$
 begin
   if p_value is null or p_value !~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' then return null; end if;
@@ -63,13 +49,10 @@ $c90_safe_date$;
 revoke all on function public.c90_safe_date(text) from public;
 grant execute on function public.c90_safe_date(text) to authenticated;
 
--- New profiles use the server date. Existing accounts are never reset.
+-- New profiles use the server date. Existing profiles are not reset.
 create or replace function public.handle_new_auth_user()
-returns trigger
-language plpgsql
-security definer
-set search_path = public, pg_temp
-set row_security = off
+returns trigger language plpgsql security definer
+set search_path = public, pg_temp set row_security = off
 as $c90_signup_hardened$
 declare
   v_username text;
@@ -92,26 +75,22 @@ begin
   return new;
 end;
 $c90_signup_hardened$;
+drop trigger if exists on_auth_user_created_90days on auth.users;
+create trigger on_auth_user_created_90days after insert on auth.users
+for each row execute function public.handle_new_auth_user();
 
 create or replace function public.c90_guard_start_date()
-returns trigger
-language plpgsql
-security definer
-set search_path = public, pg_temp
-set row_security = off
+returns trigger language plpgsql security definer
+set search_path = public, pg_temp set row_security = off
 as $c90_guard$
 declare v_is_admin boolean := false;
 begin
   if new.start_date is distinct from old.start_date then
     select exists(select 1 from public.profiles p where p.user_id=auth.uid() and p.role='admin') into v_is_admin;
     if not v_is_admin and not (
-      auth.uid() is not null
-      and auth.uid()=old.user_id
-      and old.start_date is null
-      and new.start_date=current_date
-    ) then
-      raise exception 'تغییر تاریخ شروع فقط برای مدیر مجاز است';
-    end if;
+      auth.uid() is not null and auth.uid()=old.user_id
+      and old.start_date is null and new.start_date=current_date
+    ) then raise exception 'تغییر تاریخ شروع فقط برای مدیر مجاز است'; end if;
   end if;
   return new;
 end;
@@ -120,17 +99,12 @@ drop trigger if exists c90_immutable_start_date on public.profiles;
 create trigger c90_immutable_start_date before update of start_date on public.profiles
 for each row execute function public.c90_guard_start_date();
 
--- Participants may edit only their own school metadata through the table API.
--- Start-date changes are restricted to the administrator RPC below.
 revoke update on public.profiles from authenticated;
 grant update (grade, major, class_name) on public.profiles to authenticated;
 
 create or replace function public.c90_initialize_start_date()
-returns date
-language plpgsql
-security definer
-set search_path = public, pg_temp
-set row_security = off
+returns date language plpgsql security definer
+set search_path = public, pg_temp set row_security = off
 as $c90_init_date$
 declare v_date date;
 begin
@@ -145,11 +119,8 @@ revoke all on function public.c90_initialize_start_date() from public;
 grant execute on function public.c90_initialize_start_date() to authenticated;
 
 create or replace function public.c90_admin_set_start_date(p_user_id uuid,p_start_date date)
-returns date
-language plpgsql
-security definer
-set search_path = public, pg_temp
-set row_security = off
+returns date language plpgsql security definer
+set search_path = public, pg_temp set row_security = off
 as $c90_admin_date$
 begin
   if auth.uid() is null or not exists(select 1 from public.profiles where user_id=auth.uid() and role='admin') then
@@ -344,8 +315,15 @@ end;
 $c90_ranking$;
 revoke all on function public.class_ranking() from public;
 grant execute on function public.class_ranking() to authenticated;
-
 drop function if exists public.individual_ranking();
+-- Challenge 90: individual ranking RPC
+-- Run once AFTER realtime_class_ranking.sql.
+-- Does not alter or delete user data.
+
+-- 9. Individual leaderboard for users in the same grade and major.
+-- Scores follow the app's personal score formula.
+drop function if exists public.individual_ranking();
+
 create function public.individual_ranking()
 returns table (
   rank_no integer,
@@ -432,76 +410,11 @@ begin
         count(*) filter (where x.value->>'st' = 'done') as sessions_done,
         coalesce(sum(
           case when x.value->>'st' = 'done'
-            and coalesce(x.value->>'min', '') ~ '^[0-9]{1,3}$'
-            and (x.value->>'min')::integer <= 180
+            and coalesce(x.value->>'min', '') ~ '^[0-9]+$'
             then greatest(0, (x.value->>'min')::integer)
             else 0 end
         ), 0) as minutes_done
       from jsonb_each(public.c90_valid_day_map(r.payload->'hyp'->'days', 20)) x(key, value)
-    ) h on true
-  )
-  select
-    row_number() over (order by s.score desc, s.username asc)::integer,
-    s.username::text,
-    s.display_name::text,
-    s.score,
-    s.user_id = auth.uid()
-  from scores s
-  order by s.score desc, s.username asc;
-end;
-$c90_individual$;
-            and (x.value->>'min')::integer <= 180
-
-            then greatest(0, (x.value->>'min')::integer)
-            else 0 end
-        ), 0) as minutes_done
-      from jsonb_each(
-        case when jsonb_typeof(r.payload->'hyp'->'days') = 'object'
-          then r.payload->'hyp'->'days' else '{}'::jsonb end
-      ) x(key, value)
-    ) h on true
-  )
-  select
-    row_number() over (order by s.score desc, s.username asc)::integer,
-    s.username::text,
-    s.display_name::text,
-    s.score,
-    s.user_id = auth.uid()
-  from scores s
-  order by s.score desc, s.username asc;
-end;
-$c90_individual$;
-revoke all on function public.individual_ranking() from public;
-grant execute on function public.individual_ranking() to authenticated;
-
-commit;
-
-            and (x.value->>'min')::integer <= 180
-            then greatest(0, (x.value->>'min')::integer)
-            else 0 end
-        ), 0) as minutes_done
-      from jsonb_each(public.c90_valid_day_map(r.payload->'hyp'->'days', 20)) x(key, value)
-    ) h on true
-  )
-  select
-    row_number() over (order by s.score desc, s.username asc)::integer,
-    s.username::text,
-    s.display_name::text,
-    s.score,
-    s.user_id = auth.uid()
-  from scores s
-  order by s.score desc, s.username asc;
-end;
-$c90_individual$;
-            and (x.value->>'min')::integer <= 180
-
-            then greatest(0, (x.value->>'min')::integer)
-            else 0 end
-        ), 0) as minutes_done
-      from jsonb_each(
-        case when jsonb_typeof(r.payload->'hyp'->'days') = 'object'
-          then r.payload->'hyp'->'days' else '{}'::jsonb end
-      ) x(key, value)
     ) h on true
   )
   select
