@@ -34,6 +34,7 @@ as $c90_day_map$
             ),
             '{min}',
             to_jsonb(
+              case
                 when length(coalesce(e.value->>'min', '')) between 1 and 3 then
                   case
                     when coalesce(e.value->>'min', '') ~ '^[0-9]{1,3}$'
