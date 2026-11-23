@@ -41,6 +41,7 @@ begin
     select p.user_id, p.username, p.display_name, coalesce(p.initial_days, 0) as initial_days
     from public.profiles p
     where p.grade = v_grade and p.major = v_major
+      and coalesce(p.role, 'participant') <> 'admin'
   ),
   reports as (
     select c.user_id, c.username, c.display_name, c.initial_days, dr.payload
