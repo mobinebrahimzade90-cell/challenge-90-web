@@ -1310,8 +1310,13 @@ initDate();initHyp();initRank();render();boot();
 #C90_ADMIN input{width:100%;padding:12px;background:#0f0b0c;color:white;border:1px solid #49343b;border-radius:11px;font:inherit}
 #C90_ADMIN .adminhead{display:flex;align-items:center;gap:12px;margin-bottom:14px}
 #C90_ADMIN .adminhead h2{flex:1;margin:0;color:#e8b339;font-size:1.12rem}
-#C90_ADMIN .userrow{display:flex;align-items:center;gap:10px;margin-top:8px;padding:13px;border:1px solid #49343b;border-radius:13px;background:linear-gradient(110deg,#21171b,#120e10);cursor:pointer;transition:.2s}
-#C90_ADMIN .userrow:after{content:"‹";margin-right:auto;color:#e8b339;font-size:1.5rem}
+#C90_ADMIN .user-entry{margin-top:8px;border:1px solid #49343b;border-radius:13px;overflow:hidden;background:#120e10}
+#C90_ADMIN .userrow{display:flex;align-items:center;gap:10px;padding:13px;border:0;background:linear-gradient(110deg,#21171b,#120e10);cursor:pointer;transition:.2s}
+#C90_ADMIN .userrow:after{content:"⌄";margin-right:auto;color:#e8b339;font-size:1.2rem;transition:transform .25s}
+#C90_ADMIN .user-entry.open>.userrow:after{transform:rotate(180deg)}
+#C90_ADMIN .user-details{display:none;padding:12px;border-top:1px solid #49343b;background:#0d0a0c;animation:adminDrop .25s ease}
+#C90_ADMIN .user-entry.open>.user-details{display:block}
+@keyframes adminDrop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 #C90_ADMIN .adminnav{display:flex;gap:8px;margin:14px 0;padding:4px;border:1px solid #49343b;border-radius:13px;background:#0f0b0c}
 #C90_ADMIN .adminnav button{flex:1;min-width:0;padding:10px 6px;font-size:.83rem;border-radius:10px}
 #C90_ADMIN .adminnav button.active{background:#e8b339;color:#1a1204;border-color:#e8b339}
@@ -1422,12 +1427,8 @@ function hideLoader(){const e=document.getElementById("c90Loading");if(e)e.class
 <div id="C90_ADMIN">
  <div class="adminbox">
   <div class="adminhead"><h2>پنل مدیریت</h2><button id="c90AdminClose">بستن</button></div>
-  <section id="c90AdminListView"><input id="c90AdminSearch" placeholder="جست‌وجوی نام کاربری"><div id="c90AdminUsers" style="margin-top:12px"></div></section>
-  <section id="c90AdminDetailView" style="display:none">
-   <div class="admin-detail-head"><button id="c90AdminBack">← فهرست کاربران</button><h3 id="c90AdminTitle"></h3></div>
-   <div id="c90DeviceTools" class="adminsection" style="display:none"></div>
-   <div id="c90AdminViewer" class="adminsection">در حال دریافت اطلاعات…</div>
-  </section>
+  <input id="c90AdminSearch" placeholder="جست‌وجوی نام کاربری">
+  <div id="c90AdminUsers" style="margin-top:12px"></div>
  </div>
 </div>
 <script>
@@ -1736,20 +1737,26 @@ async function signup(){
  await enter(d);
 }
 async function openAdmin(){
- $("C90_ADMIN").style.display="block";
- $("c90AdminListView").style.display="block";$("c90AdminDetailView").style.display="none";
- $("c90AdminUsers").textContent="در حال دریافت فهرست…";
+ $("C90_ADMIN").style.display="block";$("c90AdminUsers").textContent="در حال دریافت فهرست…";
  try{allUsers=await request("/rest/v1/profiles?select=user_id,username,display_name,role,grade,major,start_date&order=created_at.desc",{headers:authHeaders()});drawUsers()}
  catch(e){$("c90AdminUsers").textContent="خطا: "+e.message}
 }
+let activeAdminDetail=null;
 function drawUsers(){
  const q=$("c90AdminSearch").value.trim().toLowerCase();
  const list=allUsers.filter(x=>(x.username||"").toLowerCase().includes(q)||(x.display_name||"").toLowerCase().includes(q));
- $("c90AdminUsers").innerHTML="";
+ $("c90AdminUsers").innerHTML="";activeAdminDetail=null;
  list.forEach(x=>{
-  const d=document.createElement("div");d.className="userrow";
-  d.textContent=(x.display_name||x.username)+"  @"+x.username+"  "+(x.role==="admin"?"مدیر":"شرکت‌کننده");
-  d.onclick=()=>showUser(x);$("c90AdminUsers").appendChild(d);
+  const entry=document.createElement("div");entry.className="user-entry";
+  const row=document.createElement("div");row.className="userrow";
+  row.textContent=(x.display_name||x.username)+"  @"+x.username+"  "+(x.role==="admin"?"مدیر":"شرکت‌کننده");
+  const details=document.createElement("div");details.className="user-details";
+  row.onclick=()=>{
+   if(entry.classList.contains("open")){entry.classList.remove("open");details.innerHTML="";activeAdminDetail=null;return}
+   if(activeAdminDetail&&activeAdminDetail!==details){activeAdminDetail.innerHTML="";activeAdminDetail.parentElement.classList.remove("open")}
+   activeAdminDetail=details;entry.classList.add("open");showUser(x,details);
+  };
+  entry.append(row,details);$("c90AdminUsers").appendChild(entry);
  });
  if(!list.length)$("c90AdminUsers").textContent="موردی پیدا نشد.";
 }
@@ -1757,18 +1764,21 @@ let viewedUser=null,viewedState=null,viewDay=1,viewTab="challenge",viewHypDay=1;
 function adminDateFor(state,i){if(!state||!state.start||!i)return "";const d=new Date(state.start+"T00:00:00Z");d.setUTCDate(d.getUTCDate()+i-1);return d.toISOString().slice(0,10)}
 function adminText(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;e.textContent=txt==null?"":String(txt);return e}
 function adminRecord(root,title,items){
- const card=adminText("div","admin-record","");card.append(adminText("h3","",title));let count=0;
- items.forEach(([label,value])=>{if(value===null||value===undefined||String(value).trim()==="")return;const item=adminText("div","adminitem","");item.append(adminText("b","",label),document.createTextNode(String(value)));card.append(item);count++});
- if(!count)card.append(adminText("div","adminmuted","برای این بخش اطلاعاتی ثبت نشده است."));root.append(card)
+ const card=adminText("div","admin-record","");card.append(adminText("h3","",title));
+ items.forEach(([label,value])=>{
+  const missing=value===null||value===undefined||(typeof value==="string"&&!value.trim());
+  const item=adminText("div","adminitem","");item.append(adminText("b","",label),document.createTextNode(missing?"ثبت نشده":String(value)));card.append(item);
+ });
+ root.append(card)
 }
 function adminChallengeDetail(root){
- const d=(viewedState.days||{})[viewDay]||{},status=d.st==="clean"?"نزدم":d.st==="fail"?"زدم":"ثبت نشده";
- const tasks=Array.isArray(d.tasks)?d.tasks.map(t=>((t.s==="y"||t.d)?"✓ انجام شد: ":"○ انجام نشد: ")+(t.t||"")).join("\n"):"";
+ const d=(viewedState.days||{})[viewDay]||{},status=d.st==="clean"?"پاکی ثبت شده":d.st==="fail"?"لغزش ثبت شده":"";
+ const tasks=Array.isArray(d.tasks)&&d.tasks.length?d.tasks.map(t=>((t.s==="y"||t.d)?"✓ انجام شد: ":"○ انجام نشد: ")+(t.t||"ثبت نشده")).join("\n"):"";
  adminRecord(root,"روز "+viewDay+" · "+adminDateFor(viewedState,viewDay),[
- ["وضعیت",status],["دلیل‌های انتخابی",Array.isArray(d.tr)?d.tr.join("، "):""],["کارهای روزانه",tasks],
- ["جمله مثبت",d.pos],["خاطره روز",d.how],["دعا",d.pray],["توضیح",d.why]
- ]);
- if(d.sec)root.append(adminText("div","adminmuted","صندوقچه اسرار در نمای مدیریتی نمایش داده نمی‌شود."))
+ ["وضعیت روز",status],["دلیل‌های انتخابی",Array.isArray(d.tr)&&d.tr.length?d.tr.join("، "):""],
+ ["کارهای روزانه",tasks],["جمله مثبت",d.pos],["خاطره روز",d.how],["دعا",d.pray],
+ ["توضیح ثبت‌شده",d.why],["صندوقچه اسرار","اطلاعات این بخش به‌صورت خصوصی و رمزگذاری‌شده نگهداری می‌شود."]
+ ])
 }
 function adminHypDate(i){
  const hyp=viewedState&&viewedState.hyp;if(!hyp||!hyp.start)return "";
@@ -1778,9 +1788,11 @@ function adminHypDate(i){
 function adminHypDetail(root){
  const hyp=viewedState.hyp||{},d=(hyp.days||{})[viewHypDay]||(hyp.byDate||{})[adminHypDate(viewHypDay)]||{};
  adminRecord(root,"جلسه "+viewHypDay+" · "+adminHypDate(viewHypDay),[
- ["وضعیت جلسه",d.st==="done"?"تکمیل‌شده":"تکمیل نشده"],["مدت جلسه",d.min?d.min+" دقیقه":""],
- ["آرامش قبل از جلسه",d.b?d.b+" از ۵":""],["آرامش بعد از جلسه",d.a?d.a+" از ۵":""],
- ["تلقین ثبت‌شده",d.sug],["تجربه جلسه",d.note]
+ ["وضعیت جلسه",d.st==="done"?"تکمیل‌شده":""],
+ ["مدت برنامه‌ریزی‌شده",d.min!==undefined&&d.min!==null&&d.min!==""?d.min+" دقیقه":""],
+ ["امتیاز آرامش قبل از جلسه",d.b!==undefined&&d.b!==null&&d.b!==""?d.b+" از ۵":""],
+ ["امتیاز آرامش بعد از جلسه",d.a!==undefined&&d.a!==null&&d.a!==""?d.a+" از ۵":""],
+ ["متن تلقین ثبت‌شده",d.sug],["یادداشت و تجربه جلسه",d.note]
  ])
 }
 function renderAdminViewer(){
@@ -1807,23 +1819,25 @@ function renderAdminViewer(){
   root.append(grid);adminHypDetail(root)
  }
 }
-async function showUser(u){
+async function showUser(u,detail){
  viewedUser=u;viewedState=null;viewDay=1;viewHypDay=1;viewTab="challenge";
- $("c90AdminListView").style.display="none";$("c90AdminDetailView").style.display="block";
- $("c90AdminTitle").textContent=(u.display_name||u.username)+" (@"+u.username+")";$("c90AdminViewer").textContent="در حال دریافت اطلاعات…";
+ detail.innerHTML='<div class="adminmuted">در حال دریافت اطلاعات…</div><div id="c90AdminViewer" class="adminsection"></div><div id="c90DeviceTools" class="adminsection"></div>';
  try{
   const a=await request("/rest/v1/daily_reports?select=payload,updated_at&user_id=eq."+encodeURIComponent(u.user_id)+"&order=updated_at.desc&limit=1",{headers:authHeaders()});
   viewedState=a.length?a[0].payload:null;renderAdminViewer();
-  const tools=$("c90DeviceTools");tools.innerHTML="";tools.style.display="block";tools.append(adminText("div","adminmuted","مدیریت اتصال دستگاه این حساب"));
-  const release=adminText("button","","آزادسازی دستگاه برای ورود به گوشی جدید");
-  release.onclick=async()=>{if(!confirm("اتصال دستگاه قبلی این حساب آزاد شود؟"))return;release.disabled=true;try{const done=await request("/rest/v1/rpc/admin_release_device",{method:"POST",headers:authHeaders(),body:JSON.stringify({p_user_id:u.user_id})});alert(done===true?"اتصال دستگاه آزاد شد.":"برای این حساب اتصال دستگاهی ثبت نشده بود.")}catch(e){alert("آزادسازی انجام نشد: "+e.message)}finally{release.disabled=false}};
-  tools.append(release);
-  const dateWrap=adminText("div","adminsection","");dateWrap.append(adminText("div","adminmuted","تغییر تاریخ شروع چالش (فقط مدیر)"));
+  const tools=detail.querySelector("#c90DeviceTools");tools.innerHTML="";
+  tools.append(adminText("div","adminmuted","مدیریت تاریخ شروع چالش"));
   const input=document.createElement("input");input.type="date";input.value=u.start_date||(viewedState&&viewedState.start)||"";
   const set=adminText("button","","ثبت تاریخ شروع جدید");
-  set.onclick=async()=>{if(!input.value){alert("تاریخ معتبر انتخاب کن.");return}if(!confirm("تاریخ شروع این کاربر تغییر کند؟"))return;set.disabled=true;try{await request("/rest/v1/profiles?user_id=eq."+encodeURIComponent(u.user_id),{method:"PATCH",headers:{...authHeaders(),Prefer:"return=representation"},body:JSON.stringify({start_date:input.value})});if(viewedState){viewedState.start=input.value;await request("/rest/v1/daily_reports?user_id=eq."+encodeURIComponent(u.user_id)+"&report_date=eq.2000-01-01",{method:"PATCH",headers:{...authHeaders(),Prefer:"return=minimal"},body:JSON.stringify({payload:viewedState})})}u.start_date=input.value;alert("تاریخ شروع به‌روزرسانی شد.")}catch(e){alert("تغییر تاریخ انجام نشد: "+e.message)}finally{set.disabled=false}};
-  dateWrap.append(input,set);tools.append(dateWrap)
- }catch(e){$("c90AdminViewer").textContent="خطا: "+e.message}
+  set.onclick=async()=>{
+   if(!input.value){alert("تاریخ معتبر انتخاب کن.");return}
+   if(!confirm("تاریخ شروع این کاربر تغییر کند؟"))return;
+   set.disabled=true;
+   try{await request("/rest/v1/profiles?user_id=eq."+encodeURIComponent(u.user_id),{method:"PATCH",headers:{...authHeaders(),Prefer:"return=representation"},body:JSON.stringify({start_date:input.value})});u.start_date=input.value;alert("تاریخ شروع به‌روزرسانی شد.")}
+   catch(e){alert("تغییر تاریخ انجام نشد: "+e.message)}finally{set.disabled=false}
+  };
+  tools.append(input,set);
+ }catch(e){detail.querySelector("#c90AdminViewer").textContent="خطا: "+e.message}
 }
 let c90AuthBusy=false;
 async function runC90Auth(action,loadingText){
@@ -1849,7 +1863,6 @@ $("c90AuthBack").onclick=()=>{$("C90_AUTH_PANEL").style.display="none";msg("");}
 $("c90Signup").onclick=()=>runC90Auth(signup,"در حال ساخت حساب…");
 $("c90Password").onkeydown=e=>{if(e.key==="Enter")$("c90Login").click()};
 $("c90AdminClose").onclick=()=>$("C90_ADMIN").style.display="none";
-$("c90AdminBack").onclick=()=>{$("c90AdminDetailView").style.display="none";$("c90AdminListView").style.display="block";$("c90DeviceTools").style.display="none";viewedUser=null;viewedState=null};
 $("c90AdminSearch").oninput=drawUsers;
 (function showLoginForGuest(){
  const panel=$("C90_AUTH_PANEL");
