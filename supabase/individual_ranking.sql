@@ -94,8 +94,30 @@ begin
         count(*) filter (where x.value->>'st' = 'done') as sessions_done,
         coalesce(sum(
           case when x.value->>'st' = 'done'
-            and coalesce(x.value->>'min', '') ~ '^[0-9]+$'
-            then greatest(0, (x.value->>'min')::integer)
+            and coalesce(x.value->>'min', '') ~ '^[0-9]+
+      from jsonb_each(
+        case when jsonb_typeof(r.payload->'hyp'->'days') = 'object'
+          then r.payload->'hyp'->'days' else '{}'::jsonb end
+      ) x(key, value)
+    ) h on true
+  )
+  select
+    row_number() over (order by s.score desc, s.username asc)::integer,
+    s.username::text,
+    s.display_name::text,
+    s.score,
+    s.user_id = auth.uid()
+  from scores s
+  order by s.score desc, s.username asc;
+end;
+$c90_individual$;
+
+revoke all on function public.individual_ranking() from public;
+grant execute on function public.individual_ranking() to authenticated;
+
+
+
+            then least(30, greatest(0, (x.value->>'min')::integer))
             else 0 end
         ), 0) as minutes_done
       from jsonb_each(
