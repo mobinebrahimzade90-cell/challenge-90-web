@@ -196,8 +196,7 @@ begin
         - coalesce(st.fail_days, 0)::numeric * 150
         + coalesce(st.tasks_done, 0)::numeric * 5
         - coalesce(st.tasks_missed, 0)::numeric * 2
-        + coalesce(hy.sessions_done, 0)::numeric * 10
-        + floor(coalesce(hy.minutes_done, 0)::numeric / 5)
+        + coalesce(hy.minutes_done, 0)::numeric
         + coalesce(rd.initial_days, 0)::numeric * 10
       ) as points,
       greatest(
@@ -271,8 +270,194 @@ begin
         coalesce(sum(
           case
             when h.value->>'st' = 'done'
-             and coalesce(h.value->>'min', '') ~ '^[0-9]+$'
-            then greatest(0, (h.value->>'min')::integer)
+             and coalesce(h.value->>'min', '') ~ '^[0-9]+
+      from jsonb_each(
+        case
+          when jsonb_typeof(rd.payload->'hyp'->'days') = 'object'
+          then rd.payload->'hyp'->'days'
+          else '{}'::jsonb
+        end
+      ) as h(key, value)
+    ) as hy on true
+  ),
+  class_stats as (
+    select
+      pu.class_name,
+      count(*)::integer as member_count,
+      count(*) filter (where pu.active_days > 0)::integer as active_count,
+      avg(least(100::numeric, greatest(0::numeric, pu.points / pu.elapsed_days))) as average_daily_points,
+      avg(least(100::numeric, greatest(0::numeric, pu.clean_days / pu.elapsed_days * 100))) as consistency_pct
+    from per_user as pu
+    group by pu.class_name
+  )
+  select
+    cs.class_name::text,
+    cs.member_count,
+    cs.active_count,
+    round(cs.average_daily_points, 2),
+    round(cs.active_count::numeric * 100 / nullif(cs.member_count, 0), 2),
+    round(cs.consistency_pct, 2),
+    round(
+      cs.average_daily_points * 0.50
+      + (cs.active_count::numeric * 100 / nullif(cs.member_count, 0)) * 0.30
+      + cs.consistency_pct * 0.20,
+      2
+    ),
+    (cs.class_name = v_class)
+  from class_stats as cs
+  order by 7 desc, 1 asc;
+end;
+$c90_ranking$;
+
+revoke all on function public.class_ranking() from public;
+grant execute on function public.class_ranking() to authenticated;
+
+-- 6. Enable database change events for realtime, if publication exists.
+do $c90_realtime$
+begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
+    if not exists (
+      select 1 from pg_publication_tables
+      where pubname = 'supabase_realtime'
+        and schemaname = 'public'
+        and tablename = 'daily_reports'
+    ) then
+      execute 'alter publication supabase_realtime add table public.daily_reports';
+    end if;
+
+    if not exists (
+      select 1 from pg_publication_tables
+      where pubname = 'supabase_realtime'
+        and schemaname = 'public'
+        and tablename = 'profiles'
+    ) then
+      execute 'alter publication supabase_realtime add table public.profiles';
+    end if;
+  else
+    raise notice 'Publication supabase_realtime is not available; enable Realtime for public.profiles and public.daily_reports in Supabase.';
+  end if;
+end;
+$c90_realtime$;
+
+-- 9. Individual leaderboard for users in the same grade and major.
+-- Scores follow the app's personal score formula.
+drop function if exists public.individual_ranking();
+
+create function public.individual_ranking()
+returns table (
+  position integer,
+  username text,
+  display_name text,
+  points numeric,
+  is_me boolean
+)
+language plpgsql
+security definer
+set search_path = public, pg_temp
+set row_security = off
+as $c90_individual$
+declare
+  v_grade smallint;
+  v_major text;
+begin
+  if auth.uid() is null then
+    raise exception 'ابتدا وارد حساب کاربری شو';
+  end if;
+
+  select p.grade, p.major
+    into v_grade, v_major
+  from public.profiles p
+  where p.user_id = auth.uid();
+
+  if v_grade is null or v_major is null then
+    raise exception 'پایه و رشته تحصیلی حساب کامل نیست';
+  end if;
+
+  return query
+  with cohort as (
+    select p.user_id, p.username, p.display_name
+    from public.profiles p
+    where p.grade = v_grade and p.major = v_major
+  ),
+  reports as (
+    select c.user_id, c.username, c.display_name, dr.payload
+    from cohort c
+    left join public.daily_reports dr
+      on dr.user_id = c.user_id
+     and dr.report_date = date '2000-01-01'
+  ),
+  scores as (
+    select
+      r.user_id, r.username, r.display_name,
+      greatest(
+        0::numeric,
+        coalesce(d.clean_days, 0)::numeric * 100
+        - coalesce(d.fail_days, 0)::numeric * 150
+        + coalesce(d.tasks_done, 0)::numeric * 5
+        - coalesce(d.tasks_missed, 0)::numeric * 2
+        + coalesce(h.minutes_done, 0)::numeric
+      ) as score
+    from reports r
+    left join lateral (
+      select
+        count(*) filter (where x.value->>'st' = 'clean') as clean_days,
+        count(*) filter (where x.value->>'st' = 'fail') as fail_days,
+        coalesce(sum((
+          select count(*)
+          from jsonb_array_elements(
+            case when jsonb_typeof(x.value->'tasks') = 'array'
+              then x.value->'tasks' else '[]'::jsonb end
+          ) task(value)
+          where coalesce(task.value->>'s',
+            case when task.value->>'d' = 'true' then 'y' else '' end) = 'y'
+        )), 0) as tasks_done,
+        coalesce(sum((
+          select count(*)
+          from jsonb_array_elements(
+            case when jsonb_typeof(x.value->'tasks') = 'array'
+              then x.value->'tasks' else '[]'::jsonb end
+          ) task(value)
+          where coalesce(task.value->>'s',
+            case when task.value->>'d' = 'true' then 'y' else '' end) = 'n'
+        )), 0) as tasks_missed
+      from jsonb_each(
+        case when jsonb_typeof(r.payload->'days') = 'object'
+          then r.payload->'days' else '{}'::jsonb end
+      ) x(key, value)
+    ) d on true
+    left join lateral (
+      select
+        count(*) filter (where x.value->>'st' = 'done') as sessions_done,
+        coalesce(sum(
+          case when x.value->>'st' = 'done'
+            and coalesce(x.value->>'min', '') ~ '^[0-9]+
+
+            then greatest(0, (x.value->>'min')::integer)
+            else 0 end
+        ), 0) as minutes_done
+      from jsonb_each(
+        case when jsonb_typeof(r.payload->'hyp'->'days') = 'object'
+          then r.payload->'hyp'->'days' else '{}'::jsonb end
+      ) x(key, value)
+    ) h on true
+  )
+  select
+    row_number() over (order by s.score desc, s.username asc)::integer,
+    s.username::text,
+    s.display_name::text,
+    s.score,
+    s.user_id = auth.uid()
+  from scores s
+  order by s.score desc, s.username asc;
+end;
+$c90_individual$;
+
+revoke all on function public.individual_ranking() from public;
+grant execute on function public.individual_ranking() to authenticated;
+
+commit;
+
+            then least(30, greatest(0, (h.value->>'min')::integer))
             else 0
           end
         ), 0)::integer as minutes_done
