@@ -1144,7 +1144,7 @@ function renderRankProgress(){
  const pct=next?Math.max(0,Math.min(100,((points-current.min)/(next.min-current.min))*100)):100;
  const remaining=next?Math.max(0,next.min-points):0;
  box.dataset.tier=current.tone;
- box.innerHTML='<details class="rank-progress-details"><summary class="rank-progress-summary"><div class="rank-summary-title"><small>امتیاز و سطح بازیکن</small><h3>مسیر ارتقا</h3></div><div class="rank-summary-right"><div class="rank-points"><b>'+fa(points)+'</b><span>امتیاز</span></div><span class="rank-collapse-icon" aria-hidden="true">⌄</span></div></summary>'+
+ box.innerHTML='<details class="rank-progress-details"><summary class="rank-progress-summary"><div class="rank-summary-title"><small>امتیاز و سطح بازیکن</small><h3>مسیر ارتقا</h3></div><div class="rank-summary-right"><div class="rank-points"><b>'+fa(points)+'</b><span>امتیاز</span></div><span class="rank-collapse-icon" aria-hidden="true"></span></div></summary>'+
  '<div class="rank-progress-content"><div class="rank-progress-inner"><div class="rank-current"><div class="rank-current-medal">'+c90RankIcon(current,82)+'</div><div><small>رتبهٔ فعلی</small><strong>'+current.name+'</strong><span>'+(next?'تا رتبهٔ '+next.name+'، '+fa(remaining)+' امتیاز دیگر':'بالاترین رتبهٔ فعلی')+'</span></div></div>'+
  '<div class="rank-progress-track"><i style="width:'+pct+'%"></i></div><div class="rank-progress-caption"><span>'+fa(current.min)+'</span><span>'+(next?fa(next.min):"۹۰۰۰+")+'</span></div>'+
  '<div class="rank-level-grid">'+C90_RANK_LEVELS.map(level=>{const unlocked=points>=level.min;return '<div class="rank-level '+(unlocked?'unlocked':'')+' '+(current.key===level.key?'current':'')+'" data-tier="'+level.tone+'">'+c90RankIcon(level,54)+'<b>'+level.name+'</b><small>'+fa(level.min)+'+</small></div>'}).join('')+'</div></div></div></details>';
@@ -2054,13 +2054,11 @@ $("c90AdminSearch").oninput=drawUsers;
 .rank-summary-title small{color:var(--mute);font-size:.72rem}
 .rank-summary-title h3{margin:3px 0 0;font-size:1.02rem}
 .rank-summary-right{display:flex;align-items:center;gap:12px}
-.rank-collapse-icon{font-size:1.45rem;color:var(--gt);transition:transform .2s}
-.rank-progress-details[open] .rank-collapse-icon{transform:rotate(180deg)}
-.rank-progress-details:not([open])>.rank-progress-content{display:grid}
-.rank-progress-content{display:grid;grid-template-rows:0fr;overflow:hidden;padding-top:0;transition:grid-template-rows .46s cubic-bezier(.22,.8,.25,1),padding-top .46s cubic-bezier(.22,.8,.25,1)}
-.rank-progress-details[open]>.rank-progress-content{grid-template-rows:1fr;padding-top:14px}
-.rank-progress-inner{min-height:0;overflow:hidden;opacity:0;transform:translateY(-10px);transition:opacity .3s ease,transform .42s cubic-bezier(.22,.8,.25,1)}
-.rank-progress-details[open] .rank-progress-inner{opacity:1;transform:translateY(0)}
+.rank-collapse-icon{position:relative;display:inline-block;flex:0 0 10px;width:10px;height:10px;margin-inline:5px;border-right:2px solid var(--gt);border-bottom:2px solid var(--gt);border-radius:1px;transform:rotate(45deg) translateY(-2px);transition:transform .32s cubic-bezier(.2,.8,.2,1),border-color .2s}
+.rank-progress-details[open] .rank-collapse-icon{transform:rotate(225deg) translateY(-2px);border-color:var(--accent,var(--gt))}
+.rank-progress-content{display:block;max-height:0;overflow:hidden;opacity:0;transform:translateY(-8px);padding-top:0;transition:max-height .55s cubic-bezier(.22,.8,.25,1),opacity .28s ease,transform .38s cubic-bezier(.22,.8,.25,1),padding-top .38s ease;will-change:max-height,opacity}
+.rank-progress-details[open]>.rank-progress-content{max-height:1200px;opacity:1;transform:translateY(0);padding-top:14px}
+.rank-progress-inner{min-height:0;width:100%}
 .rank-progress-card{padding:12px 14px}
-@media(prefers-reduced-motion:reduce){.rank-progress-content,.rank-progress-inner,.rank-collapse-icon{transition:none!important}}
+@media(prefers-reduced-motion:reduce){.rank-progress-content,.rank-progress-inner,.rank-collapse-icon{transition:none!important;transform:none!important}}
 </style>
