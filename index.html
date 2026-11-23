@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://ghklgfvifqlsmlkpcpqi.supabase.co wss://ghklgfvifqlsmlkpcpqi.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>90</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -484,7 +486,7 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
 
 <script>
 (()=>{
-const N=90;let KEY="challenge90.v1."+(localStorage.getItem("c90.uid")||"guest");const $=id=>document.getElementById(id);
+const N=90;let KEY="challenge90.v1.guest";try{KEY="challenge90.v1."+(localStorage.getItem("c90.uid")||"guest")}catch(e){}const $=id=>document.getElementById(id);
 const fa=n=>Number(n).toLocaleString("fa-IR",{useGrouping:false});
 const MONTHS=["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"];
 const WEEK=["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنجشنبه","جمعه","شنبه"];
@@ -513,20 +515,119 @@ function d2j(jdn){
   return[jy,7+div(k,30),mod(k,30)+1];
 }
 const isoOf=g=>g[0]+"-"+String(g[1]).padStart(2,"0")+"-"+String(g[2]).padStart(2,"0");
-const C90_FIXED_START="2026-11-21";
+let C90_FIXED_START="2026-11-21";
 const validStartIso=v=>{if(typeof v!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(v))return false;const[y,m,d]=v.split("-").map(Number),x=new Date(Date.UTC(y,m-1,d));return x.getUTCFullYear()===y&&x.getUTCMonth()+1===m&&x.getUTCDate()===d};
-const startJ=()=>{if(S.start!==C90_FIXED_START){S.start=C90_FIXED_START;save()}const[a,b,c]=C90_FIXED_START.split("-").map(Number);return g2d(a,b,c)};
+const startJ=()=>{const value=validStartIso(S.start)?S.start:C90_FIXED_START;const[a,b,c]=value.split("-").map(Number);return g2d(a,b,c)};
+const isPlainObject=v=>!!v&&typeof v==="object"&&!Array.isArray(v);
+const cloneState=v=>v===undefined?undefined:JSON.parse(JSON.stringify(v));
+const sameState=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+function mergeState(local,remote,base){
+ if(local===undefined||local===null)return cloneState(remote);
+ if(remote===undefined||remote===null)return cloneState(local);
+ if(sameState(local,remote))return cloneState(local);
+ if(base!==undefined&&sameState(local,base))return cloneState(remote);
+ if(base!==undefined&&sameState(remote,base))return cloneState(local);
+ if(Array.isArray(local)&&Array.isArray(remote)){
+  const keyed=arr=>{const counts=new Map(),map=new Map(),order=[];arr.forEach((value,index)=>{const core=isPlainObject(value)?(value.id!=null?"id:"+String(value.id):typeof value.t==="string"?"task:"+value.t:"obj:"+JSON.stringify(value)):"val:"+JSON.stringify(value);const n=counts.get(core)||0;counts.set(core,n+1);const key=core+"#"+n;map.set(key,value);order.push(key)});return{map,order}};
+  const l=keyed(local),r=keyed(remote),b=Array.isArray(base)?keyed(base):{map:new Map(),order:[]};
+  const order=[...b.order.filter(k=>l.map.has(k)||r.map.has(k)),...l.order.filter(k=>!b.map.has(k)),...r.order.filter(k=>!b.map.has(k)&&!l.map.has(k))],out=[];
+  for(const key of order){
+   const hasL=l.map.has(key),hasR=r.map.has(key),hasB=b.map.has(key);
+   if(hasL&&hasR)out.push(mergeState(l.map.get(key),r.map.get(key),hasB?b.map.get(key):undefined));
+   else if(hasL){if(!(hasB&&sameState(l.map.get(key),b.map.get(key))))out.push(cloneState(l.map.get(key)))}
+   else if(hasR){if(!(hasB&&sameState(r.map.get(key),b.map.get(key))))out.push(cloneState(r.map.get(key)))}
+  }
+  return out;
+ }
+ if(isPlainObject(local)&&isPlainObject(remote)){
+  const out={},keys=new Set([...Object.keys(local),...Object.keys(remote)]);
+  for(const key of keys){
+   if(key==="__proto__"||key==="prototype"||key==="constructor")continue;
+   const hasL=Object.prototype.hasOwnProperty.call(local,key),hasR=Object.prototype.hasOwnProperty.call(remote,key),hasB=isPlainObject(base)&&Object.prototype.hasOwnProperty.call(base,key);
+   if(hasL&&hasR)out[key]=mergeState(local[key],remote[key],hasB?base[key]:undefined);
+   else if(hasL){if(!(hasB&&sameState(local[key],base[key])))out[key]=cloneState(local[key])}
+   else if(hasR){if(!(hasB&&sameState(remote[key],base[key])))out[key]=cloneState(remote[key])}
+  }
+  return out;
+ }
+ return cloneState(local);
+}
+window.C90_MERGE_STATE=mergeState;
+function normalizeState(value){
+ const out=isPlainObject(value)?cloneState(value):{start:"",days:{},vault:null};
+ if(!isPlainObject(out.days))out.days={};
+ for(const key of Object.keys(out.days)){
+  if(!/^(?:[1-9]|[1-8][0-9]|90)$/.test(key)){delete out.days[key];continue}
+  const raw=out.days[key],d=isPlainObject(raw)?raw:{};
+  d.st=["clean","fail",""].includes(d.st)?d.st:"";
+  for(const field of ["pray","how","sec","why","pos"])if(d[field]!=null&&typeof d[field]!=="string")d[field]=String(d[field]);
+  for(const field of ["pray","how","why","pos"])if(typeof d[field]==="string")d[field]=d[field].slice(0,4000);
+  if(!Array.isArray(d.tr))d.tr=[];
+  d.tr=d.tr.filter(x=>typeof x==="string").slice(0,30).map(x=>x.slice(0,120));
+  if(!Array.isArray(d.tasks))d.tasks=[];
+  d.tasks=d.tasks.filter(isPlainObject).slice(0,50).map(x=>({...x,t:String(x.t||"").slice(0,300),s:["y","n",""].includes(x.s)?x.s:(x.d?"y":""),d:!!x.d}));
+  out.days[key]=d;
+ }
+ if(!isPlainObject(out.hyp))out.hyp={};
+ if(!isPlainObject(out.hyp.days))out.hyp.days={};
+ if(!isPlainObject(out.hyp.byDate))out.hyp.byDate={};
+ const localNow=new Date();
+ const fallbackHypStart=isoOf([localNow.getFullYear(),localNow.getMonth()+1,localNow.getDate()]);
+ const legacyHypKeys=Object.keys(out.hyp.days).filter(k=>/^(?:[1-9]|1[0-9]|20)$/.test(k));
+ if(!validStartIso(out.hyp.start))out.hyp.start=legacyHypKeys.length?(validStartIso(out.start)?out.start:C90_FIXED_START):fallbackHypStart;
+ const cleanHypDay=value=>{
+  const d=isPlainObject(value)?value:{};
+  d.st=d.st==="done"?"done":"";
+  const minutes=Number(d.min);
+  d.min=Number.isFinite(minutes)?Math.max(0,Math.min(180,Math.floor(minutes))):0;
+  for(const field of ["a","b"]){const n=Number(d[field]);d[field]=Number.isFinite(n)?Math.max(0,Math.min(5,Math.floor(n))):0}
+  for(const field of ["sug","note"])if(d[field]!=null&&typeof d[field]!=="string")d[field]=String(d[field]);
+  for(const field of ["sug","note"])if(typeof d[field]==="string")d[field]=d[field].slice(0,4000);
+  return d;
+ };
+ for(const key of Object.keys(out.hyp.byDate)){
+  if(!validStartIso(key)){delete out.hyp.byDate[key];continue}
+  out.hyp.byDate[key]=cleanHypDay(out.hyp.byDate[key]);
+ }
+ const [hy,hm,hd]=out.hyp.start.split("-").map(Number),hypStartJ=g2d(hy,hm,hd);
+ // Migrate legacy relative indexes to stable calendar dates exactly once.
+ for(const key of legacyHypKeys){
+  const dateKey=isoOf(d2g(hypStartJ+Number(key)-1));
+  if(!out.hyp.byDate[dateKey])out.hyp.byDate[dateKey]=cleanHypDay(out.hyp.days[key]);
+ }
+ // Preserve the legacy numeric view for existing scoring and ranking RPCs.
+ const indexedHypDays={};
+ for(let i=1;i<=20;i++){
+  const dateKey=isoOf(d2g(hypStartJ+i-1));
+  if(out.hyp.byDate[dateKey])indexedHypDays[i]=out.hyp.byDate[dateKey];
+ }
+ out.hyp.days=indexedHypDays;
+ if(!validStartIso(out.start))out.start=C90_FIXED_START;
+ return out;
+}
+window.C90_NORMALIZE_STATE=normalizeState;
+window.C90_GET_STATE=()=>S;
 const todayJ=()=>{const n=new Date();return g2d(n.getFullYear(),n.getMonth()+1,n.getDate())};
 const fmtJ=j=>{const[y,m,d]=d2j(j);return WEEK[mod(j+1,7)]+" "+fa(d)+" "+MONTHS[m-1]+" "+fa(y)};
 
 /* ---------- ذخیره‌ی محلی ---------- */
-function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d)return d}catch(e){}return{start:"",days:{},vault:null}}
-function save(){mainDirty=true;try{localStorage.setItem(KEY,JSON.stringify(S));window.dispatchEvent(new CustomEvent("c90save",{detail:S}))}catch(e){}}
-window.C90_SET_START_DATE=function(value){if(String(value)!==C90_FIXED_START)throw new Error("تاریخ شروع چالش ثابت است: شنبه ۳۰ آبان ۱۴۰۵");S.start=C90_FIXED_START;save();if(page===1)render()};
-window.C90_LOAD_USER_STATE=function(uid,authoritativeStart){KEY="challenge90.v1."+String(uid);S=load();if(!S||typeof S!=="object")S={days:{},vault:null};if(!S.days||typeof S.days!=="object")S.days={};S.start=C90_FIXED_START;save();ensureLv();render()};
-window.addEventListener("c90cloudupdate",e=>{const d=e.detail;if(!d||typeof d!=="object")return;if(JSON.stringify(S)===JSON.stringify(d))return;S=d;S.start=C90_FIXED_START;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(x){}if(page===2)hrender();else if(page===3)rrender();else render()});
+function load(){let raw=null;try{raw=localStorage.getItem(KEY);const d=raw?JSON.parse(raw):null;if(isPlainObject(d))return normalizeState(d)}catch(e){try{if(raw)localStorage.setItem(KEY+".recovery",raw)}catch(x){}}return{start:"",days:{},vault:null}}
+function save(){
+ mainDirty=true;
+ try{localStorage.setItem(KEY,JSON.stringify(S));window.C90_STORAGE_FAILED=false}
+ catch(e){window.C90_STORAGE_FAILED=true;console.error("Local save failed:",e)}
+ // Keep cloud persistence active even when the browser storage quota is exhausted.
+ window.dispatchEvent(new CustomEvent("c90save",{detail:S}));
+}
+window.C90_SET_START_DATE=function(value){if(!validStartIso(String(value)))throw new Error("تاریخ شروع معتبر نیست.");C90_FIXED_START=String(value);S.start=C90_FIXED_START;save();if(page===1)render()};
+window.C90_LOAD_USER_STATE=function(uid,authoritativeStart){KEY="challenge90.v1."+String(uid);S=normalizeState(load());C90_FIXED_START=validStartIso(authoritativeStart)?String(authoritativeStart):(validStartIso(S.start)?S.start:C90_FIXED_START);S.start=C90_FIXED_START;save();ensureLv();render()};
+window.addEventListener("c90cloudupdate",e=>{const d=normalizeState(e.detail);const base=window.C90_SYNC_BASE||undefined,merged=normalizeState(mergeState(S,d,base));if(sameState(S,merged))return;S=merged;S.start=C90_FIXED_START;save();if(page===2)hrender();else if(page===3)rrender();else render()});
 function later(){clearTimeout(t);t=setTimeout(save,300)}
+window.C90_FLUSH_LOCAL=()=>{clearTimeout(t);save();if(window.C90_STORAGE_FAILED&&window.C90_TOAST)window.C90_TOAST("ذخیره محلی ناموفق بود؛ فضای دستگاه را بررسی کن.");return S};
+window.addEventListener("pagehide",()=>{try{clearTimeout(t);save()}catch(e){}});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){try{clearTimeout(t);save()}catch(e){}}});
 function toast(m){const e=$("toast");e.textContent=m;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",4000)}
+window.C90_TOAST=toast;
 function day(i){const d=S.days[i]||(S.days[i]={st:"",pray:"",how:"",tasks:[],sec:"",why:"",tr:[]});if(!d.tr)d.tr=[];if(d.why==null)d.why="";if(d.pos==null)d.pos="";if(!d.tasks)d.tasks=[];d.tasks.forEach(x=>{if(x.s==null)x.s=x.d?"y":""});return d}
 function dayHasSavedData(d){
  if(!d)return false;
@@ -669,7 +770,7 @@ async function vaultUI(){
   if(open){const d=day(cur),want=cur;let v="";try{v=d.sec?await decT(d.sec):""}catch(e){}if(want===cur)$("sec").value=v}
 }
 $("vGo").onclick=async()=>{
-  const pw=$("pw").value;if(pw.length<4){$("vMsg").textContent="رمز دست‌کم ۴ نویسه باشد.";return}
+  const pw=$("pw").value;if(!S.vault&&pw.length<12){$("vMsg").textContent="برای ساخت صندوقچه، رمز دست‌کم ۱۲ نویسه انتخاب کن.";return}
   try{
     if(!S.vault){const salt=crypto.getRandomValues(new Uint8Array(16));cryptoKey=await derive(pw,salt);S.vault={salt:b64(salt),chk:await encT("ok")};save()}
     else{cryptoKey=await derive(pw,unb(S.vault.salt));if(await decT(S.vault.chk)!=="ok")throw 0}
@@ -690,8 +791,8 @@ $("okSave").onclick=async()=>{
 };
 
 /* ---------- رویدادها ---------- */
-$("pray").oninput=e=>{day(cur).pray=e.target.value;later()};
-$("pos").oninput=e=>{day(cur).pos=e.target.value;later()};
+$("pray").oninput=e=>{e.target.value=e.target.value.slice(0,4000);day(cur).pray=e.target.value;later()};
+$("pos").oninput=e=>{e.target.value=e.target.value.slice(0,4000);day(cur).pos=e.target.value;later()};
 const VAL={clean:.06,fail:-.12,"":0};
 function flash(st){if(!st)return;const e=$("flash");e.style.background="radial-gradient(circle at 50% 70%,"+(st==="clean"?"rgba(255,214,120,.65)":"rgba(190,20,35,.7)")+",transparent 70%)";e.classList.remove("go");void e.offsetWidth;e.classList.add("go")}
 function patterns(){const c={};for(const k in S.days)(S.days[k].tr||[]).forEach(x=>c[x]=(c[x]||0)+1);const a=Object.entries(c).sort((x,y)=>y[1]-x[1]).slice(0,4),L=$("patL");$("pat").classList.toggle("hide",!a.length);L.innerHTML="";a.forEach(([n,v])=>{const r=document.createElement("div");r.className="pr";r.innerHTML="<span></span><div><i style='width:"+Math.round(v/a[0][1]*100)+"%'></i></div><em>"+fa(v)+"</em>";r.firstChild.textContent=n;L.appendChild(r)})}
@@ -702,8 +803,8 @@ document.querySelectorAll(".choice button").forEach(b=>b.onclick=()=>{
   if(navigator.vibrate)navigator.vibrate(nw==="fail"?[30,40,30]:20);
   if(nw==="fail")setTimeout(()=>$("reason").scrollIntoView({behavior:"smooth",block:"center"}),120);
 });
-$("why").oninput=e=>{day(cur).why=e.target.value;later()};
-function addT(){const v=$("newTask").value.trim();if(!v)return;day(cur).tasks.push({t:v,s:""});$("newTask").value="";save();paint()}
+$("why").oninput=e=>{e.target.value=e.target.value.slice(0,4000);day(cur).why=e.target.value;later()};
+function addT(){const input=$("newTask"),v=input.value.trim().slice(0,300);if(!v)return;const tasks=day(cur).tasks;if(tasks.length>=50){toast("برای هر روز حداکثر ۵۰ کار می‌توان ثبت کرد.");return}tasks.push({t:v,s:""});input.value="";save();paint()}
 $("addTask").onclick=addT;$("newTask").onkeydown=e=>{if(e.key==="Enter")addT()};
 $("back").onclick=()=>{save();closeDay()};
 document.onkeydown=e=>{if(e.key==="Escape"&&$("day").classList.contains("on")){save();closeDay()}};
@@ -951,10 +1052,28 @@ NAV.addEventListener("click",event=>{
 },true);
 
 const HN=20,HID=["hY","hM","hD"];
-function ensureHyp(){if(!S.hyp)S.hyp={start:"",days:{}};if(!S.hyp.start)S.hyp.start=isoOf(d2g(todayJ()))}
+function ensureHyp(){
+ if(!S.hyp||!isPlainObject(S.hyp))S.hyp={start:isoOf(d2g(todayJ())),days:{},byDate:{}};
+ if(!isPlainObject(S.hyp.days))S.hyp.days={};
+ if(!isPlainObject(S.hyp.byDate))S.hyp.byDate={};
+ if(!validStartIso(S.hyp.start))S.hyp.start=isoOf(d2g(todayJ()));
+}
 const hStartJ=()=>{ensureHyp();const[a,b,c]=S.hyp.start.split("-").map(Number);return g2d(a,b,c)};
-function hday(i){ensureHyp();return S.hyp.days[i]||(S.hyp.days[i]={st:"",min:0,b:0,a:0,sug:"",note:""})}
-let hcur=0,SE=null,SE_END=0,SE_AUDIO=null;
+const hDateKey=i=>isoOf(d2g(hStartJ()+Number(i)-1));
+function hypDay(i,create=false){
+ ensureHyp();const key=hDateKey(i);
+ let d=S.hyp.byDate[key]||S.hyp.days[i]||null;
+ if(!d&&create)d={st:"",min:0,b:0,a:0,sug:"",note:""};
+ if(d){S.hyp.byDate[key]=d;S.hyp.days[i]=d}
+ return d;
+}
+function hday(i){return hypDay(i,true)}
+function reindexHypDays(){
+ ensureHyp();const indexed={};
+ for(let i=1;i<=HN;i++){const d=S.hyp.byDate[hDateKey(i)];if(d)indexed[i]=d}
+ S.hyp.days=indexed;
+}
+let hcur=0,SE=null,SE_END=0,SE_START=0,SE_WAKE_LOCK=null,SE_AUDIO=null;
 function unlockHypAudio(){
   const AC=window.AudioContext||window.webkitAudioContext;
   if(!AC)return;
@@ -984,7 +1103,7 @@ function hrender(){
   for(let r=0;r<4;r++){
     const row=document.createElement("div");row.className="hr"+(r%2?" o":"");
     for(let c=0;c<5;c++){
-      const i=r*5+c+1,d=S.hyp.days[i],jd=d2j(j0+i-1),w=document.createElement("div"),b=document.createElement("button");
+      const i=r*5+c+1,d=hypDay(i,false),jd=d2j(j0+i-1),w=document.createElement("div"),b=document.createElement("button");
       w.className="hxw"+(d&&d.st?" "+d.st:"")+(i===ti?" today":"")+(i>ti?" future":"");b.className="hex";
       b.innerHTML="<b>"+fa(i)+"</b><small>"+fa(jd[1])+"/"+fa(jd[2])+"</small>";b.setAttribute("aria-label","روز "+fa(i));b.onclick=()=>openH(i);
       w.appendChild(b);row.appendChild(w);
@@ -1017,51 +1136,68 @@ function hpaint(){
   const duration=$("hDuration");if(duration)duration.value=String(d.min||5);
   [["hB","b"],["hA","a"]].forEach(([id,k])=>{const E=$(id);E.innerHTML="";for(let v=1;v<=5;v++){const b=document.createElement("button");b.textContent=fa(v);if(d[k]===v)b.className="on";b.onclick=()=>{d[k]=d[k]===v?0:v;save();hpaint()};E.appendChild(b)}});
 }
+async function acquireHypWakeLock(){
+ if(!("wakeLock" in navigator)||document.visibilityState!=="visible")return;
+ try{
+  if(SE_WAKE_LOCK&&!SE_WAKE_LOCK.released)return;
+  SE_WAKE_LOCK=await navigator.wakeLock.request("screen");
+  SE_WAKE_LOCK.addEventListener("release",()=>{SE_WAKE_LOCK=null});
+ }catch(e){console.warn("Hypnosis wake lock unavailable:",e&&e.message||e)}
+}
+async function releaseHypWakeLock(){
+ const lock=SE_WAKE_LOCK;SE_WAKE_LOCK=null;
+ if(lock){try{await lock.release()}catch(e){}}
+}
 function startSess(){
-  const d=hday(hcur);
-  if(d.st==="done"){toast("امتیاز این جلسه قبلاً ثبت شده است.");return}
-  const entered=Math.floor(Number($("hDuration").value)||0);
-  if(!Number.isFinite(entered)||entered<1||entered>180){toast("مدت جلسه باید بین ۱ تا ۱۸۰ دقیقه باشد.");return}
-  d.min=entered;save();
-  SE_END=Date.now()+entered*60000;
-  try{if(window.NativeDevice&&NativeDevice.scheduleHypnosisCompletion)NativeDevice.scheduleHypnosisCompletion(SE_END)}catch(e){}
-  const P=[["دم",4000,1],["نگه دار",2000,1],["بازدم",6000,.6]];
-  let ph=0,pt=Date.now();
-  unlockHypAudio();
-  const setPh=()=>{const p=P[ph],dm=$("dm");$("sc").textContent=p[0];dm.style.transitionDuration=p[1]+"ms";dm.style.transform="rotate(45deg) scale("+p[2]+")"};
-  $("dm").style.transitionDuration="0ms";$("dm").style.transform="rotate(45deg) scale(.6)";$("sess").classList.add("on");
-  const tick=()=>{
-    if(!SE)return;
-    const now=Date.now(),left=Math.max(0,SE_END-now),sec=Math.ceil(left/1000);
-    $("stm").textContent=fa(Math.floor(sec/60))+":"+fa(String(sec%60).padStart(2,"0"));
-    if(now-pt>=P[ph][1]){ph=(ph+1)%P.length;pt=now;setPh()}
-    if(left<=0)endSess(true);
-  };
-  clearInterval(SE);setPh();tick();SE=setInterval(tick,250);
+ if(SE)return;
+ const d=hday(hcur);
+ if(d.st==="done"){toast("امتیاز این جلسه قبلاً ثبت شده است.");return}
+ const entered=Math.floor(Number($("hDuration").value)||0);
+ if(!Number.isFinite(entered)||entered<1||entered>180){toast("مدت جلسه باید بین ۱ تا ۱۸۰ دقیقه باشد.");return}
+ d.min=entered;save();
+ SE_START=Date.now();SE_END=SE_START+entered*60000;
+ // The session is timed locally; do not depend on a native/network bridge.
+
+ const P=[["دم",4000,1],["نگه دار",2000,1],["بازدم",6000,.6]];
+ let ph=-1;
+ unlockHypAudio();
+ const setPh=next=>{ph=next;const p=P[ph],dm=$("dm");$("sc").textContent=p[0];dm.style.transitionDuration=p[1]+"ms";dm.style.transform="rotate(45deg) scale("+p[2]+")"};
+ $("dm").style.transitionDuration="0ms";$("dm").style.transform="rotate(45deg) scale(.6)";$("sess").classList.add("on");
+ acquireHypWakeLock();
+ const tick=()=>{
+  if(!SE)return;
+  const now=Date.now(),elapsed=Math.max(0,now-SE_START),left=Math.max(0,SE_END-now),sec=Math.ceil(left/1000);
+  $("stm").textContent=fa(Math.floor(sec/60))+":"+fa(String(sec%60).padStart(2,"0"));
+  const cycle=elapsed%12000,next=cycle<4000?0:(cycle<6000?1:2);
+  if(next!==ph)setPh(next);
+  if(left<=0)endSess(true);
+ };
+ clearInterval(SE);tick();SE=setInterval(tick,500);
 }
 function endSess(ok){
-  if(!SE&&!$("sess").classList.contains("on"))return;
-  clearInterval(SE);SE=null;SE_END=0;$("sess").classList.remove("on");
-  try{if(window.NativeDevice&&NativeDevice.cancelHypnosisCompletion)NativeDevice.cancelHypnosisCompletion()}catch(e){}
-  if(ok){
-    const d=hday(hcur);d.st="done";d.min=Math.max(1,Math.floor(Number(d.min)||5));save();hpaint();hrender();
-    playHypCompletionCue();toast("جلسه کامل شد؛ امتیاز ثبت شد")
-  }else{toast("جلسه متوقف شد؛ تایمر از ابتدا شروع می‌شود.")}
+ if(!SE&&!$("sess").classList.contains("on"))return;
+ clearInterval(SE);SE=null;SE_END=0;SE_START=0;$("sess").classList.remove("on");
+ releaseHypWakeLock();
+ if(ok){
+  const d=hday(hcur);d.st="done";d.min=Math.max(1,Math.floor(Number(d.min)||5));save();hpaint();hrender();
+  playHypCompletionCue();toast("جلسه کامل شد؛ امتیاز ثبت شد")
+ }else{toast("جلسه متوقف شد؛ تایمر از ابتدا شروع می‌شود.")}
 }
 window.C90_STOP_HYPN_TIMER=()=>{if(SE||$("sess").classList.contains("on")){endSess(false);return true}return false};
 function initHyp(){
   initName();
   HID.forEach(id=>{const e=$(id);e.onfocus=()=>e.select();e.onkeydown=k=>{if(k.key==="Enter")e.blur()};
-    e.onchange=()=>{const v=readTrio(HID);if(!v){toast("تاریخ درست نیست");hrender();return}ensureHyp();S.hyp.start=isoOf(d2g(j2d(v.y,v.m,v.d)));save();hrender()}});
+    e.onchange=()=>{const v=readTrio(HID);if(!v){toast("تاریخ درست نیست");hrender();return}ensureHyp();S.hyp.start=isoOf(d2g(j2d(v.y,v.m,v.d)));reindexHypDays();save();hrender()}});
   $("hDuration").onchange=e=>{const v=Math.max(1,Math.min(180,Math.floor(Number(e.target.value)||5)));e.target.value=String(v);hday(hcur).min=v;save()};
-  $("hSug").oninput=e=>{hday(hcur).sug=e.target.value;later()};
-  $("hNote").oninput=e=>{hday(hcur).note=e.target.value;later()};
+  $("hSug").oninput=e=>{e.target.value=e.target.value.slice(0,4000);hday(hcur).sug=e.target.value;later()};
+  $("hNote").oninput=e=>{e.target.value=e.target.value.slice(0,4000);hday(hcur).note=e.target.value;later()};
   const hc=()=>{save();$("hday").classList.remove("on");hrender()};
   $("hBack").onclick=hc;
-  $("hOk").onclick=async()=>{save();try{await syncCloud(S);hc();toast("اطلاعات جلسه در حساب کاربری ذخیره شد ✔")}catch(e){hc();toast("همگام‌سازی انجام نشد؛ اتصال را بررسی کن.")}};
+  $("hOk").onclick=async()=>{save();hc();try{await syncCloud(S);toast("اطلاعات جلسه در حساب کاربری ذخیره شد ✔")}catch(e){toast("اطلاعات روی دستگاه ذخیره شد؛ همگام‌سازی آنلاین بعداً تکرار می‌شود.")}};
   $("hStart").onclick=startSess;$("sEnd").onclick=()=>endSess(false);
-  // Screen locking/background throttling must not cancel or pause the session.
-  window.addEventListener("pagehide",()=>{if(SE)endSess(false)});
+  // Backgrounding does not cancel the wall-clock session; reacquire wake lock when returning.
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&SE)acquireHypWakeLock()});
+  window.addEventListener("pagehide",()=>{try{save()}catch(e){}});
   moveInd();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(moveInd);window.addEventListener("resize",moveInd);
 }
 
@@ -1264,6 +1400,8 @@ initDate();initHyp();initRank();render();boot();
 #C90_ADMIN .admincircle.selected{outline:2px solid #fff;outline-offset:2px}
 #C90_ADMIN .adminitem{padding:10px 4px;border-bottom:1px solid #49343b}
 #C90_ADMIN .adminmuted{color:#a1908a;font-size:.85rem}
+#C90_ADMIN .admin-danger{background:#7d202b;color:#fff;border:1px solid #c94c58;border-radius:10px;padding:11px 14px;margin-top:12px;width:100%;font:inherit;font-weight:700}
+#C90_ADMIN .admin-danger:disabled{opacity:.55}
 #C90_ADMIN .admindate{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0}
 #C90_ADMIN .admindate input{flex:1;min-width:150px}
 .c90-accountbar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:8px}
@@ -1312,6 +1450,7 @@ function hideLoader(){const e=document.getElementById("c90Loading");if(e)e.class
  <div class="authbox">
   <div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><h2>۹۰ روز | حساب کاربری</h2><button type="button" id="c90AuthBack" style="flex:0 0 auto;padding:7px 14px">بازگشت</button></div>
   <div id="c90AuthIntro">برای ذخیره‌ی امن اطلاعات، وارد حساب خودت شو یا حساب جدید بساز.</div>
+  <div class="privacy-consent"><input id="c90PrivacyConsent" type="checkbox"><label for="c90PrivacyConsent">با ثبت‌نام موافقم اطلاعات و گزارش‌های این برنامه روی سرور ذخیره شود. مدیر سامانه می‌تواند گزارش‌های ثبت‌شده را برای مدیریت چالش مشاهده کند. صندوقچه اسرار رمزگذاری می‌شود، اما سایر یادداشت‌ها رمزنگاری سرتاسری نیستند.</label></div>
   <input id="c90Username" autocomplete="username" placeholder="نام کاربری (انگلیسی، ۳ تا ۳۰ نویسه)" maxlength="30">
   <div class="initial-prelogin">
    <label for="c90PreDays">روزهای پاکی پیش از شروع چالش</label>
@@ -1358,24 +1497,61 @@ function hideLoader(){const e=document.getElementById("c90Loading");if(e)e.class
  if(layer&&layer.parentElement!==document.body)document.body.appendChild(layer);
 });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0"></script>
 <script>
 (()=>{
 const URL="https://ghklgfvifqlsmlkpcpqi.supabase.co";
 const KEY="sb_publishable_npuLhwy-KA2kH9HsML2S1w_Gx1XISzy";
 const $=id=>document.getElementById(id);
 const fa=n=>Number(n||0).toLocaleString("fa-IR",{useGrouping:false});
-let session=null,profile=null,cloudTimer=null,allUsers=[];
+let session=null,profile=null,cloudTimer=null,allUsers=[],refreshPromise=null;
 const authHeaders=()=>({"apikey":KEY,"Authorization":"Bearer "+session.access_token,"Content-Type":"application/json"});
 const msg=t=>$("c90AuthMsg").textContent=t;
 const internalEmail=u=>u.toLowerCase()+"@example.com";
+async function refreshSession(){
+ if(refreshPromise)return refreshPromise;
+ if(!session||!session.refresh_token)throw new Error("نشست منقضی شده است؛ دوباره وارد حساب شو.");
+ const previous=session;
+ refreshPromise=(async()=>{
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+  try{
+   const r=await fetch(URL+"/auth/v1/token?grant_type=refresh_token",{method:"POST",signal:controller.signal,headers:{apikey:KEY,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:previous.refresh_token})});
+   const d=await r.json().catch(()=>({}));
+   if(!r.ok||!d.access_token)throw new Error(d.msg||d.message||d.error_description||d.error||"تمدید نشست انجام نشد؛ دوباره وارد حساب شو.");
+   session={...previous,...d,user:d.user||previous.user};
+   try{localStorage.setItem("c90.session",JSON.stringify(session));localStorage.setItem("c90.uid",session.user.id)}catch(storageError){window.C90_SESSION_STORAGE_FAILED=true}
+   if(window.C90_RT_CLIENT){try{await window.C90_RT_CLIENT.realtime.setAuth(session.access_token)}catch(rtError){console.warn("Realtime token refresh:",rtError)}}
+   return session;
+  }catch(e){
+   if(e.name==="AbortError")throw new Error("تمدید نشست به‌موقع پاسخ نداد؛ اتصال اینترنت را بررسی کن.");
+   throw e;
+  }finally{clearTimeout(timer)}
+ })();
+ try{return await refreshPromise}finally{refreshPromise=null}
+}
 async function request(path,opts={}){
- const {timeoutMs=15000,...fetchOpts}=opts;
+ const {timeoutMs=15000,_authRetried=false,...fetchOpts}=opts;
  const controller=new AbortController();
  const timer=setTimeout(()=>controller.abort(),timeoutMs);
  try{
-  const r=await fetch(URL+path,{...fetchOpts,signal:controller.signal,headers:{apikey:KEY,"Content-Type":"application/json",...(opts.headers||{})}});
+  const headers={apikey:KEY,"Content-Type":"application/json",...(opts.headers||{})};
+  const r=await fetch(URL+path,{...fetchOpts,signal:controller.signal,headers});
   const d=await r.json().catch(()=>({}));
+  if(r.status===401&&!_authRetried&&headers.Authorization&&session&&session.refresh_token){
+   try{await refreshSession()}
+   catch(refreshError){
+    if(/invalid_grant|invalid refresh token|refresh_token_not_found|refresh token.*(expired|invalid)/i.test(String(refreshError.message||refreshError))){
+     session=null;profile=null;window.C90_CURRENT_PROFILE=null;window.C90_CURRENT_USERNAME=null;
+     clearTimeout(cloudTimer);clearInterval(window.C90_CLASS_RANK_TIMER);
+     try{localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid")}catch(storageError){}
+     if(window.C90_RT_CLIENT&&window.C90_RT_CHANNEL)window.C90_RT_CLIENT.removeChannel(window.C90_RT_CHANNEL).catch(()=>{});
+     const panel=$("C90_AUTH_PANEL");if(panel)panel.style.display="flex";
+     msg("نشست حساب منقضی شده است؛ دوباره وارد شو. اطلاعات ذخیره‌نشدهٔ محلی پاک نشده‌اند.");
+    }
+    throw refreshError;
+   }
+   return await request(path,{...opts,headers:{...(opts.headers||{}),Authorization:"Bearer "+session.access_token},_authRetried:true});
+  }
   if(!r.ok)throw new Error(d.msg||d.message||d.error_description||d.error||"خطا در ارتباط با سرور");
   return d;
  }catch(e){
@@ -1389,7 +1565,7 @@ async function getProfile(){
   a=await request("/rest/v1/profiles?select=user_id,username,display_name,role,grade,major,class_name,start_date,initial_days&user_id=eq."+encodeURIComponent(session.user.id),{headers:authHeaders()});
  }catch(e){
   if(/column .* does not exist|schema cache|could not find .* column/i.test(String(e.message||e))){
-   throw new Error("ساختار جدول پروفایل کامل نیست. فایل supabase/auth_repair.sql را در SQL Editor اجرا کن و دوباره وارد شو.");
+   throw new Error("ساختار جدول پروفایل کامل نیست. طبق supabase/README-hardening.md ساختار را تعمیر کن؛ اگر auth_repair.sql اجرا شد، حتماً پس از آن security_hardening.sql را دوباره اجرا کن.");
   }
   throw e;
  }
@@ -1397,42 +1573,53 @@ async function getProfile(){
  profile=a[0];
  window.C90_CURRENT_PROFILE=profile;
 }
-let cloudReadFailed=false,cloudReadInProgress=false,cloudReadSucceeded=false,cloudReadPromise=null,cloudReadError=null;
-async function loadCloud(options={}){
+let cloudReadFailed=false,cloudReadInProgress=false,cloudReadSucceeded=false,cloudReadPromise=null,cloudReadError=null,cloudMergedState=null,cloudWriteQueue=Promise.resolve();
+const userStateKey=()=> "challenge90.v1."+session.user.id;
+const syncedStateKey=()=> "challenge90.synced.v1."+session.user.id;
+const parseStored=value=>{try{return value?JSON.parse(value):null}catch(e){return null}};
+async function loadCloud(){
  if(cloudReadPromise)return cloudReadPromise;
  cloudReadFailed=false;cloudReadSucceeded=false;cloudReadError=null;cloudReadInProgress=true;
  cloudReadPromise=(async()=>{
   try{
-   const a=await request("/rest/v1/daily_reports?select=payload&report_date=eq.2000-01-01&user_id=eq."+encodeURIComponent(session.user.id),{headers:authHeaders(),timeoutMs:12000});
-   if(a.length&&a[0].payload&&typeof a[0].payload==="object"&&options.apply!==false){
-    localStorage.setItem("challenge90.v1."+session.user.id,JSON.stringify(a[0].payload));
-    window.dispatchEvent(new CustomEvent("c90cloudupdate",{detail:a[0].payload}));
-   }
+   const rows=await request("/rest/v1/daily_reports?select=payload&report_date=eq.2000-01-01&user_id=eq."+encodeURIComponent(session.user.id),{headers:authHeaders(),timeoutMs:12000});
+   const remote=rows.length&&rows[0].payload&&typeof rows[0].payload==="object"?window.C90_NORMALIZE_STATE(rows[0].payload):null;
+   let localRaw=null,baseRaw=null;
+   try{localRaw=parseStored(localStorage.getItem(userStateKey()));baseRaw=parseStored(localStorage.getItem(syncedStateKey()))}
+   catch(storageError){window.C90_STORAGE_FAILED=true}
+   const memoryState=typeof window.C90_GET_STATE==="function"?window.C90_GET_STATE():null;
+   const local=localRaw?window.C90_NORMALIZE_STATE(localRaw):(memoryState?window.C90_NORMALIZE_STATE(memoryState):null);
+   const base=baseRaw?window.C90_NORMALIZE_STATE(baseRaw):null;
+   cloudMergedState=remote?window.C90_NORMALIZE_STATE(window.C90_MERGE_STATE(local,remote,base)):(local||window.C90_NORMALIZE_STATE({}));
+   if(profile&&validStartIso(profile.start_date))cloudMergedState.start=profile.start_date;
+   if(remote){window.C90_SYNC_BASE=remote;try{localStorage.setItem(syncedStateKey(),JSON.stringify(remote))}catch(storageError){window.C90_STORAGE_FAILED=true}}
+   else{window.C90_SYNC_BASE=null;try{localStorage.removeItem(syncedStateKey())}catch(storageError){window.C90_STORAGE_FAILED=true}}
+   try{localStorage.setItem(userStateKey(),JSON.stringify(cloudMergedState))}catch(storageError){window.C90_STORAGE_FAILED=true}
+   if(JSON.stringify(local)!==JSON.stringify(cloudMergedState))window.dispatchEvent(new CustomEvent("c90cloudupdate",{detail:cloudMergedState}));
    cloudReadSucceeded=true;
+   if(cloudMergedState&&((remote&&JSON.stringify(cloudMergedState)!==JSON.stringify(remote))||(!remote&&local)))scheduleSync(cloudMergedState);
    return true;
-  }catch(e){
-   cloudReadFailed=true;cloudReadError=e;
-   console.warn("Cloud restore:",e.message);
-   return false;
-  }finally{
-   cloudReadInProgress=false;cloudReadPromise=null;
-  }
+  }catch(e){cloudReadFailed=true;cloudReadError=e;console.warn("Cloud restore:",e.message);return false}
+  finally{cloudReadInProgress=false;cloudReadPromise=null}
  })();
  return cloudReadPromise;
 }
 async function saveInitialDays(days){
  const result=await request("/rest/v1/rpc/c90_set_initial_days",{method:"POST",headers:authHeaders(),body:JSON.stringify({p_days:days})});
  profile.initial_days=Number(result.initial_days);
- localStorage.removeItem("c90.pendingInitialDays."+String(profile.username||"").toLowerCase());
+ try{localStorage.removeItem("c90.pendingInitialDays."+String(profile.username||"").toLowerCase())}catch(storageError){}
+ if(window.C90_PENDING_INITIAL_DAYS&&window.C90_PENDING_INITIAL_DAYS.user===String(profile.username||"").toLowerCase())window.C90_PENDING_INITIAL_DAYS=null;
  return result;
 }
 async function ensureInitialDays(){
  const username=String(profile.username||"").toLowerCase();
  if(profile.initial_days!==null&&profile.initial_days!==undefined){
-  localStorage.removeItem("c90.pendingInitialDays."+username);
+  try{localStorage.removeItem("c90.pendingInitialDays."+username)}catch(storageError){}
   return;
  }
- const pending=localStorage.getItem("c90.pendingInitialDays."+username);
+ let pending=window.C90_PENDING_INITIAL_DAYS&&window.C90_PENDING_INITIAL_DAYS.user===username?String(window.C90_PENDING_INITIAL_DAYS.days):null;
+ try{pending=pending??localStorage.getItem("c90.pendingInitialDays."+username)}catch(storageError){}
+
  if(pending!==null){
   const days=Number(pending);
   if(Number.isInteger(days)&&days>=0&&days<=90){
@@ -1470,7 +1657,8 @@ async function ensureInitialDays(){
 function refreshPreInitialDays(){
  const user=String($("c90Username").value||"").trim().toLowerCase();
  const input=$("c90PreDays"),button=$("c90PreSave"),note=$("c90PreMsg");
- const saved=localStorage.getItem("c90.pendingInitialDays."+user);
+ let saved=window.C90_PENDING_INITIAL_DAYS&&window.C90_PENDING_INITIAL_DAYS.user===user?String(window.C90_PENDING_INITIAL_DAYS.days):null;
+ try{saved=saved??localStorage.getItem("c90.pendingInitialDays."+user)}catch(storageError){}
  if(saved!==null){
   input.value=saved;input.disabled=true;button.disabled=true;
   note.textContent="روزهای آغازین برای این نام کاربری ثبت شده و انتخاب قفل است.";
@@ -1485,27 +1673,55 @@ $("c90PreSave").onclick=()=>{
  const raw=$("c90PreDays").value.trim();
  if(!/^[a-z0-9][a-z0-9._-]{2,29}$/.test(user)){ $("c90PreMsg").textContent="ابتدا نام کاربری معتبر را وارد کن.";return}
  if(!/^[0-9]{1,2}$/.test(raw)||Number(raw)>90){$("c90PreMsg").textContent="عدد صحیح بین ۰ تا ۹۰ وارد کن.";return}
- localStorage.setItem("c90.pendingInitialDays."+user,String(Number(raw)));
+ window.C90_PENDING_INITIAL_DAYS={user,days:Number(raw)};
+ try{localStorage.setItem("c90.pendingInitialDays."+user,String(Number(raw)))}catch(storageError){}
  refreshPreInitialDays();
  $("c90PreMsg").textContent="انتخاب ذخیره شد؛ پس از ورود به همین حساب، امتیاز آغازین ثبت می‌شود.";
 };
 refreshPreInitialDays();
 async function syncCloud(data){
  if(!session||!data)throw new Error("برای ذخیره آنلاین باید وارد حساب کاربری شوی.");
- if(!cloudReadSucceeded){
-  const restored=await loadCloud({apply:false});
-  if(!restored)throw new Error("بازیابی اطلاعات از سرور ناموفق بود: "+String(cloudReadError&&cloudReadError.message||"خطای ناشناخته"));
- }
- const payload={user_id:session.user.id,report_date:"2000-01-01",payload:data,updated_at:new Date().toISOString()};
- await request("/rest/v1/daily_reports?on_conflict=user_id,report_date",{method:"POST",headers:{...authHeaders(),Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(payload)});
+ const job=cloudWriteQueue.catch(()=>{}).then(async()=>{
+  if(!cloudReadSucceeded){
+   const restored=await loadCloud();
+   if(!restored)throw new Error("بازیابی اطلاعات از سرور ناموفق بود: "+String(cloudReadError&&cloudReadError.message||"خطای ناشناخته"));
+  }
+  const rawLatest=window.C90_STORAGE_FAILED?data:(parseStored(localStorage.getItem(userStateKey()))||cloudMergedState||data);
+  const latest=window.C90_NORMALIZE_STATE(rawLatest);
+  if(!latest||typeof latest!=="object")throw new Error("اطلاعات محلی معتبر نیست و برای جلوگیری از بازنویسی، ارسال متوقف شد.");
+  const payload={user_id:session.user.id,report_date:"2000-01-01",payload:latest,updated_at:new Date().toISOString()};
+  await request("/rest/v1/daily_reports?on_conflict=user_id,report_date",{method:"POST",headers:{...authHeaders(),Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(payload)});
+  try{localStorage.setItem(syncedStateKey(),JSON.stringify(latest))}catch(storageError){window.C90_STORAGE_FAILED=true}
+  window.C90_SYNC_BASE=latest;cloudMergedState=latest;
+  let after=null;try{after=localStorage.getItem(userStateKey())}catch(storageError){window.C90_STORAGE_FAILED=true}
+  if(after&&after!==JSON.stringify(latest)){const newer=parseStored(after);if(newer)scheduleSync(newer)}
+  return true;
+ });
+ cloudWriteQueue=job;
+ return job;
 }
 // Expose the authenticated sync function to the main app script, which runs outside this IIFE.
 window.syncCloud=syncCloud;
-function scheduleSync(data){
+function scheduleSync(data,retry=0){
  if(!session)return;
  clearTimeout(cloudTimer);
- cloudTimer=setTimeout(()=>syncCloud(data).catch(e=>console.warn("Cloud sync:",e.message)),1000);
+ const delays=[1000,2000,5000,10000,20000,30000];
+ cloudTimer=setTimeout(async()=>{
+  try{await syncCloud(data)}
+  catch(e){
+   console.warn("Cloud sync (local data preserved):",e&&e.message||e);
+   if(session&&retry<5&&navigator.onLine){scheduleSync(data,retry+1);return}
+   if(!SE&&window.C90_TOAST)window.C90_TOAST("ذخیره آنلاین فعلاً انجام نشد؛ اطلاعات روی دستگاه محفوظ است.");
+  }
+ },delays[Math.min(retry,delays.length-1)]);
 }
+window.addEventListener("online",()=>{
+ if(!session)return;
+ let local=null;try{local=parseStored(localStorage.getItem(userStateKey()))}catch(storageError){window.C90_STORAGE_FAILED=true}
+ if(!local&&typeof window.C90_GET_STATE==="function")local=window.C90_GET_STATE();
+ if(local)syncCloud(local).catch(e=>console.warn("Online retry:",e.message));
+});
+
 async function enter(s){
  session=s;
  setLoaderStage(1,"در حال شناسایی حساب","اعتبارسنجی نشست کاربری");
@@ -1513,10 +1729,10 @@ async function enter(s){
  const shownName=profile.display_name||profile.username||"کاربر";
  const shownClass=(profile.grade?"پایه "+profile.grade:"پایه ثبت نشده")+(profile.major?" · "+profile.major:"");
  setLoaderStage(2,"پروفایل شناسایی شد","اطلاعات حساب دریافت شد",shownName,shownClass);
- localStorage.setItem("c90.session",JSON.stringify(s));localStorage.setItem("c90.uid",s.user.id);
- if(sessionStorage.getItem("c90.active_uid")!==s.user.id){
-  sessionStorage.setItem("c90.active_uid",s.user.id);
- }
+ try{localStorage.setItem("c90.session",JSON.stringify(s));localStorage.setItem("c90.uid",s.user.id)}
+ catch(storageError){window.C90_SESSION_STORAGE_FAILED=true;console.warn("Session persistence unavailable:",storageError)}
+ try{if(sessionStorage.getItem("c90.active_uid")!==s.user.id)sessionStorage.setItem("c90.active_uid",s.user.id)}
+ catch(storageError){console.warn("Session tab marker unavailable:",storageError)}
  window.C90_CURRENT_USERNAME=profile.username;
  setLoaderStage(2,"در حال آماده‌سازی پروفایل","بررسی وضعیت حساب",shownName,shownClass);
  if(profile.start_date){if(typeof window.C90_SET_START_DATE!=="function")throw new Error("ماژول برنامه بارگذاری نشده است؛ صفحه را تازه‌سازی کن.");window.C90_SET_START_DATE(profile.start_date)}else{const initialized=await request("/rest/v1/rpc/c90_initialize_start_date",{method:"POST",headers:authHeaders(),body:"{}"});const candidates=[initialized,initialized&&initialized.c90_initialize_start_date,initialized&&initialized.start_date,Array.isArray(initialized)&&initialized[0],Array.isArray(initialized)&&initialized[0]&&initialized[0].c90_initialize_start_date];const todayIso=candidates.find(v=>typeof v==="string"&&validStartIso(v));if(!todayIso)throw new Error("تاریخ شروع حساب از سرور با قالب معتبر دریافت نشد؛ تاریخ حساب باید بررسی شود.");profile.start_date=todayIso;if(typeof window.C90_SET_START_DATE!=="function")throw new Error("ماژول برنامه بارگذاری نشده است؛ صفحه را تازه‌سازی کن.");window.C90_SET_START_DATE(todayIso)}
@@ -1548,10 +1764,19 @@ async function enter(s){
     .on("postgres_changes",{event:"*",schema:"public",table:"daily_reports"},()=>window.C90_LOAD_RANKING().catch(()=>{}))
     .on("postgres_changes",{event:"*",schema:"public",table:"profiles"},()=>window.C90_LOAD_RANKING().catch(()=>{}))
     .on("postgres_changes",{event:"*",schema:"public",table:"daily_reports",filter:"user_id=eq."+session.user.id},payload=>{
-      const row=payload.new;
-      if(!row||row.report_date!=="2000-01-01"||!row.payload)return;
-      const local=localStorage.getItem("challenge90.v1."+session.user.id);
-      try{if(JSON.stringify(JSON.parse(local||"null"))!==JSON.stringify(row.payload))window.dispatchEvent(new CustomEvent("c90cloudupdate",{detail:row.payload}))}catch(e){}
+      const row=payload.new;if(!row||row.report_date!=="2000-01-01"||!row.payload)return;
+      const key="challenge90.v1."+session.user.id;let base=window.C90_SYNC_BASE||null,local=null;
+      try{base=base||parseStored(localStorage.getItem("challenge90.synced.v1."+session.user.id));local=parseStored(localStorage.getItem(key))}
+      catch(storageError){window.C90_STORAGE_FAILED=true}
+      const memoryState=typeof window.C90_GET_STATE==="function"?window.C90_GET_STATE():null;
+      const localState=local||memoryState;
+      const remote=window.C90_NORMALIZE_STATE(row.payload),merged=window.C90_NORMALIZE_STATE(window.C90_MERGE_STATE?window.C90_MERGE_STATE(localState,remote,base):Object.assign({},remote||{},localState||{}));
+      if(profile&&validStartIso(profile.start_date))merged.start=profile.start_date;
+      window.C90_SYNC_BASE=remote;
+      try{localStorage.setItem("challenge90.synced.v1."+session.user.id,JSON.stringify(remote));localStorage.setItem(key,JSON.stringify(merged))}
+      catch(storageError){window.C90_STORAGE_FAILED=true}
+      if(JSON.stringify(local)!==JSON.stringify(merged))window.dispatchEvent(new CustomEvent("c90cloudupdate",{detail:merged}));
+      if(JSON.stringify(merged)!==JSON.stringify(row.payload))scheduleSync(merged);
     })
     .subscribe();
   }
@@ -1583,9 +1808,22 @@ async function enter(s){
  const out=document.createElement("div");out.className="c90-accountbar";
  out.innerHTML='<span style="color:var(--mute)">حساب: '+String(profile.username||"").replace(/[&<>"]/g,"")+'</span><button id="c90Logout">ترک حساب</button>';
  document.querySelector(".wrap").prepend(out);
- $("c90Logout").onclick=async()=>{const button=$("c90Logout");button.disabled=true;button.textContent="در حال ترک حساب…";try{await request("/auth/v1/logout",{method:"POST",headers:authHeaders()})}catch(e){}clearTimeout(cloudTimer);clearInterval(window.C90_CLASS_RANK_TIMER);if(window.C90_RT_CLIENT&&window.C90_RT_CHANNEL){try{await window.C90_RT_CLIENT.removeChannel(window.C90_RT_CHANNEL)}catch(e){}}localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");sessionStorage.removeItem("c90.loaded");sessionStorage.removeItem("c90.active_uid");session=null;profile=null;window.C90_CURRENT_PROFILE=null;window.C90_CURRENT_USERNAME=null;location.reload()};
+ $("c90Logout").onclick=async()=>{
+  const button=$("c90Logout");button.disabled=true;button.textContent="در حال ذخیره و خروج…";
+  let syncError=null;
+  try{const flushed=window.C90_FLUSH_LOCAL?window.C90_FLUSH_LOCAL():null;let local=null;try{local=parseStored(localStorage.getItem(userStateKey()))}catch(storageError){window.C90_STORAGE_FAILED=true}local=local||flushed;if(local)await syncCloud(local)}catch(e){syncError=e}
+  if(syncError&&!confirm("همگام‌سازی آنلاین انجام نشد. اطلاعات محلی روی همین دستگاه حفظ می‌شود، اما ممکن است هنوز روی سرور نباشد. با خروج محلی ادامه می‌دهی؟\n"+String(syncError.message||syncError))){
+    button.disabled=false;button.textContent="ترک حساب";return;
+  }
+  try{await request("/auth/v1/logout",{method:"POST",headers:authHeaders()})}catch(e){}
+  clearTimeout(cloudTimer);clearInterval(window.C90_CLASS_RANK_TIMER);
+  if(window.C90_RT_CLIENT&&window.C90_RT_CHANNEL){try{await window.C90_RT_CLIENT.removeChannel(window.C90_RT_CHANNEL)}catch(e){}}
+  try{localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid")}catch(storageError){}
+  try{sessionStorage.removeItem("c90.loaded");sessionStorage.removeItem("c90.active_uid")}catch(storageError){}
+  session=null;profile=null;window.C90_CURRENT_PROFILE=null;window.C90_CURRENT_USERNAME=null;location.reload()
+};
  window.addEventListener("c90save",e=>scheduleSync(e.detail));
- if(navigator.onLine){const local=localStorage.getItem("challenge90.v1."+session.user.id);if(local){try{await syncCloud(JSON.parse(local))}catch(e){console.warn(e)}}}
+ if(navigator.onLine){let local=null;try{local=localStorage.getItem("challenge90.v1."+session.user.id)}catch(storageError){window.C90_STORAGE_FAILED=true}if(local){try{await syncCloud(JSON.parse(local))}catch(e){console.warn(e)}}}
 }
 async function ensureSchoolInfo(){
  if(profile.grade&&profile.major){
@@ -1628,6 +1866,7 @@ async function signup(){
  if(!/^[a-z0-9][a-z0-9._-]{2,29}$/.test(u)){msg("نام کاربری باید ۳ تا ۳۰ نویسه و فقط شامل حروف انگلیسی کوچک، عدد، نقطه، خط تیره یا زیرخط باشد.");return}
  if(p.length<8){msg("رمز عبور باید حداقل ۸ نویسه باشد.");return}
  if(![10,11,12].includes(grade)||!["کامپیوتر","گرافیک","معماری"].includes(major)){msg("پایه و رشته را انتخاب کن.");return}
+ if(!$("c90PrivacyConsent").checked){msg("برای ثبت‌نام، ابتدا اطلاعیه حریم خصوصی را بخوان و تأیید کن.");return}
  msg("در حال ساخت حساب…");
  let d;
  try{
@@ -1727,18 +1966,7 @@ async function showUser(u){
   const a=await request("/rest/v1/daily_reports?select=payload,updated_at&user_id=eq."+encodeURIComponent(u.user_id)+"&order=updated_at.desc&limit=1",{headers:authHeaders()});
   viewedState=a.length?a[0].payload:null;renderAdminViewer();
   const tools=$("c90DeviceTools");tools.innerHTML="";tools.style.display="block";
-  tools.append(adminText("div","adminmuted","مدیریت اتصال دستگاه این حساب"));
-  const release=adminText("button","","آزادسازی دستگاه برای ورود به گوشی جدید");
-  release.onclick=async()=>{
-   if(!confirm("اتصال دستگاه قبلی این حساب آزاد شود؟ اطلاعات و گزارش‌های کاربر حذف نمی‌شوند."))return;
-   release.disabled=true;release.textContent="در حال آزادسازی…";
-   try{
-    const done=await request("/rest/v1/rpc/admin_release_device",{method:"POST",headers:authHeaders(),body:JSON.stringify({p_user_id:u.user_id})});
-    alert(done===true?"اتصال دستگاه آزاد شد. کاربر اکنون می‌تواند با همان نام کاربری و رمز عبور روی گوشی جدید وارد شود.":"برای این حساب اتصال دستگاهی ثبت نشده بود.");
-   }catch(e){alert("آزادسازی انجام نشد: "+e.message)}
-   finally{release.disabled=false;release.textContent="آزادسازی دستگاه برای ورود به گوشی جدید"}
-  };
-  tools.append(release);
+  tools.append(adminText("div","adminmuted","قفل و آزادسازی دستگاه در سرور این نسخه پیاده‌سازی نشده است؛ برای جلوگیری از نمایش کنترل غیرعملیاتی، دکمهٔ آزادسازی حذف شده است."));
   const dateWrap=adminText("div","adminsection","");
   dateWrap.append(adminText("div","adminmuted","تغییر تاریخ شروع چالش (فقط مدیر)"));
   const startInput=document.createElement("input");startInput.type="date";startInput.value=u.start_date||((viewedState&&viewedState.start)||"");
@@ -1748,14 +1976,64 @@ async function showUser(u){
    if(!confirm("تاریخ شروع این کاربر تغییر کند؟ شماره روزهای چالش نیز بر اساس تاریخ جدید محاسبه می‌شود."))return;
    setStart.disabled=true;
    try{
-    await request("/rest/v1/profiles?user_id=eq."+encodeURIComponent(u.user_id),{method:"PATCH",headers:{...authHeaders(),Prefer:"return=representation"},body:JSON.stringify({start_date:startInput.value})});
-    if(viewedState){viewedState.start=startInput.value;await request("/rest/v1/daily_reports?user_id=eq."+encodeURIComponent(u.user_id)+"&report_date=eq.2000-01-01",{method:"PATCH",headers:{...authHeaders(),Prefer:"return=minimal"},body:JSON.stringify({payload:viewedState})})}
+    await request("/rest/v1/rpc/c90_admin_set_start_date",{method:"POST",headers:authHeaders(),body:JSON.stringify({p_user_id:u.user_id,p_start_date:startInput.value})});
+    if(viewedState)viewedState.start=startInput.value;
     u.start_date=startInput.value;
-    alert("تاریخ شروع به‌روزرسانی شد.");
+    alert("تاریخ شروع و محاسبات رتبه‌بندی به‌صورت یکپارچه به‌روزرسانی شد.");
    }catch(e){alert("تغییر تاریخ انجام نشد: "+e.message)}
    finally{setStart.disabled=false}
   };
   dateWrap.append(startInput,setStart);tools.append(dateWrap);
+
+  const accountWrap=adminText("div","adminsection","");
+  accountWrap.append(adminText("div","adminmuted","مدیریت دسترسی حساب کاربر"));
+  const passwordLabel=adminText("label","adminmuted","رمز عبور جدید (حداقل ۸ نویسه)");
+  const passwordInput=document.createElement("input");
+  passwordInput.type="password";passwordInput.autocomplete="new-password";
+  passwordInput.minLength=8;passwordInput.maxLength=72;
+  passwordInput.placeholder="رمز جدید";
+  passwordLabel.append(passwordInput);
+  const resetPassword=adminText("button","","ثبت رمز جدید");
+  resetPassword.onclick=async()=>{
+   const password=passwordInput.value;
+   if(password.length<8||password.length>72){alert("رمز باید بین ۸ تا ۷۲ نویسه باشد.");return}
+   if(!confirm("رمز ورود حساب @"+u.username+" تغییر کند؟"))return;
+   resetPassword.disabled=true;
+   try{
+    const result=await fetch(URL+"/functions/v1/c90-admin-user",{
+     method:"POST",
+     headers:{apikey:KEY,Authorization:"Bearer "+session.access_token,"Content-Type":"application/json"},
+     body:JSON.stringify({action:"reset_password",user_id:u.user_id,password})
+    });
+    const data=await result.json().catch(()=>({}));
+    if(!result.ok)throw new Error(data.error||"تغییر رمز انجام نشد.");
+    passwordInput.value="";
+    alert("رمز عبور تغییر کرد.");
+   }catch(e){alert("خطا: "+e.message)}
+   finally{resetPassword.disabled=false}
+  };
+  const deleteUser=adminText("button","admin-danger","حذف کامل حساب کاربر");
+  deleteUser.onclick=async()=>{
+   if(u.role==="admin"){alert("حذف حساب مدیر از این بخش مجاز نیست.");return}
+   if(!confirm("حساب @"+u.username+" و تمام گزارش‌های مرتبط با آن برای همیشه حذف شوند؟ این عملیات قابل بازگشت نیست."))return;
+   if(prompt("برای تأیید حذف، نام کاربری را دقیقاً وارد کن:")!==u.username)return;
+   deleteUser.disabled=true;
+   try{
+    await request("/rest/v1/rpc/c90_admin_delete_user",{
+     method:"POST",headers:authHeaders(),
+     body:JSON.stringify({p_user_id:u.user_id})
+    });
+    allUsers=allUsers.filter(item=>item.user_id!==u.user_id);
+    viewedUser=null;viewedState=null;
+    $("c90AdminTitle").textContent="حساب حذف شد";
+    $("c90AdminViewer").textContent="حساب کاربر و گزارش‌های مرتبط با موفقیت حذف شدند.";
+    tools.style.display="none";
+    drawUsers();
+   }catch(e){alert("حذف انجام نشد: "+e.message)}
+   finally{deleteUser.disabled=false}
+  };
+  accountWrap.append(passwordLabel,resetPassword,deleteUser);
+  tools.append(accountWrap);
  }catch(e){$("c90AdminViewer").textContent="خطا: "+e.message}
 }
 let c90AuthBusy=false;
@@ -1808,8 +2086,8 @@ $("c90AdminSearch").oninput=drawUsers;
   }
   old.user=u;await enter(old);
  }catch(e){
-  localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");
-  sessionStorage.removeItem("c90.active_uid");
+  try{localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid")}catch(storageError){}
+  try{sessionStorage.removeItem("c90.active_uid")}catch(storageError){}
   $("intro").classList.remove("on");$("splash").classList.remove("on");$("setup").classList.remove("on");
   $("C90_AUTH_PANEL").style.display="flex";msg("بازیابی ورود ناموفق بود: "+(e&&e.message?e.message:"خطای نامشخص")+"؛ دوباره وارد شو.");
  }finally{hideLoader()}
@@ -1871,6 +2149,9 @@ $("c90AdminSearch").oninput=drawUsers;
 #C90_AUTH_PANEL #c90Signup{background:#2a1d27;color:#f2d99a;border:1px solid #76543e}
 #C90_AUTH_PANEL #c90AuthBack{border:1px solid #5e4650;border-radius:10px;background:#ffffff08;color:#cbb9b8}
 #C90_AUTH_PANEL .authmsg{min-height:25px;text-align:center;line-height:1.7}
+#C90_AUTH_PANEL .privacy-consent{display:flex;align-items:flex-start;gap:9px;margin:12px 0;padding:11px;border:1px solid #59414a;border-radius:12px;background:#0d0a0f;color:#c8b8b9;font-size:.72rem;line-height:1.8}
+#C90_AUTH_PANEL .privacy-consent input[type=checkbox]{flex:0 0 19px;width:19px;height:19px;min-height:19px;margin:3px 0 0;accent-color:#e8b339}
+#C90_AUTH_PANEL .privacy-consent label{cursor:pointer}
 @media(max-height:720px){#C90_AUTH_PANEL{align-items:flex-start}#C90_AUTH_PANEL .authbox{margin:4px auto}}
 </style>
 <style>
