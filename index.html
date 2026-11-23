@@ -965,7 +965,7 @@ function ensureHyp(){
  reindexHypDays();
 }
 const hStartJ=()=>{ensureHyp();const[a,b,c]=S.hyp.start.split("-").map(Number);return g2d(a,b,c)};
-const hDateKey=i=>isoOf(d2g(hStartJ()+Number(i)-1));
+const hDateKey=i=>{const[a,b,c]=S.hyp.start.split("-").map(Number);return isoOf(d2g(g2d(a,b,c)+Number(i)-1))};
 function hypDay(i,create=false){
  ensureHyp();const key=hDateKey(i);
  let d=S.hyp.byDate[key]||S.hyp.days[i]||null;
