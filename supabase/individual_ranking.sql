@@ -58,8 +58,7 @@ begin
         - coalesce(d.fail_days, 0)::numeric * 150
         + coalesce(d.tasks_done, 0)::numeric * 5
         - coalesce(d.tasks_missed, 0)::numeric * 2
-        + coalesce(h.sessions_done, 0)::numeric * 10
-        + floor(coalesce(h.minutes_done, 0)::numeric / 5)
+        + least(coalesce(h.minutes_done, 0)::numeric, 30::numeric)
         + coalesce(r.initial_days, 0)::numeric * 10
       ) as score
     from reports r
