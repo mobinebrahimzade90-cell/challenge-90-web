@@ -1344,6 +1344,8 @@ initDate();initHyp();initRank();render();boot();
 #C90_ADMIN .admincircle.selected{outline:2px solid #fff;outline-offset:2px}
 #C90_ADMIN .adminitem{padding:10px 4px;border-bottom:1px solid #49343b}
 #C90_ADMIN .adminmuted{color:#a1908a;font-size:.85rem}
+#C90_ADMIN .admin-danger{background:#7d202b;color:#fff;border:1px solid #c94c58;border-radius:10px;padding:11px 14px;margin-top:12px;width:100%;font:inherit;font-weight:700}
+#C90_ADMIN .admin-danger:disabled{opacity:.55}
 #C90_ADMIN .admindate{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0}
 #C90_ADMIN .admindate input{flex:1;min-width:150px}
 .c90-accountbar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:8px}
@@ -1921,6 +1923,56 @@ async function showUser(u){
    finally{setStart.disabled=false}
   };
   dateWrap.append(startInput,setStart);tools.append(dateWrap);
+
+  const accountWrap=adminText("div","adminsection","");
+  accountWrap.append(adminText("div","adminmuted","مدیریت دسترسی حساب کاربر"));
+  const passwordLabel=adminText("label","adminmuted","رمز عبور جدید (حداقل ۸ نویسه)");
+  const passwordInput=document.createElement("input");
+  passwordInput.type="password";passwordInput.autocomplete="new-password";
+  passwordInput.minLength=8;passwordInput.maxLength=72;
+  passwordInput.placeholder="رمز جدید";
+  passwordLabel.append(passwordInput);
+  const resetPassword=adminText("button","","ثبت رمز جدید");
+  resetPassword.onclick=async()=>{
+   const password=passwordInput.value;
+   if(password.length<8||password.length>72){alert("رمز باید بین ۸ تا ۷۲ نویسه باشد.");return}
+   if(!confirm("رمز ورود حساب @"+u.username+" تغییر کند؟"))return;
+   resetPassword.disabled=true;
+   try{
+    const result=await fetch(URL+"/functions/v1/c90-admin-user",{
+     method:"POST",
+     headers:{apikey:KEY,Authorization:"Bearer "+session.access_token,"Content-Type":"application/json"},
+     body:JSON.stringify({action:"reset_password",user_id:u.user_id,password})
+    });
+    const data=await result.json().catch(()=>({}));
+    if(!result.ok)throw new Error(data.error||"تغییر رمز انجام نشد.");
+    passwordInput.value="";
+    alert("رمز عبور تغییر کرد.");
+   }catch(e){alert("خطا: "+e.message)}
+   finally{resetPassword.disabled=false}
+  };
+  const deleteUser=adminText("button","admin-danger","حذف کامل حساب کاربر");
+  deleteUser.onclick=async()=>{
+   if(u.role==="admin"){alert("حذف حساب مدیر از این بخش مجاز نیست.");return}
+   if(!confirm("حساب @"+u.username+" و تمام گزارش‌های مرتبط با آن برای همیشه حذف شوند؟ این عملیات قابل بازگشت نیست."))return;
+   if(prompt("برای تأیید حذف، نام کاربری را دقیقاً وارد کن:")!==u.username)return;
+   deleteUser.disabled=true;
+   try{
+    await request("/rest/v1/rpc/c90_admin_delete_user",{
+     method:"POST",headers:authHeaders(),
+     body:JSON.stringify({p_user_id:u.user_id})
+    });
+    allUsers=allUsers.filter(item=>item.user_id!==u.user_id);
+    viewedUser=null;viewedState=null;
+    $("c90AdminTitle").textContent="حساب حذف شد";
+    $("c90AdminViewer").textContent="حساب کاربر و گزارش‌های مرتبط با موفقیت حذف شدند.";
+    tools.style.display="none";
+    drawUsers();
+   }catch(e){alert("حذف انجام نشد: "+e.message)}
+   finally{deleteUser.disabled=false}
+  };
+  accountWrap.append(passwordLabel,resetPassword,deleteUser);
+  tools.append(accountWrap);
  }catch(e){$("c90AdminViewer").textContent="خطا: "+e.message}
 }
 let c90AuthBusy=false;
