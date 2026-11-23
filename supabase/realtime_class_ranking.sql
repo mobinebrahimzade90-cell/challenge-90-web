@@ -176,6 +176,7 @@ begin
       and p.major = v_major
       and p.class_name is not null
       and btrim(p.class_name) <> ''
+      and coalesce(p.role, 'participant') <> 'admin'
   ),
   report_data as (
     select c.user_id, c.class_name, c.initial_days, dr.payload
@@ -378,6 +379,7 @@ begin
     select p.user_id, p.username, p.display_name
     from public.profiles p
     where p.grade = v_grade and p.major = v_major
+      and coalesce(p.role, 'participant') <> 'admin'
   ),
   reports as (
     select c.user_id, c.username, c.display_name, dr.payload
@@ -568,6 +570,7 @@ begin
     select p.user_id, p.username, p.display_name
     from public.profiles p
     where p.grade = v_grade and p.major = v_major
+      and coalesce(p.role, 'participant') <> 'admin'
   ),
   reports as (
     select c.user_id, c.username, c.display_name, dr.payload
