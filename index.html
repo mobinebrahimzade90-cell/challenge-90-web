@@ -1156,12 +1156,8 @@ function startSess(){
  if(!Number.isFinite(entered)||entered<1||entered>180){toast("مدت جلسه باید بین ۱ تا ۱۸۰ دقیقه باشد.");return}
  d.min=entered;save();
  SE_START=Date.now();SE_END=SE_START+entered*60000;
- try{
-  if(window.NativeDevice&&typeof NativeDevice.scheduleHypnosisCompletion==="function"){
-   const nativeResult=NativeDevice.scheduleHypnosisCompletion(SE_END);
-   if(nativeResult&&typeof nativeResult.then==="function")nativeResult.catch(e=>console.warn("Native completion bridge unavailable; JavaScript timer remains active:",e));
-  }
- }catch(e){console.warn("Native completion bridge unavailable; JavaScript timer remains active:",e)}
+ // The session is timed locally; do not depend on a native/network bridge.
+
  const P=[["دم",4000,1],["نگه دار",2000,1],["بازدم",6000,.6]];
  let ph=-1;
  unlockHypAudio();
@@ -1182,12 +1178,6 @@ function endSess(ok){
  if(!SE&&!$("sess").classList.contains("on"))return;
  clearInterval(SE);SE=null;SE_END=0;SE_START=0;$("sess").classList.remove("on");
  releaseHypWakeLock();
- try{
-  if(window.NativeDevice&&typeof NativeDevice.cancelHypnosisCompletion==="function"){
-   const nativeResult=NativeDevice.cancelHypnosisCompletion();
-   if(nativeResult&&typeof nativeResult.then==="function")nativeResult.catch(e=>console.warn("Native completion cancellation failed:",e));
-  }
- }catch(e){console.warn("Native completion cancellation failed:",e)}
  if(ok){
   const d=hday(hcur);d.st="done";d.min=Math.max(1,Math.floor(Number(d.min)||5));save();hpaint();hrender();
   playHypCompletionCue();toast("جلسه کامل شد؛ امتیاز ثبت شد")
