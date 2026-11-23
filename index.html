@@ -1305,22 +1305,45 @@ initDate();initHyp();initRank();render();boot();
 #C90_INITIAL_DAYS button b{font-size:1.3rem}
 #C90_INITIAL_DAYS .initialmsg{min-height:25px;margin-top:10px;color:#ffda82;font-size:.8rem}
 @keyframes initialRise{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
-#C90_ADMIN{position:fixed;inset:0;z-index:900;background:#0b0809;color:#f3ebe6;display:none;overflow:auto;padding:18px;font-family:Vazirmatn,Tahoma,sans-serif}
-#C90_ADMIN .adminbox{max-width:760px;margin:20px auto;background:#181113;border:1px solid #49343b;border-radius:16px;padding:18px}
-#C90_ADMIN input{width:100%;padding:12px;background:#0f0b0c;color:white;border:1px solid #49343b;border-radius:9px;font:inherit}
-#C90_ADMIN .userrow{padding:12px;border-bottom:1px solid #49343b;cursor:pointer}
-#C90_ADMIN .adminnav{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:14px 0}
+#C90_ADMIN{position:fixed;inset:0;z-index:900;background:#0b0809;color:#f3ebe6;display:none;overflow:auto;overscroll-behavior:contain;padding:12px;font-family:Vazirmatn,Tahoma,sans-serif}
+#C90_ADMIN .adminbox{width:100%;max-width:760px;min-height:calc(100dvh - 24px);margin:0 auto;background:#181113;border:1px solid #49343b;border-radius:18px;padding:14px;box-shadow:0 18px 55px #0008}
+#C90_ADMIN input{width:100%;padding:12px;background:#0f0b0c;color:white;border:1px solid #49343b;border-radius:11px;font:inherit}
+#C90_ADMIN .adminhead{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+#C90_ADMIN .adminhead h2{flex:1;margin:0;color:#e8b339;font-size:1.12rem}
+#C90_ADMIN .userrow{display:flex;align-items:center;gap:10px;margin-top:8px;padding:13px;border:1px solid #49343b;border-radius:13px;background:linear-gradient(110deg,#21171b,#120e10);cursor:pointer;transition:.2s}
+#C90_ADMIN .userrow:after{content:"‹";margin-right:auto;color:#e8b339;font-size:1.5rem}
+#C90_ADMIN .adminnav{display:flex;gap:8px;margin:14px 0;padding:4px;border:1px solid #49343b;border-radius:13px;background:#0f0b0c}
+#C90_ADMIN .adminnav button{flex:1;min-width:0;padding:10px 6px;font-size:.83rem;border-radius:10px}
 #C90_ADMIN .adminnav button.active{background:#e8b339;color:#1a1204;border-color:#e8b339}
-#C90_ADMIN .adminsection{background:#0f0b0c;border:1px solid #49343b;border-radius:12px;padding:12px;margin:10px 0}
-#C90_ADMIN .admincircles{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:12px}
-#C90_ADMIN .admincircle{aspect-ratio:1;border-radius:50%;padding:0;background:#30242a;color:#fff}
-#C90_ADMIN .admincircle.clean{background:#e8b339;color:#1a1204}
-#C90_ADMIN .admincircle.fail{background:#d62839;color:#fff}
+#C90_ADMIN .adminsection{background:#0f0b0c;border:1px solid #49343b;border-radius:13px;padding:13px;margin:10px 0}
+#C90_ADMIN .admincircles{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:7px;margin-top:14px}
+#C90_ADMIN .admincircle{aspect-ratio:1;border-radius:50%;padding:0;background:#30242a;color:#fff;font-size:.8rem;min-width:0}
+#C90_ADMIN .admincircle.clean{background:#e8b339;color:#1a1204;border-color:#e8b339}
+#C90_ADMIN .admincircle.fail{background:#d62839;color:#fff;border-color:#d62839}
 #C90_ADMIN .admincircle.selected{outline:2px solid #fff;outline-offset:2px}
-#C90_ADMIN .adminitem{padding:10px 4px;border-bottom:1px solid #49343b}
-#C90_ADMIN .adminmuted{color:#a1908a;font-size:.85rem}
-#C90_ADMIN .admindate{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0}
-#C90_ADMIN .admindate input{flex:1;min-width:150px}
+#C90_ADMIN .adminitem{padding:11px 12px;margin-top:8px;border:1px solid #49343b;border-radius:11px;background:#171114;white-space:pre-wrap;overflow-wrap:anywhere}
+#C90_ADMIN .adminitem b{display:block;color:#e8b339;margin-bottom:4px}
+#C90_ADMIN .adminmuted{color:#a1908a;font-size:.82rem}
+#C90_ADMIN .admin-detail-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#C90_ADMIN .admin-detail-head h3{flex:1;margin:0}
+#C90_ADMIN .admin-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;color:#a1908a;font-size:.76rem}
+#C90_ADMIN .admin-legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-left:5px}
+#C90_ADMIN .admin-honey{display:flex;flex-direction:column;padding:4px 0 12px;container-type:inline-size}
+#C90_ADMIN .admin-honey-row{display:flex;gap:1.6cqw;direction:rtl}
+#C90_ADMIN .admin-honey-row.offset{padding-right:8.8cqw;margin-top:-3cqw}
+#C90_ADMIN .admin-hex-wrap{width:16cqw;aspect-ratio:1/1.1547;position:relative;flex:none}
+#C90_ADMIN .admin-hex{position:absolute;inset:0;width:100%;height:100%;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);border:0;border-radius:0;padding:0;background:#30242a;color:#eee;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15}
+#C90_ADMIN .admin-hex:before{content:"";position:absolute;inset:1.5px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:#171114}
+#C90_ADMIN .admin-hex>*{position:relative}
+#C90_ADMIN .admin-hex b{font-size:1rem;color:#f3ebe6}
+#C90_ADMIN .admin-hex small{font-size:.52rem;opacity:.65;direction:ltr}
+#C90_ADMIN .admin-hex.done{background:#e8b339}
+#C90_ADMIN .admin-hex.done:before{background:linear-gradient(160deg,#74551b,#29200e)}
+#C90_ADMIN .admin-hex.selected{filter:drop-shadow(0 0 6px #fff)}
+#C90_ADMIN .admin-record{margin-top:14px;padding:14px;border:1px solid #5b4147;border-radius:14px;background:linear-gradient(145deg,#21171b,#100d0f);animation:up .3s ease}
+#C90_ADMIN .admin-record h3{margin:0 0 10px;color:#e8b339}
+@media(max-width:420px){#C90_ADMIN .admincircles{gap:5px}#C90_ADMIN .admincircle{font-size:.7rem}#C90_ADMIN .adminbox{padding:11px}}
+
 .c90-accountbar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:8px}
 #c90RankTabs [data-rank].on{background:var(--gold);color:#1a1204}
 </style>
@@ -1398,13 +1421,13 @@ function hideLoader(){const e=document.getElementById("c90Loading");if(e)e.class
 </div>
 <div id="C90_ADMIN">
  <div class="adminbox">
-  <h2 style="color:#e8b339">پنل مدیریت شرکت‌کنندگان</h2>
-  <button id="c90AdminClose">بازگشت</button>
-  <input id="c90AdminSearch" placeholder="جست‌وجوی نام کاربری">
-  <div id="c90AdminUsers" style="margin-top:12px"></div>
-  <h3 id="c90AdminTitle"></h3>
-  <div id="c90DeviceTools" class="adminsection" style="display:none"></div>
-  <div id="c90AdminViewer" class="adminsection">ابتدا یک شرکت‌کننده را انتخاب کن.</div>
+  <div class="adminhead"><h2>پنل مدیریت</h2><button id="c90AdminClose">بستن</button></div>
+  <section id="c90AdminListView"><input id="c90AdminSearch" placeholder="جست‌وجوی نام کاربری"><div id="c90AdminUsers" style="margin-top:12px"></div></section>
+  <section id="c90AdminDetailView" style="display:none">
+   <div class="admin-detail-head"><button id="c90AdminBack">← فهرست کاربران</button><h3 id="c90AdminTitle"></h3></div>
+   <div id="c90DeviceTools" class="adminsection" style="display:none"></div>
+   <div id="c90AdminViewer" class="adminsection">در حال دریافت اطلاعات…</div>
+  </section>
  </div>
 </div>
 <script>
@@ -1713,11 +1736,11 @@ async function signup(){
  await enter(d);
 }
 async function openAdmin(){
- $("C90_ADMIN").style.display="block";$("c90AdminUsers").textContent="در حال دریافت فهرست…";
- try{
-  allUsers=await request("/rest/v1/profiles?select=user_id,username,display_name,role,grade,major,start_date&order=created_at.desc",{headers:authHeaders()});
-  drawUsers();
- }catch(e){$("c90AdminUsers").textContent="خطا: "+e.message}
+ $("C90_ADMIN").style.display="block";
+ $("c90AdminListView").style.display="block";$("c90AdminDetailView").style.display="none";
+ $("c90AdminUsers").textContent="در حال دریافت فهرست…";
+ try{allUsers=await request("/rest/v1/profiles?select=user_id,username,display_name,role,grade,major,start_date&order=created_at.desc",{headers:authHeaders()});drawUsers()}
+ catch(e){$("c90AdminUsers").textContent="خطا: "+e.message}
 }
 function drawUsers(){
  const q=$("c90AdminSearch").value.trim().toLowerCase();
@@ -1730,95 +1753,76 @@ function drawUsers(){
  });
  if(!list.length)$("c90AdminUsers").textContent="موردی پیدا نشد.";
 }
-let viewedUser=null,viewedState=null,viewDay=0,viewTab="status";
-function adminDateFor(state,i){
- if(!state||!state.start||!i)return "";
- const d=new Date(state.start+"T00:00:00Z");d.setUTCDate(d.getUTCDate()+i-1);
- return d.toISOString().slice(0,10);
+let viewedUser=null,viewedState=null,viewDay=1,viewTab="challenge",viewHypDay=1;
+function adminDateFor(state,i){if(!state||!state.start||!i)return "";const d=new Date(state.start+"T00:00:00Z");d.setUTCDate(d.getUTCDate()+i-1);return d.toISOString().slice(0,10)}
+function adminText(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;e.textContent=txt==null?"":String(txt);return e}
+function adminRecord(root,title,items){
+ const card=adminText("div","admin-record","");card.append(adminText("h3","",title));let count=0;
+ items.forEach(([label,value])=>{if(value===null||value===undefined||String(value).trim()==="")return;const item=adminText("div","adminitem","");item.append(adminText("b","",label),document.createTextNode(String(value)));card.append(item);count++});
+ if(!count)card.append(adminText("div","adminmuted","برای این بخش اطلاعاتی ثبت نشده است."));root.append(card)
 }
-function adminDayIndex(state,iso){
- if(!state||!state.start||!iso)return 0;
- return Math.round((Date.parse(iso+"T00:00:00Z")-Date.parse(state.start+"T00:00:00Z"))/86400000)+1;
+function adminChallengeDetail(root){
+ const d=(viewedState.days||{})[viewDay]||{},status=d.st==="clean"?"نزدم":d.st==="fail"?"زدم":"ثبت نشده";
+ const tasks=Array.isArray(d.tasks)?d.tasks.map(t=>((t.s==="y"||t.d)?"✓ انجام شد: ":"○ انجام نشد: ")+(t.t||"")).join("\n"):"";
+ adminRecord(root,"روز "+viewDay+" · "+adminDateFor(viewedState,viewDay),[
+ ["وضعیت",status],["دلیل‌های انتخابی",Array.isArray(d.tr)?d.tr.join("، "):""],["کارهای روزانه",tasks],
+ ["جمله مثبت",d.pos],["خاطره روز",d.how],["دعا",d.pray],["توضیح",d.why]
+ ]);
+ if(d.sec)root.append(adminText("div","adminmuted","صندوقچه اسرار در نمای مدیریتی نمایش داده نمی‌شود."))
 }
-function adminText(tag,cls,txt){
- const e=document.createElement(tag);if(cls)e.className=cls;e.textContent=txt;return e;
+function adminHypDate(i){
+ const hyp=viewedState&&viewedState.hyp;if(!hyp||!hyp.start)return "";
+ const p=hyp.start.split("-").map(Number);if(p.length!==3||!p.every(Number.isFinite))return "";
+ return new Date(Date.UTC(p[0],p[1]-1,p[2]+i-1)).toISOString().slice(0,10)
+}
+function adminHypDetail(root){
+ const hyp=viewedState.hyp||{},d=(hyp.days||{})[viewHypDay]||(hyp.byDate||{})[adminHypDate(viewHypDay)]||{};
+ adminRecord(root,"جلسه "+viewHypDay+" · "+adminHypDate(viewHypDay),[
+ ["وضعیت جلسه",d.st==="done"?"تکمیل‌شده":"تکمیل نشده"],["مدت جلسه",d.min?d.min+" دقیقه":""],
+ ["آرامش قبل از جلسه",d.b?d.b+" از ۵":""],["آرامش بعد از جلسه",d.a?d.a+" از ۵":""],
+ ["تلقین ثبت‌شده",d.sug],["تجربه جلسه",d.note]
+ ])
 }
 function renderAdminViewer(){
  const root=$("c90AdminViewer");root.innerHTML="";
- if(!viewedState){root.textContent="هنوز گزارشی ثبت نشده است.";return}
- const state=viewedState,days=state.days||{},keys=Object.keys(days).map(Number).filter(n=>n>=1&&n<=90).sort((a,b)=>a-b);
- const dateBox=adminText("div","admindate","");
- dateBox.append(adminText("label","adminmuted","نمایش اطلاعات یک تاریخ:"));
- const date=document.createElement("input");date.type="date";date.value=adminDateFor(state,viewDay||1);
- const go=adminText("button","","نمایش تاریخ");
- go.onclick=()=>{const idx=adminDayIndex(state,date.value);if(idx<1||idx>90){alert("این تاریخ خارج از بازه ۹۰ روزه است.");return}viewDay=idx;viewTab="day";renderAdminViewer()};
- dateBox.append(date,go);root.append(dateBox);
+ if(!viewedState){root.append(adminText("div","adminmuted","هنوز گزارشی برای این حساب ذخیره نشده است."));return}
  const nav=adminText("div","adminnav","");
- const tabs=[["status","وضعیت ۹۰ روز"],["positive","جمله‌های مثبت"],["tasks","کارهای روزانه"],["notes","نوشته‌های روزانه"],["day","اطلاعات تاریخ انتخابی"]];
- tabs.forEach(([id,label])=>{const b=adminText("button",viewTab===id?"active":"",label);b.onclick=()=>{viewTab=id;renderAdminViewer()};nav.append(b)});root.append(nav);
- if(viewTab==="status"){
-  root.append(adminText("div","adminmuted","طلایی: نزدم | قرمز: زدم | خاکستری: ثبت‌نشده. برای دیدن جزئیات یک روز، دایره‌اش را بزن."));
-  const grid=adminText("div","admincircles","");for(let i=1;i<=90;i++){
-   const d=days[i]||{},b=adminText("button","admincircle "+(d.st||""),String(i));
-   if(i===viewDay)b.classList.add("selected");
-   b.onclick=()=>{viewDay=i;viewTab="day";renderAdminViewer()};
-   grid.append(b);
-  }root.append(grid);
- }else if(viewTab==="positive"){
-  let count=0;keys.forEach(i=>{const d=days[i]||{};if((d.pos||"").trim()){count++;const item=adminText("div","adminitem","");item.append(adminText("b","","روز "+i+" | "+adminDateFor(state,i)),adminText("div","","“"+d.pos+"”"));root.append(item)}});
-  if(!count)root.append(adminText("div","adminmuted","هنوز جمله‌ی مثبتی ثبت نشده است."));
- }else if(viewTab==="tasks"){
-  let count=0;keys.forEach(i=>{const d=days[i]||{};if(d.tasks&&d.tasks.length){count++;const item=adminText("div","adminitem","");item.append(adminText("b","","روز "+i+" | "+adminDateFor(state,i)));d.tasks.forEach(t=>item.append(adminText("div","",((t.s==="y"||t.d)?"✓ انجام شد: ":"× انجام نشد/ثبت نشده: ")+(t.t||""))));root.append(item)}});
-  if(!count)root.append(adminText("div","adminmuted","کار روزانه‌ای ثبت نشده است."));
- }else if(viewTab==="notes"){
-  let count=0;keys.forEach(i=>{const d=days[i]||{},vals=[["خاطره",d.how],["دعا",d.pray],["دلیل",d.why]];const filled=vals.filter(x=>(x[1]||"").trim());if(filled.length){count++;const item=adminText("div","adminitem","");item.append(adminText("b","","روز "+i+" | "+adminDateFor(state,i)));filled.forEach(([k,v])=>item.append(adminText("div","",k+": "+v)));root.append(item)}});
-  if(!count)root.append(adminText("div","adminmuted","نوشته‌ای ثبت نشده است."));
+ [["challenge","چالش ۹۰ روزه"],["hypnosis","خودهیپنوتیزمی"]].forEach(([id,label])=>{const b=adminText("button",viewTab===id?"active":"",label);b.onclick=()=>{viewTab=id;renderAdminViewer()};nav.append(b)});
+ root.append(nav);
+ if(viewTab==="challenge"){
+  root.append(adminText("div","adminmuted","دایره هر روز را انتخاب کن تا اطلاعات ثبت‌شده همان روز نمایش داده شود."));
+  const grid=adminText("div","admincircles","");
+  for(let i=1;i<=90;i++){const d=(viewedState.days||{})[i]||{},b=adminText("button","admincircle "+(d.st||""),i);if(i===viewDay)b.classList.add("selected");b.onclick=()=>{viewDay=i;renderAdminViewer()};grid.append(b)}
+  root.append(grid);const legend=adminText("div","admin-legend","");
+  [["#e8b339","نزدم"],["#d62839","زدم"],["#30242a","ثبت نشده"]].forEach(([c,t])=>{const x=adminText("span","","");const dot=document.createElement("i");dot.style.background=c;x.append(dot,document.createTextNode(t));legend.append(x)});root.append(legend);
+  adminChallengeDetail(root)
  }else{
-  const i=viewDay||1,d=days[i]||{};
-  root.append(adminText("h3","","روز "+i+" | "+adminDateFor(state,i)));
-  root.append(adminText("div","", "وضعیت: "+(d.st==="clean"?"نزدم":d.st==="fail"?"زدم":"ثبت نشده")));
-  if(d.tr&&d.tr.length)root.append(adminText("div","","دلیل‌های انتخابی: "+d.tr.join("، ")));
-  [["جمله مثبت",d.pos],["کارهای روزانه",(d.tasks||[]).map(t=>(t.s==="y"||t.d?"✓ ":"○ ")+(t.t||"")).join("\n")],["خاطره",d.how],["دعا",d.pray],["توضیح",d.why]].forEach(([k,v])=>{if((v||"").trim())root.append(adminText("div","adminitem",k+": "+v))});
-  if(!d.st&&!d.pos&&!(d.tasks||[]).length&&!d.how&&!d.pray&&!d.why)root.append(adminText("div","adminmuted","برای این روز اطلاعاتی ثبت نشده است."));
+  const hyp=viewedState.hyp||{},days=hyp.days||{},byDate=hyp.byDate||{},grid=adminText("div","admin-honey","");
+  root.append(adminText("div","adminmuted","هر شش‌ضلعی را انتخاب کن تا اطلاعات همان جلسه را ببینی."));
+  for(let r=0;r<4;r++){const row=adminText("div","admin-honey-row"+(r%2?" offset":""),"");
+   for(let c=0;c<5;c++){const i=r*5+c+1,d=days[i]||byDate[adminHypDate(i)]||{},wrap=adminText("div","admin-hex-wrap",""),b=adminText("button","admin-hex"+(d.st==="done"?" done":"")+(i===viewHypDay?" selected":""),"");
+    b.append(adminText("b","",i),adminText("small","",adminHypDate(i).slice(5).replace("-","/")));b.onclick=()=>{viewHypDay=i;renderAdminViewer()};wrap.append(b);row.append(wrap)}
+   grid.append(row)
+  }
+  root.append(grid);adminHypDetail(root)
  }
 }
 async function showUser(u){
- viewedUser=u;viewedState=null;viewDay=1;viewTab="status";
- $("c90AdminTitle").textContent=(u.display_name||u.username)+" (@"+u.username+")";
- $("c90AdminViewer").textContent="در حال دریافت گزارش…";
+ viewedUser=u;viewedState=null;viewDay=1;viewHypDay=1;viewTab="challenge";
+ $("c90AdminListView").style.display="none";$("c90AdminDetailView").style.display="block";
+ $("c90AdminTitle").textContent=(u.display_name||u.username)+" (@"+u.username+")";$("c90AdminViewer").textContent="در حال دریافت اطلاعات…";
  try{
   const a=await request("/rest/v1/daily_reports?select=payload,updated_at&user_id=eq."+encodeURIComponent(u.user_id)+"&order=updated_at.desc&limit=1",{headers:authHeaders()});
   viewedState=a.length?a[0].payload:null;renderAdminViewer();
-  const tools=$("c90DeviceTools");tools.innerHTML="";tools.style.display="block";
-  tools.append(adminText("div","adminmuted","مدیریت اتصال دستگاه این حساب"));
+  const tools=$("c90DeviceTools");tools.innerHTML="";tools.style.display="block";tools.append(adminText("div","adminmuted","مدیریت اتصال دستگاه این حساب"));
   const release=adminText("button","","آزادسازی دستگاه برای ورود به گوشی جدید");
-  release.onclick=async()=>{
-   if(!confirm("اتصال دستگاه قبلی این حساب آزاد شود؟ اطلاعات و گزارش‌های کاربر حذف نمی‌شوند."))return;
-   release.disabled=true;release.textContent="در حال آزادسازی…";
-   try{
-    const done=await request("/rest/v1/rpc/admin_release_device",{method:"POST",headers:authHeaders(),body:JSON.stringify({p_user_id:u.user_id})});
-    alert(done===true?"اتصال دستگاه آزاد شد. کاربر اکنون می‌تواند با همان نام کاربری و رمز عبور روی گوشی جدید وارد شود.":"برای این حساب اتصال دستگاهی ثبت نشده بود.");
-   }catch(e){alert("آزادسازی انجام نشد: "+e.message)}
-   finally{release.disabled=false;release.textContent="آزادسازی دستگاه برای ورود به گوشی جدید"}
-  };
+  release.onclick=async()=>{if(!confirm("اتصال دستگاه قبلی این حساب آزاد شود؟"))return;release.disabled=true;try{const done=await request("/rest/v1/rpc/admin_release_device",{method:"POST",headers:authHeaders(),body:JSON.stringify({p_user_id:u.user_id})});alert(done===true?"اتصال دستگاه آزاد شد.":"برای این حساب اتصال دستگاهی ثبت نشده بود.")}catch(e){alert("آزادسازی انجام نشد: "+e.message)}finally{release.disabled=false}};
   tools.append(release);
-  const dateWrap=adminText("div","adminsection","");
-  dateWrap.append(adminText("div","adminmuted","تغییر تاریخ شروع چالش (فقط مدیر)"));
-  const startInput=document.createElement("input");startInput.type="date";startInput.value=u.start_date||((viewedState&&viewedState.start)||"");
-  const setStart=adminText("button","","ثبت تاریخ شروع جدید");
-  setStart.onclick=async()=>{
-   if(!startInput.value){alert("تاریخ معتبر انتخاب کن.");return}
-   if(!confirm("تاریخ شروع این کاربر تغییر کند؟ شماره روزهای چالش نیز بر اساس تاریخ جدید محاسبه می‌شود."))return;
-   setStart.disabled=true;
-   try{
-    await request("/rest/v1/profiles?user_id=eq."+encodeURIComponent(u.user_id),{method:"PATCH",headers:{...authHeaders(),Prefer:"return=representation"},body:JSON.stringify({start_date:startInput.value})});
-    if(viewedState){viewedState.start=startInput.value;await request("/rest/v1/daily_reports?user_id=eq."+encodeURIComponent(u.user_id)+"&report_date=eq.2000-01-01",{method:"PATCH",headers:{...authHeaders(),Prefer:"return=minimal"},body:JSON.stringify({payload:viewedState})})}
-    u.start_date=startInput.value;
-    alert("تاریخ شروع به‌روزرسانی شد.");
-   }catch(e){alert("تغییر تاریخ انجام نشد: "+e.message)}
-   finally{setStart.disabled=false}
-  };
-  dateWrap.append(startInput,setStart);tools.append(dateWrap);
+  const dateWrap=adminText("div","adminsection","");dateWrap.append(adminText("div","adminmuted","تغییر تاریخ شروع چالش (فقط مدیر)"));
+  const input=document.createElement("input");input.type="date";input.value=u.start_date||(viewedState&&viewedState.start)||"";
+  const set=adminText("button","","ثبت تاریخ شروع جدید");
+  set.onclick=async()=>{if(!input.value){alert("تاریخ معتبر انتخاب کن.");return}if(!confirm("تاریخ شروع این کاربر تغییر کند؟"))return;set.disabled=true;try{await request("/rest/v1/profiles?user_id=eq."+encodeURIComponent(u.user_id),{method:"PATCH",headers:{...authHeaders(),Prefer:"return=representation"},body:JSON.stringify({start_date:input.value})});if(viewedState){viewedState.start=input.value;await request("/rest/v1/daily_reports?user_id=eq."+encodeURIComponent(u.user_id)+"&report_date=eq.2000-01-01",{method:"PATCH",headers:{...authHeaders(),Prefer:"return=minimal"},body:JSON.stringify({payload:viewedState})})}u.start_date=input.value;alert("تاریخ شروع به‌روزرسانی شد.")}catch(e){alert("تغییر تاریخ انجام نشد: "+e.message)}finally{set.disabled=false}};
+  dateWrap.append(input,set);tools.append(dateWrap)
  }catch(e){$("c90AdminViewer").textContent="خطا: "+e.message}
 }
 let c90AuthBusy=false;
@@ -1845,6 +1849,7 @@ $("c90AuthBack").onclick=()=>{$("C90_AUTH_PANEL").style.display="none";msg("");}
 $("c90Signup").onclick=()=>runC90Auth(signup,"در حال ساخت حساب…");
 $("c90Password").onkeydown=e=>{if(e.key==="Enter")$("c90Login").click()};
 $("c90AdminClose").onclick=()=>$("C90_ADMIN").style.display="none";
+$("c90AdminBack").onclick=()=>{$("c90AdminDetailView").style.display="none";$("c90AdminListView").style.display="block";$("c90DeviceTools").style.display="none";viewedUser=null;viewedState=null};
 $("c90AdminSearch").oninput=drawUsers;
 (function showLoginForGuest(){
  const panel=$("C90_AUTH_PANEL");
