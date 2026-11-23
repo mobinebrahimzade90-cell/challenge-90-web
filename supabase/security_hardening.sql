@@ -596,4 +596,70 @@ $c90_individual$;
 revoke all on function public.individual_ranking() from public;
 grant execute on function public.individual_ranking() to authenticated;
 
+
+-- Administrator-only permanent account deletion.
+-- Delete the user's report/profile rows and Auth identity in one transaction.
+create or replace function public.c90_admin_delete_user(p_user_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = pg_catalog, public, auth, pg_temp
+set row_security = off
+as $c90_admin_delete$
+declare
+  v_actor_role text;
+  v_target_role text;
+  v_deleted_reports integer := 0;
+begin
+  if auth.uid() is null then
+    raise exception 'ابتدا وارد حساب مدیر شو';
+  end if;
+
+  select p.role into v_actor_role
+  from public.profiles p
+  where p.user_id = auth.uid()
+  for share;
+
+  if v_actor_role is distinct from 'admin' then
+    raise exception 'فقط مدیر مجاز به حذف حساب است';
+  end if;
+
+  if p_user_id is null or p_user_id = auth.uid() then
+    raise exception 'حذف حساب مدیرِ واردشده مجاز نیست';
+  end if;
+
+  select p.role into v_target_role
+  from public.profiles p
+  where p.user_id = p_user_id
+  for update;
+
+  if not found then
+    raise exception 'حساب کاربر پیدا نشد';
+  end if;
+
+  if v_target_role = 'admin' then
+    raise exception 'حذف حساب مدیر از این بخش مجاز نیست';
+  end if;
+
+  delete from public.daily_reports where user_id = p_user_id;
+  get diagnostics v_deleted_reports = row_count;
+
+  delete from public.profiles where user_id = p_user_id;
+
+  delete from auth.users where id = p_user_id;
+  if not found then
+    raise exception 'شناسه ورود کاربر پیدا نشد؛ عملیات لغو شد';
+  end if;
+
+  return jsonb_build_object(
+    'success', true,
+    'deleted_user_id', p_user_id,
+    'deleted_reports', v_deleted_reports
+  );
+end;
+$c90_admin_delete$;
+
+revoke all on function public.c90_admin_delete_user(uuid) from public, anon;
+grant execute on function public.c90_admin_delete_user(uuid) to authenticated;
+
 commit;
