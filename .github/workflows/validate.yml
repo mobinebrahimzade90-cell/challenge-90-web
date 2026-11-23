@@ -93,6 +93,11 @@ jobs:
           $legacy_signup$;
           create trigger legacy_profile_creator after insert on auth.users
           for each row execute function public.handle_new_auth_user();
+          -- Seed existing Auth identities before the hardened signup trigger is installed.
+          insert into auth.users(id,email,raw_user_meta_data)
+          values
+            ('00000000-0000-0000-0000-000000000001','admin90@example.com','{}'::jsonb),
+            ('00000000-0000-0000-0000-000000000002','user90@example.com','{}'::jsonb);
           create table public.profiles (
             user_id uuid primary key,
             username text unique,
@@ -239,10 +244,6 @@ jobs:
           end $c90_rls_admin$;
           select public.c90_admin_set_start_date('00000000-0000-0000-0000-000000000002',current_date);
           reset role;
-          insert into auth.users(id,email,raw_user_meta_data)
-          values
-            ('00000000-0000-0000-0000-000000000001','admin90@example.com','{}'::jsonb),
-            ('00000000-0000-0000-0000-000000000002','user90@example.com','{}'::jsonb);
           set role authenticated;
           select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',false);
           do $c90_admin_delete_test$
