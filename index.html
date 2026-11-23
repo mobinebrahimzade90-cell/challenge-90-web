@@ -1107,7 +1107,7 @@ function calcScore(){
   let hs=0,hm=0;
   if(S.hyp)for(let i=1;i<=HN;i++){const d=S.hyp.days[i];if(d&&d.st==="done"){hs++;hm+=d.min||0}}
   const main=clean*100-fail*150+ty*5-tn*2;
-  const hypnosis=hs*10+Math.floor(hm/5);
+  const hypnosis=hm;
   return{total:Math.max(0,main+hypnosis),main,hypnosis};
 }
 let rEdit=false;
