@@ -1144,10 +1144,13 @@ function renderRankProgress(){
  const pct=next?Math.max(0,Math.min(100,((points-current.min)/(next.min-current.min))*100)):100;
  const remaining=next?Math.max(0,next.min-points):0;
  box.dataset.tier=current.tone;
- box.innerHTML='<details class="rank-progress-details"><summary class="rank-progress-summary"><div class="rank-summary-title"><small>امتیاز و سطح بازیکن</small><h3>مسیر ارتقا</h3></div><div class="rank-summary-right"><div class="rank-points"><b>'+fa(points)+'</b><span>امتیاز</span></div><span class="rank-collapse-icon" aria-hidden="true"></span></div></summary>'+
+ box.innerHTML='<div class="rank-progress-details"><button type="button" class="rank-progress-summary" aria-expanded="false"><div class="rank-summary-title"><small>امتیاز و سطح بازیکن</small><h3>مسیر ارتقا</h3></div><div class="rank-summary-right"><div class="rank-points"><b>'+fa(points)+'</b><span>امتیاز</span></div><span class="rank-collapse-icon" aria-hidden="true"></span></div></button>'+
  '<div class="rank-progress-content"><div class="rank-progress-inner"><div class="rank-current"><div class="rank-current-medal">'+c90RankIcon(current,82)+'</div><div><small>رتبهٔ فعلی</small><strong>'+current.name+'</strong><span>'+(next?'تا رتبهٔ '+next.name+'، '+fa(remaining)+' امتیاز دیگر':'بالاترین رتبهٔ فعلی')+'</span></div></div>'+
  '<div class="rank-progress-track"><i style="width:'+pct+'%"></i></div><div class="rank-progress-caption"><span>'+fa(current.min)+'</span><span>'+(next?fa(next.min):"۹۰۰۰+")+'</span></div>'+
- '<div class="rank-level-grid">'+C90_RANK_LEVELS.map(level=>{const unlocked=points>=level.min;return '<div class="rank-level '+(unlocked?'unlocked':'')+' '+(current.key===level.key?'current':'')+'" data-tier="'+level.tone+'">'+c90RankIcon(level,54)+'<b>'+level.name+'</b><small>'+fa(level.min)+'+</small></div>'}).join('')+'</div></div></div></details>';
+ '<div class="rank-level-grid">'+C90_RANK_LEVELS.map(level=>{const unlocked=points>=level.min;return '<div class="rank-level '+(unlocked?'unlocked':'')+' '+(current.key===level.key?'current':'')+'" data-tier="'+level.tone+'">'+c90RankIcon(level,54)+'<b>'+level.name+'</b><small>'+fa(level.min)+'+</small></div>'}).join('')+'</div></div></div></div>';
+ const toggle=box.querySelector('.rank-progress-summary');
+ const panel=box.querySelector('.rank-progress-content');
+ if(toggle&&panel){toggle.addEventListener('click',()=>{const expanded=toggle.getAttribute('aria-expanded')==='true';toggle.setAttribute('aria-expanded',String(!expanded));box.querySelector('.rank-progress-details').classList.toggle('expanded',!expanded);panel.style.maxHeight=expanded?'0px':panel.scrollHeight+'px';});}
 }
 
 function renderClassRanking(){
@@ -2049,15 +2052,16 @@ $("c90AdminSearch").oninput=drawUsers;
 </html>
 <style>
 .rank-progress-details{width:100%}
-.rank-progress-summary{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;list-style:none;min-height:64px}
-.rank-progress-summary::-webkit-details-marker{display:none}
+.rank-progress-summary{display:flex;width:100%;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;min-height:64px;padding:0;border:0;background:transparent;color:inherit;text-align:right;font:inherit;border-radius:0}
+.rank-progress-summary:hover{border:0}
+.rank-progress-summary:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
 .rank-summary-title small{color:var(--mute);font-size:.72rem}
 .rank-summary-title h3{margin:3px 0 0;font-size:1.02rem}
 .rank-summary-right{display:flex;align-items:center;gap:12px}
 .rank-collapse-icon{position:relative;display:inline-block;flex:0 0 10px;width:10px;height:10px;margin-inline:5px;border-right:2px solid var(--gt);border-bottom:2px solid var(--gt);border-radius:1px;transform:rotate(45deg) translateY(-2px);transition:transform .32s cubic-bezier(.2,.8,.2,1),border-color .2s}
-.rank-progress-details[open] .rank-collapse-icon{transform:rotate(225deg) translateY(-2px);border-color:var(--accent,var(--gt))}
-.rank-progress-content{display:block;max-height:0;overflow:hidden;opacity:0;transform:translateY(-8px);padding-top:0;transition:max-height .55s cubic-bezier(.22,.8,.25,1),opacity .28s ease,transform .38s cubic-bezier(.22,.8,.25,1),padding-top .38s ease;will-change:max-height,opacity}
-.rank-progress-details[open]>.rank-progress-content{max-height:1200px;opacity:1;transform:translateY(0);padding-top:14px}
+.rank-progress-details.expanded .rank-collapse-icon{transform:rotate(225deg) translateY(-2px);border-color:var(--accent,var(--gt))}
+.rank-progress-content{display:block;max-height:0;overflow:hidden;opacity:0;transform:translateY(-10px);padding-top:0;transition:max-height .85s cubic-bezier(.22,.75,.2,1),opacity .45s ease,transform .55s cubic-bezier(.22,.75,.2,1),padding-top .55s ease;will-change:max-height,opacity,transform}
+.rank-progress-details.expanded>.rank-progress-content{opacity:1;transform:translateY(0);padding-top:14px}
 .rank-progress-inner{min-height:0;width:100%}
 .rank-progress-card{padding:12px 14px}
 @media(prefers-reduced-motion:reduce){.rank-progress-content,.rank-progress-inner,.rank-collapse-icon{transition:none!important;transform:none!important}}
