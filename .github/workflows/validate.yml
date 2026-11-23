@@ -258,11 +258,14 @@ jobs:
             if result->>'success' <> 'true' or (result->>'deleted_reports')::integer <> 1 then
               raise exception 'Admin deletion RPC returned unexpected result: %', result;
             end if;
+          end $c90_admin_delete_test$;
+          reset role;
+          do $c90_admin_delete_verify$
+          begin
             if exists(select 1 from public.profiles where user_id='00000000-0000-0000-0000-000000000002')
               or exists(select 1 from public.daily_reports where user_id='00000000-0000-0000-0000-000000000002')
               or exists(select 1 from auth.users where id='00000000-0000-0000-0000-000000000002') then
               raise exception 'Admin deletion left account or report data behind';
             end if;
-          end $c90_admin_delete_test$;
-          reset role;
+          end $c90_admin_delete_verify$;
           SQL
