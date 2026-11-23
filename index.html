@@ -1175,20 +1175,42 @@ function renderRankingContent(){
  const rows=classMode?window.CHALLENGE_CLASSES:window.CHALLENGE_INDIVIDUALS;
  if(!Array.isArray(rows)){note.textContent="برای مشاهده رتبه‌بندی آنلاین وارد حساب کاربری شو.";return}
  if(!rows.length){note.textContent="هنوز اطلاعاتی برای رتبه‌بندی ثبت نشده است.";return}
+
+ let visibleRows;
+ if(classMode){
+  visibleRows=rows.map((x,i)=>({item:x,rank:i+1}));
+ }else{
+  visibleRows=rows.slice(0,10).map((x,i)=>({item:x,rank:Number(x.rank_no)||i+1}));
+  const myIndex=rows.findIndex(x=>x.is_me);
+  if(myIndex>=10){
+   visibleRows.push({separator:true});
+   visibleRows.push({item:rows[myIndex],rank:Number(rows[myIndex].rank_no)||myIndex+1});
+  }
+ }
+
  const fragment=document.createDocumentFragment();
- rows.slice(0,100).forEach((x,i)=>{
+ visibleRows.forEach(entry=>{
+  if(entry.separator){
+   const separator=document.createElement("div");
+   separator.className="rk-separator";
+   separator.textContent="رتبهٔ شما";
+   fragment.appendChild(separator);
+   return;
+  }
+  const x=entry.item,rank=entry.rank;
   const row=document.createElement("div");
-  row.className="rk"+(i<3?" r"+(i+1):"")+(x.is_my_class||x.is_me?" me":"");
+  row.className="rk"+(rank<=3?" r"+rank:"")+(x.is_my_class||x.is_me?" me":"");
   const score=classMode?(+x.ranking_score||0):(+x.points||0);
-  row.innerHTML="<u>"+fa(i+1)+"</u><span class=\"rk-medal-slot\"></span><span class=\"rk-name\"></span><em>"+fa(score)+"</em>";
+  row.innerHTML="<u>"+fa(rank)+"</u><span class=\"rk-medal-slot\"></span><span class=\"rk-name\"></span><em>"+fa(score)+"</em>";
   row.querySelector(".rk-name").textContent=classMode?x.class_name:(x.display_name||x.username)+(x.is_me?" (تو)":"");
   const level=C90_RANK_LEVELS.reduce((best,item)=>score>=item.min?item:best,null)||{key:"starter",name:"تازه‌وارد",tone:"starter"};
   const badge=document.createElement("span");badge.className="rank-inline-badge";badge.title=level.name;badge.innerHTML=c90RankIcon(level,30);row.querySelector(".rk-medal-slot").appendChild(badge);
   fragment.appendChild(row);
  });
  list.appendChild(fragment);
- if(rows.length>100)note.textContent="۱۰۰ رتبهٔ اول نمایش داده می‌شود؛ "+note.textContent;
- note.textContent=classMode?"امتیاز کلاسی: ۵۰٪ میانگین، ۳۰٪ مشارکت، ۲۰٪ استمرار.":"رتبه‌بندی افراد هم‌پایه و هم‌رشته بر اساس امتیاز ثبت‌شده.";
+ note.textContent=classMode
+  ?"رتبه‌بندی سراسری همهٔ کلاس‌ها بر اساس امتیاز کلاسی."
+  :"۱۰ نفر اول رتبه‌بندی سراسری؛ اگر رتبهٔ شما بیشتر از ۱۰ باشد، رتبهٔ واقعی شما جداگانه نمایش داده می‌شود.";
  renderRankProgress();
 }
 function rrender(){
