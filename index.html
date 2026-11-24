@@ -1834,7 +1834,9 @@ function c90AdminDialog({mode="edit",title="",description="",username="",value="
 let activeAdminDetail=null;
 let c90AdminEditDismissBound=false;
 function closeAllAdminEditMenus(){
- document.querySelectorAll("#C90_ADMIN .user-edit-menu.open").forEach(menu=>{
+ // Menus are moved to document.body when opened, so they are no longer
+ // descendants of #C90_ADMIN. Search the whole document to close them.
+ document.querySelectorAll(".user-edit-menu.open").forEach(menu=>{
   menu.classList.remove("open");
   menu.style.display="none";
   if(menu._editWrap)menu._editWrap.classList.remove("open");
