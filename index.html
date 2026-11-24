@@ -1898,7 +1898,7 @@ function drawUsers(){
    const displayName=next.trim();if(displayName===String(x.display_name||""))return;
    displayNameEdit.disabled=true;
    try{
-    await request("/rest/v1/profiles?user_id=eq."+encodeURIComponent(x.user_id),{method:"PATCH",headers:{...authHeaders(),Prefer:"return=representation"},body:JSON.stringify({display_name:displayName})});
+    await request("/rest/v1/rpc/admin_set_user_display_name",{method:"POST",headers:authHeaders(),body:JSON.stringify({p_target_user_id:x.user_id,p_display_name:displayName})});
     x.display_name=displayName;drawUsers();$("c90AdminSearch").value=displayName;
     alert("نام نمایشی اصلی کاربر ذخیره شد.");
    }catch(err){alert("تغییر نام نمایشی انجام نشد: "+err.message)}
