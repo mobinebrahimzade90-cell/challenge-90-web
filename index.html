@@ -1772,6 +1772,51 @@ async function openAdmin(){
  try{allUsers=await request("/rest/v1/profiles?select=user_id,username,display_name,admin_alias,role,grade,major,start_date&order=created_at.desc",{headers:authHeaders()});drawUsers()}
  catch(e){$("c90AdminUsers").textContent="خطا: "+e.message}
 }
+
+function c90AdminDialog({mode="edit",title="",description="",username="",value=""}={}){
+ return new Promise(resolve=>{
+  const overlay=document.createElement("div");
+  overlay.className="c90-admin-dialog";
+  const deleting=mode==="delete";
+  overlay.innerHTML=`
+   <div class="c90-admin-dialog-card" role="dialog" aria-modal="true">
+    <div class="c90-admin-dialog-top"><span class="c90-admin-dialog-mark">${deleting?"!":"✦"}</span><button type="button" class="c90-admin-dialog-close" aria-label="بستن">×</button></div>
+    <div class="c90-admin-dialog-kicker">CHALLENGE 90 · ADMIN CONTROL</div>
+    <h3 class="c90-admin-dialog-title"></h3>
+    <p class="c90-admin-dialog-description"></p>
+    <div class="c90-admin-dialog-user"><small>حساب انتخاب‌شده</small><b></b></div>
+    <label class="c90-admin-dialog-label"></label>
+    <input class="c90-admin-dialog-input" type="text" autocomplete="off">
+    <div class="c90-admin-dialog-hint"></div>
+    <div class="c90-admin-dialog-error" aria-live="polite"></div>
+    <div class="c90-admin-dialog-actions"><button type="button" class="c90-admin-dialog-cancel">انصراف</button><button type="button" class="c90-admin-dialog-submit"></button></div>
+   </div>`;
+  const $q=sel=>overlay.querySelector(sel);
+  $q(".c90-admin-dialog-title").textContent=title;
+  $q(".c90-admin-dialog-description").textContent=description;
+  $q(".c90-admin-dialog-user b").textContent=deleting?"@"+username:username;
+  $q(".c90-admin-dialog-label").textContent=deleting?"برای تأیید نهایی، نام کاربری را دقیق وارد کن":"نام مستعار مدیریتی";
+  const input=$q(".c90-admin-dialog-input");
+  input.value=deleting?"":value;
+  input.placeholder=deleting?username:"نام دلخواه برای نمایش در پنل";
+  input.maxLength=deleting?30:40;
+  $q(".c90-admin-dialog-hint").textContent=deleting?"این عملیات دائمی است و اطلاعات حساب کاربر از سامانه حذف خواهد شد.": "این نام فقط در پنل مدیریت نمایش داده می‌شود و نام کاربری اصلی تغییر نمی‌کند. برای پاک‌کردن نام مستعار، کادر را خالی بگذار.";
+  const submit=$q(".c90-admin-dialog-submit");
+  submit.textContent=deleting?"حذف دائمی حساب":"ذخیره تغییرات";
+  submit.classList.toggle("danger",deleting);
+  const close=result=>{overlay.classList.remove("show");setTimeout(()=>overlay.remove(),180);document.removeEventListener("keydown",key);resolve(result)};
+  const key=e=>{if(e.key==="Escape")close(null);if(e.key==="Enter"&&!deleting)submit.click()};
+  $q(".c90-admin-dialog-close").onclick=()=>close(null);
+  $q(".c90-admin-dialog-cancel").onclick=()=>close(null);
+  overlay.addEventListener("click",e=>{if(e.target===overlay)close(null)});
+  document.addEventListener("keydown",key);
+  if(deleting){submit.disabled=true;input.addEventListener("input",()=>{submit.disabled=input.value.trim()!==username;$q(".c90-admin-dialog-error").textContent=""})}
+  submit.onclick=()=>{if(deleting&&input.value.trim()!==username){$q(".c90-admin-dialog-error").textContent="نام کاربری دقیقاً مطابقت ندارد.";return}if(!deleting&&input.value.trim().length>40){$q(".c90-admin-dialog-error").textContent="حداکثر طول نام ۴۰ نویسه است.";return}close(deleting?true:input.value.trim())};
+  document.body.append(overlay);
+  requestAnimationFrame(()=>{overlay.classList.add("show");input.focus();if(!deleting)input.select()});
+ });
+}
+
 let activeAdminDetail=null;
 function drawUsers(){
  const q=$("c90AdminSearch").value.trim().toLowerCase();
@@ -1794,10 +1839,9 @@ function drawUsers(){
   edit.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>';
   edit.onclick=async ev=>{
    ev.stopPropagation();
-   const next=prompt("نام دلخواه مدیریتی برای این کاربر را وارد کن.\\nخالی گذاشتن، نام مستعار را حذف می‌کند.",x.admin_alias||"");
+   const next=await c90AdminDialog({mode:"edit",title:"ویرایش نام نمایشی",description:"نامی تعیین کن که فقط در پنل مدیریت برای این حساب دیده شود.",username:"@"+x.username,value:x.admin_alias||""});
    if(next===null)return;
    const alias=next.trim();
-   if(alias.length>40){alert("حداکثر طول نام ۴۰ نویسه است.");return}
    edit.disabled=true;
    try{
     await request("/rest/v1/rpc/admin_set_user_alias",{method:"POST",headers:authHeaders(),body:JSON.stringify({p_target_user_id:x.user_id,p_alias:alias})});
@@ -1811,11 +1855,7 @@ function drawUsers(){
   del.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/><path d="M10 11v5M14 11v5"/></svg>';
   del.onclick=async ev=>{
    ev.stopPropagation();
-   if(!confirm("هشدار: حذف حساب کاربر «"+(x.admin_alias||x.display_name||x.username)+"» دائمی است و قابل بازگشت نیست.\\n\\nبرای ادامه، تأیید اول را بزن."))return;
-   const typed=prompt("برای تأیید نهایی، نام کاربری دقیق این حساب را وارد کن:\\n@"+x.username);
-   if(typed===null)return;
-   if(typed.trim()!==x.username){alert("نام کاربری مطابقت ندارد؛ حذف انجام نشد.");return}
-   const finalOk=confirm("تأیید نهایی: حساب @"+x.username+" برای همیشه حذف شود؟");
+   const finalOk=await c90AdminDialog({mode:"delete",title:"حذف حساب کاربری",description:"این اقدام برگشت‌پذیر نیست. برای فعال شدن دکمه حذف، نام کاربری دقیق حساب را وارد کن.",username:x.username});
    if(!finalOk)return;
    del.disabled=true;
    try{
@@ -2150,6 +2190,39 @@ $("c90AdminSearchFab").onclick=()=>{
 .rank-level b{white-space:normal!important;overflow-wrap:anywhere!important;line-height:1.4!important}
 .rank-level{min-width:0!important;overflow:visible!important}
 </style>
+
+<style>
+/* Admin action dialogs — matched to the Challenge 90 visual system */
+.c90-admin-dialog{position:fixed;inset:0;z-index:2600;display:grid;place-items:center;padding:18px;background:rgba(5,3,5,.78);backdrop-filter:blur(12px);opacity:0;transition:opacity .2s ease;font-family:Vazirmatn,Tahoma,sans-serif}
+.c90-admin-dialog.show{opacity:1}
+.c90-admin-dialog-card{position:relative;width:min(100%,430px);padding:22px 20px 18px;border:1px solid #76543e;border-radius:23px;background:radial-gradient(ellipse at 50% 0%,#49302b55,transparent 55%),linear-gradient(150deg,#291a20,#191117 58%,#100d13);box-shadow:0 28px 90px #000d,inset 0 1px #ffffff18;transform:translateY(16px) scale(.97);transition:transform .28s cubic-bezier(.2,.8,.2,1);overflow:hidden}
+.c90-admin-dialog.show .c90-admin-dialog-card{transform:translateY(0) scale(1)}
+.c90-admin-dialog-card:before{content:"";position:absolute;top:0;left:12%;right:12%;height:1px;background:linear-gradient(90deg,transparent,#e8b339,transparent)}
+.c90-admin-dialog-top{display:flex;align-items:center;justify-content:space-between}
+.c90-admin-dialog-mark{width:46px;height:46px;display:grid;place-items:center;border:1px solid #a17a3d;border-radius:15px;background:linear-gradient(145deg,#3a2826,#171116);color:#f2c75f;font-size:1.35rem;box-shadow:0 0 24px #e8b33920}
+.c90-admin-dialog:has(.danger) .c90-admin-dialog-mark{border-color:#8e303b;color:#ff7580;background:linear-gradient(145deg,#3c1c25,#171116);box-shadow:0 0 24px #d6283925}
+.c90-admin-dialog-close{width:36px;height:36px;padding:0;border:1px solid #59414a;border-radius:50%;background:#ffffff08;color:#cbb9b8;font-size:1.35rem;line-height:1}
+.c90-admin-dialog-kicker{margin-top:17px;color:#b89b72;font:600 .62rem Arial,sans-serif;letter-spacing:.18em;direction:ltr}
+.c90-admin-dialog-title{margin:5px 0 4px;color:#f2d17b;font-size:1.25rem}
+.c90-admin-dialog-description{margin:0 0 14px;color:#c1b0ac;font-size:.82rem;line-height:1.85}
+.c90-admin-dialog-user{display:flex;flex-direction:column;gap:2px;padding:10px 12px;margin-bottom:14px;border:1px solid #59414a;border-radius:13px;background:#0d0a0f88}
+.c90-admin-dialog-user small{color:#9e8984;font-size:.68rem}
+.c90-admin-dialog-user b{color:#f3e7d8;font-size:.9rem;overflow-wrap:anywhere}
+.c90-admin-dialog-label{display:block;margin-bottom:6px;color:#e8c66f;font-size:.8rem;font-weight:700}
+.c90-admin-dialog-input{width:100%;min-height:48px;padding:11px 13px;border:1px solid #59414a;border-radius:12px;background:#0d0a0f;color:#fff;font:inherit;outline:none}
+.c90-admin-dialog-input:focus{border-color:#e8b339;box-shadow:0 0 0 3px #e8b33920}
+.c90-admin-dialog-hint{margin-top:8px;color:#a99590;font-size:.72rem;line-height:1.8}
+.c90-admin-dialog-error{min-height:20px;margin-top:5px;color:#ff858c;font-size:.74rem}
+.c90-admin-dialog-actions{display:flex;gap:9px;margin-top:12px}
+.c90-admin-dialog-actions button{flex:1;min-height:47px;border-radius:12px;font-weight:800}
+.c90-admin-dialog-cancel{border-color:#59414a;background:#ffffff08;color:#cbb9b8}
+.c90-admin-dialog-submit{border:0;background:linear-gradient(135deg,#f4cb68,#d9982c);color:#211407;box-shadow:0 7px 18px #e8b33920}
+.c90-admin-dialog-submit.danger{background:linear-gradient(135deg,#ef6470,#a9182c);color:#fff;box-shadow:0 7px 18px #d6283930}
+.c90-admin-dialog-submit:disabled{opacity:.38;filter:grayscale(.5);box-shadow:none;cursor:not-allowed}
+@media(max-width:390px){.c90-admin-dialog{padding:13px}.c90-admin-dialog-card{padding:19px 16px 15px;border-radius:20px}}
+@media(prefers-reduced-motion:reduce){.c90-admin-dialog,.c90-admin-dialog-card{transition:none!important}}
+</style>
+
 </body>
 </html>
 <style>
