@@ -44,5 +44,27 @@ jobs:
       - uses: actions/upload-pages-artifact@v4
         with:
           path: .
+      - name: Wait until Pages artifact is visible to GitHub API
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const maxAttempts = 12;
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+              const { data } = await github.rest.actions.listWorkflowRunArtifacts({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: context.runId
+              });
+              const artifact = data.artifacts.find(item =>
+                item.name === "github-pages" && !item.expired
+              );
+              if (artifact) {
+                core.info(`Pages artifact is visible (ID: ${artifact.id}, attempt: ${attempt}).`);
+                return;
+              }
+              core.info(`Pages artifact not visible yet (attempt ${attempt}/${maxAttempts}). Waiting 5 seconds.`);
+              await new Promise(resolve => setTimeout(resolve, 5000));
+            }
+            throw new Error("GitHub did not expose the uploaded github-pages artifact after 60 seconds.");
       - id: deployment
         uses: actions/deploy-pages@v4
