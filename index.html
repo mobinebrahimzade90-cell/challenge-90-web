@@ -1509,7 +1509,7 @@ async function request(path,opts={}){
 async function getProfile(){
  let a;
  try{
-  a=await request("/rest/v1/profiles?select=user_id,username,display_name,public_id,role,grade,major,class_name,start_date,initial_days&user_id=eq."+encodeURIComponent(session.user.id),{headers:authHeaders()});
+  a=await request("/rest/v1/profiles?select=user_id,username,display_name,role,grade,major,class_name,start_date,initial_days&user_id=eq."+encodeURIComponent(session.user.id),{headers:authHeaders()});
  }catch(e){
   if(/column .* does not exist|schema cache|could not find .* column/i.test(String(e.message||e))){
    throw new Error("ساختار جدول پروفایل کامل نیست. فایل supabase/auth_repair.sql را در SQL Editor اجرا کن و دوباره وارد شو.");
@@ -1689,7 +1689,7 @@ async function enter(s){
  }catch(rtError){console.warn("Realtime subscription unavailable; using refresh fallback.",rtError)}
  clearInterval(window.C90_CLASS_RANK_TIMER);
  window.C90_CLASS_RANK_TIMER=setInterval(()=>{if(session&&navigator.onLine&&document.visibilityState==='visible')window.C90_LOAD_RANKING().catch(()=>{})},15000);
- $("c90AccountStatus").textContent="حساب: "+(profile.display_name||profile.username)+" | شناسه: "+(profile.public_id||"در انتظار تخصیص")+" | پایه: "+(profile.grade||"—")+" | رشته: "+(profile.major||"—");
+ $("c90AccountStatus").textContent="حساب: "+(profile.display_name||profile.username)+" | پایه: "+(profile.grade||"—")+" | رشته: "+(profile.major||"—");
  $("c90AccountOpen").textContent="مدیریت حساب";
  
  setLoaderStage(3,"در حال آماده‌سازی اطلاعات","بازیابی اطلاعات حساب",shownName,shownClass);
@@ -1783,7 +1783,7 @@ async function signup(){
 async function openAdmin(){
  if(!(history.state&&history.state.c90Admin&&history.state.screen==="users"))history.pushState({c90Admin:true,screen:"users"},"","#admin");
  $("C90_ADMIN").style.display="block";$("c90AdminUsers").textContent="در حال دریافت فهرست…";
- try{allUsers=await request("/rest/v1/profiles?select=user_id,username,display_name,public_id,admin_alias,role,grade,major,start_date&order=created_at.desc",{headers:authHeaders()});drawUsers()}
+ try{allUsers=await request("/rest/v1/profiles?select=user_id,username,display_name,admin_alias,role,grade,major,start_date&order=created_at.desc",{headers:authHeaders()});drawUsers()}
  catch(e){$("c90AdminUsers").textContent="خطا: "+e.message}
 }
 
@@ -1834,7 +1834,7 @@ function c90AdminDialog({mode="edit",title="",description="",username="",value="
 let activeAdminDetail=null;
 function drawUsers(){
  const q=$("c90AdminSearch").value.trim().toLowerCase();
- const list=allUsers.filter(x=>[x.username,x.display_name,x.admin_alias,x.public_id].some(v=>(v||"").toLowerCase().includes(q)));
+ const list=allUsers.filter(x=>[x.username,x.display_name,x.admin_alias].some(v=>(v||"").toLowerCase().includes(q)));
  $("c90AdminUsers").innerHTML="";activeAdminDetail=null;
  list.forEach(x=>{
   const entry=document.createElement("div");entry.className="user-entry";
@@ -1842,10 +1842,10 @@ function drawUsers(){
   const label=document.createElement("div");label.className="user-label";
   label.textContent=x.admin_alias||x.display_name||x.username;
   if(x.admin_alias){
-   const sub=document.createElement("span");sub.className="user-alias";sub.textContent=(x.display_name||x.username)+" · @"+x.username+" · شناسه: "+(x.public_id||"—");
+   const sub=document.createElement("span");sub.className="user-alias";sub.textContent=(x.display_name||x.username)+" · @"+x.username;
    label.append(sub);
   }else{
-   const sub=document.createElement("span");sub.className="user-alias";sub.textContent="@"+x.username+" · شناسه: "+(x.public_id||"—");
+   const sub=document.createElement("span");sub.className="user-alias";sub.textContent="@"+x.username;
    label.append(sub);
   }
   const actions=document.createElement("div");actions.className="user-actions";
