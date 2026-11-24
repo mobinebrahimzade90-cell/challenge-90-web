@@ -2092,12 +2092,18 @@ window.addEventListener("popstate",e=>{
  }
 });
 $("c90AdminSearch").oninput=drawUsers;
-$("c90AdminSearchFab").onclick=()=>{
+$("c90AdminSearchFab").onclick=ev=>{
+ ev.preventDefault();ev.stopPropagation();
  const pop=$("c90AdminSearchPop");const opening=!pop.classList.contains("open");
  pop.classList.toggle("open",opening);
  if(opening)setTimeout(()=> $("c90AdminSearch").focus(),40);
- else{$("c90AdminSearch").value="";drawUsers()}
 };
+document.addEventListener("click",ev=>{
+ const pop=$("c90AdminSearchPop"),fab=$("c90AdminSearchFab");
+ if(!pop||!fab||!pop.classList.contains("open"))return;
+ if(pop.contains(ev.target)||fab.contains(ev.target))return;
+ pop.classList.remove("open");
+});
 (function showLoginForGuest(){
  const panel=$("C90_AUTH_PANEL");
  const intro=$("intro"),splashScreen=$("splash"),setupScreen=$("setup"),loader=$("c90Loading");
