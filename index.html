@@ -1321,8 +1321,8 @@ initDate();initHyp();initRank();render();boot();
 #C90_ADMIN .user-label{flex:1;min-width:0;overflow-wrap:anywhere;font-weight:600;line-height:1.7}
 #C90_ADMIN .user-alias{display:block;color:#e8b339;font-size:.78rem;font-weight:500}
 #C90_ADMIN .user-edit-wrap{position:relative;flex:0 0 36px;z-index:5}
-#C90_ADMIN .user-edit-menu{position:absolute;right:50%;bottom:calc(100% + 9px);transform:translate(50%,7px) scale(.94);transform-origin:bottom center;display:flex;gap:7px;padding:7px;border:1px solid #715b3b;border-radius:14px;background:#191316;box-shadow:0 10px 28px #000b;opacity:0;visibility:hidden;pointer-events:none;transition:.2s ease;white-space:nowrap}
-#C90_ADMIN .user-edit-wrap:hover .user-edit-menu,#C90_ADMIN .user-edit-wrap:focus-within .user-edit-menu,#C90_ADMIN .user-edit-wrap.open .user-edit-menu{opacity:1;visibility:visible;pointer-events:auto;transform:translate(50%,0) scale(1)}
+#C90_ADMIN .user-edit-menu{position:fixed;z-index:2147483000;display:none;gap:7px;padding:8px;border:1px solid #715b3b;border-radius:14px;background:#191316;box-shadow:0 12px 34px #000e;white-space:nowrap}
+#C90_ADMIN .user-edit-menu.open{display:flex}
 #C90_ADMIN .user-edit-menu button{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;padding:0;border:1px solid}
 #C90_ADMIN .user-edit-menu svg{width:17px;height:17px}
 #C90_ADMIN .user-edit-alias{background:#252525;color:#eee;border-color:#555!important}
@@ -1854,8 +1854,16 @@ function drawUsers(){
   const editMenu=document.createElement("div");editMenu.className="user-edit-menu";
   const aliasEdit=document.createElement("button");aliasEdit.type="button";aliasEdit.className="user-edit-alias";aliasEdit.title="تغییر نام نمایشی مدیریتی";aliasEdit.setAttribute("aria-label","تغییر نام نمایشی مدیریتی");aliasEdit.innerHTML=edit.innerHTML;
   const usernameEdit=document.createElement("button");usernameEdit.type="button";usernameEdit.className="user-edit-username";usernameEdit.title="تغییر واقعی نام کاربری";usernameEdit.setAttribute("aria-label","تغییر واقعی نام کاربری");usernameEdit.innerHTML=edit.innerHTML;
-  edit.onclick=ev=>{ev.stopPropagation();editWrap.classList.toggle("open")};
-  const closeEditMenu=()=>editWrap.classList.remove("open");
+  edit.onclick=ev=>{ev.stopPropagation();if(editMenu.classList.contains("open")){closeEditMenu();return;}document.querySelectorAll("#C90_ADMIN .user-edit-menu.open").forEach(m=>{m.classList.remove("open");m.style.display="none"});editWrap.classList.add("open");document.body.appendChild(editMenu);positionEditMenu();editMenu.classList.add("open");};
+  const closeEditMenu=()=>{editWrap.classList.remove("open");editMenu.classList.remove("open");editMenu.style.display="none";};
+  const positionEditMenu=()=>{
+   const r=edit.getBoundingClientRect();
+   editMenu.style.display="flex";
+   const w=editMenu.offsetWidth,h=editMenu.offsetHeight;
+   const left=Math.max(8,Math.min(window.innerWidth-w-8,r.left+(r.width-w)/2));
+   const top=r.top>=h+12?r.top-h-8:Math.min(window.innerHeight-h-8,r.bottom+8);
+   editMenu.style.left=left+"px";editMenu.style.top=Math.max(8,top)+"px";
+  };
   aliasEdit.onclick=async ev=>{
    ev.stopPropagation();closeEditMenu();
    const next=await c90AdminDialog({mode:"edit",title:"ویرایش نام نمایشی",description:"نامی تعیین کن که فقط در پنل مدیریت برای این حساب دیده شود.",username:"@"+x.username,value:x.admin_alias||""});
@@ -1881,7 +1889,7 @@ function drawUsers(){
    }catch(err){alert("تغییر نام کاربری انجام نشد: "+err.message)}
    finally{usernameEdit.disabled=false}
   };
-  editMenu.append(aliasEdit,usernameEdit);editWrap.append(edit,editMenu);
+  editMenu.append(aliasEdit,usernameEdit);editWrap.append(edit);
   const del=document.createElement("button");del.type="button";del.className="user-delete";del.title="حذف حساب کاربری";del.setAttribute("aria-label","حذف حساب کاربری");
   del.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/><path d="M10 11v5M14 11v5"/></svg>';
   del.onclick=async ev=>{
