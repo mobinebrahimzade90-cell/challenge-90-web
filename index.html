@@ -1321,12 +1321,12 @@ initDate();initHyp();initRank();render();boot();
 #C90_ADMIN .user-label{flex:1;min-width:0;overflow-wrap:anywhere;font-weight:600;line-height:1.7}
 #C90_ADMIN .user-alias{display:block;color:#e8b339;font-size:.78rem;font-weight:500}
 #C90_ADMIN .user-edit-wrap{position:relative;flex:0 0 36px;z-index:5}
-#C90_ADMIN .user-edit-menu{position:fixed;z-index:2147483000;display:none;gap:7px;padding:8px;border:1px solid #715b3b;border-radius:14px;background:#191316;box-shadow:0 12px 34px #000e;white-space:nowrap}
-#C90_ADMIN .user-edit-menu.open{display:flex}
-#C90_ADMIN .user-edit-menu button{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;padding:0;border:1px solid}
-#C90_ADMIN .user-edit-menu svg{width:17px;height:17px}
-#C90_ADMIN .user-edit-alias{background:#252525;color:#eee;border-color:#555!important}
-#C90_ADMIN .user-edit-username{background:#501522;color:#ffb8c2;border-color:#a3475a!important}
+.user-edit-menu{position:fixed;z-index:2147483000;display:none;gap:7px;padding:8px;border:1px solid #715b3b;border-radius:14px;background:#191316;box-shadow:0 12px 34px #000e;white-space:nowrap}
+.user-edit-menu.open{display:flex}
+.user-edit-menu button{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;padding:0;border:1px solid}
+.user-edit-menu svg{width:17px;height:17px}
+.user-edit-alias{background:#252525;color:#eee;border-color:#555!important}
+.user-edit-username{background:#501522;color:#ffb8c2;border-color:#a3475a!important}
 #C90_ADMIN .user-edit{flex:0 0 36px;width:36px;height:36px;border-radius:11px;border:1px solid #6c5630;background:#3b2d17;color:#f5c85e;display:grid;place-items:center;padding:0;z-index:2}
 #C90_ADMIN .user-edit svg{width:17px;height:17px}
 #C90_ADMIN .admin-search-fab{position:fixed;z-index:930;right:22px;top:22px;bottom:auto;width:54px;height:54px;border-radius:15px;border:1px solid #e8b339;background:linear-gradient(145deg,#f3c75e,#b77d19);color:#211707;box-shadow:0 8px 28px #0009;display:grid;place-items:center;padding:0}
@@ -1854,7 +1854,7 @@ function drawUsers(){
   const editMenu=document.createElement("div");editMenu.className="user-edit-menu";
   const aliasEdit=document.createElement("button");aliasEdit.type="button";aliasEdit.className="user-edit-alias";aliasEdit.title="تغییر نام نمایشی مدیریتی";aliasEdit.setAttribute("aria-label","تغییر نام نمایشی مدیریتی");aliasEdit.innerHTML=edit.innerHTML;
   const usernameEdit=document.createElement("button");usernameEdit.type="button";usernameEdit.className="user-edit-username";usernameEdit.title="تغییر واقعی نام کاربری";usernameEdit.setAttribute("aria-label","تغییر واقعی نام کاربری");usernameEdit.innerHTML=edit.innerHTML;
-  edit.onclick=ev=>{ev.stopPropagation();if(editMenu.classList.contains("open")){closeEditMenu();return;}document.querySelectorAll("#C90_ADMIN .user-edit-menu.open").forEach(m=>{m.classList.remove("open");m.style.display="none"});editWrap.classList.add("open");document.body.appendChild(editMenu);positionEditMenu();editMenu.classList.add("open");};
+  edit.onclick=ev=>{ev.preventDefault();ev.stopPropagation();if(editMenu.classList.contains("open")){closeEditMenu();return;}document.querySelectorAll("#C90_ADMIN .user-edit-menu.open").forEach(m=>{m.classList.remove("open");m.style.display="none"});editWrap.classList.add("open");document.body.appendChild(editMenu);positionEditMenu();editMenu.classList.add("open");};
   const closeEditMenu=()=>{editWrap.classList.remove("open");editMenu.classList.remove("open");editMenu.style.display="none";};
   const positionEditMenu=()=>{
    const r=edit.getBoundingClientRect();
