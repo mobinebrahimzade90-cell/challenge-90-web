@@ -1342,6 +1342,11 @@ initDate();initHyp();initRank();render();boot();
 #C90_ADMIN .admin-search-note{font-size:.72rem;color:#aa9991;margin:7px 3px 0}
 
 #C90_ADMIN .user-entry{margin-top:8px;border:1px solid #49343b;border-radius:13px;overflow:hidden;background:#120e10}
+/* Keep the edit popover above neighboring user cards */
+#C90_ADMIN .user-entry:has(.user-edit-wrap.open){overflow:visible;position:relative;z-index:30}
+#C90_ADMIN .user-edit-wrap{z-index:40}
+#C90_ADMIN .user-edit-menu{z-index:100}
+#C90_ADMIN .user-entry:has(.user-edit-wrap.open) .userrow{border-radius:13px 13px 0 0}
 #C90_ADMIN .userrow{display:flex;align-items:center;gap:10px;padding:13px;border:0;background:linear-gradient(110deg,#21171b,#120e10);cursor:pointer;transition:.2s}
 #C90_ADMIN .userrow:after{content:"⌄";margin-right:auto;color:#e8b339;font-size:1.2rem;transition:transform .25s}
 #C90_ADMIN .user-entry.open>.userrow:after{transform:rotate(180deg)}
