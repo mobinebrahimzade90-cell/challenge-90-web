@@ -1320,6 +1320,13 @@ initDate();initHyp();initRank();render();boot();
 #C90_ADMIN .userrow{min-height:58px;gap:9px;padding:12px 13px}
 #C90_ADMIN .user-label{flex:1;min-width:0;overflow-wrap:anywhere;font-weight:600;line-height:1.7}
 #C90_ADMIN .user-alias{display:block;color:#e8b339;font-size:.78rem;font-weight:500}
+#C90_ADMIN .user-edit-wrap{position:relative;flex:0 0 36px;z-index:5}
+#C90_ADMIN .user-edit-menu{position:absolute;right:50%;bottom:calc(100% + 9px);transform:translate(50%,7px) scale(.94);transform-origin:bottom center;display:flex;gap:7px;padding:7px;border:1px solid #715b3b;border-radius:14px;background:#191316;box-shadow:0 10px 28px #000b;opacity:0;visibility:hidden;pointer-events:none;transition:.2s ease;white-space:nowrap}
+#C90_ADMIN .user-edit-wrap:hover .user-edit-menu,#C90_ADMIN .user-edit-wrap:focus-within .user-edit-menu,#C90_ADMIN .user-edit-wrap.open .user-edit-menu{opacity:1;visibility:visible;pointer-events:auto;transform:translate(50%,0) scale(1)}
+#C90_ADMIN .user-edit-menu button{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;padding:0;border:1px solid}
+#C90_ADMIN .user-edit-menu svg{width:17px;height:17px}
+#C90_ADMIN .user-edit-alias{background:#252525;color:#eee;border-color:#555!important}
+#C90_ADMIN .user-edit-username{background:#501522;color:#ffb8c2;border-color:#a3475a!important}
 #C90_ADMIN .user-edit{flex:0 0 36px;width:36px;height:36px;border-radius:11px;border:1px solid #6c5630;background:#3b2d17;color:#f5c85e;display:grid;place-items:center;padding:0;z-index:2}
 #C90_ADMIN .user-edit svg{width:17px;height:17px}
 #C90_ADMIN .admin-search-fab{position:fixed;z-index:930;right:22px;top:22px;bottom:auto;width:54px;height:54px;border-radius:15px;border:1px solid #e8b339;background:linear-gradient(145deg,#f3c75e,#b77d19);color:#211707;box-shadow:0 8px 28px #0009;display:grid;place-items:center;padding:0}
@@ -1778,7 +1785,7 @@ function c90AdminDialog({mode="edit",title="",description="",username="",value="
  return new Promise(resolve=>{
   const overlay=document.createElement("div");
   overlay.className="c90-admin-dialog";
-  const deleting=mode==="delete";
+  const deleting=mode==="delete",changingUsername=mode==="username";
   overlay.innerHTML=`
    <div class="c90-admin-dialog-card" role="dialog" aria-modal="true">
     <div class="c90-admin-dialog-top"><span class="c90-admin-dialog-mark">${deleting?"!":"✦"}</span><button type="button" class="c90-admin-dialog-close" aria-label="بستن">×</button></div>
@@ -1796,14 +1803,14 @@ function c90AdminDialog({mode="edit",title="",description="",username="",value="
   $q(".c90-admin-dialog-title").textContent=title;
   $q(".c90-admin-dialog-description").textContent=description;
   $q(".c90-admin-dialog-user b").textContent=deleting?"@"+username:username;
-  $q(".c90-admin-dialog-label").textContent=deleting?"برای تأیید نهایی، نام کاربری را دقیق وارد کن":"نام مستعار مدیریتی";
+  $q(".c90-admin-dialog-label").textContent=deleting?"برای تأیید نهایی، نام کاربری را دقیق وارد کن":changingUsername?"نام کاربری جدید":"نام مستعار مدیریتی";
   const input=$q(".c90-admin-dialog-input");
   input.value=deleting?"":value;
-  input.placeholder=deleting?username:"نام دلخواه برای نمایش در پنل";
-  input.maxLength=deleting?30:40;
-  $q(".c90-admin-dialog-hint").textContent=deleting?"این عملیات دائمی است و اطلاعات حساب کاربر از سامانه حذف خواهد شد.": "این نام فقط در پنل مدیریت نمایش داده می‌شود و نام کاربری اصلی تغییر نمی‌کند. برای پاک‌کردن نام مستعار، کادر را خالی بگذار.";
+  input.placeholder=deleting?username:changingUsername?"username جدید":"نام دلخواه برای نمایش در پنل";
+  input.maxLength=deleting||changingUsername?30:40;
+  $q(".c90-admin-dialog-hint").textContent=deleting?"این عملیات دائمی است و اطلاعات حساب کاربر از سامانه حذف خواهد شد.":changingUsername?"نام کاربری ورود این حساب نیز تغییر می‌کند. نام قبلی دیگر برای ورود معتبر نخواهد بود. فقط حروف انگلیسی کوچک، عدد، نقطه، خط تیره و زیرخط مجاز است.":"این نام فقط در پنل مدیریت نمایش داده می‌شود و نام کاربری اصلی تغییر نمی‌کند. برای پاک‌کردن نام مستعار، کادر را خالی بگذار.";
   const submit=$q(".c90-admin-dialog-submit");
-  submit.textContent=deleting?"حذف دائمی حساب":"ذخیره تغییرات";
+  submit.textContent=deleting?"حذف دائمی حساب":changingUsername?"تغییر واقعی نام کاربری":"ذخیره تغییرات";
   submit.classList.toggle("danger",deleting);
   const close=result=>{overlay.classList.remove("show");setTimeout(()=>overlay.remove(),180);document.removeEventListener("keydown",key);resolve(result)};
   const key=e=>{if(e.key==="Escape")close(null);if(e.key==="Enter"&&!deleting)submit.click()};
@@ -1812,7 +1819,7 @@ function c90AdminDialog({mode="edit",title="",description="",username="",value="
   overlay.addEventListener("click",e=>{if(e.target===overlay)close(null)});
   document.addEventListener("keydown",key);
   if(deleting){submit.disabled=true;input.addEventListener("input",()=>{submit.disabled=input.value.trim()!==username;$q(".c90-admin-dialog-error").textContent=""})}
-  submit.onclick=()=>{if(deleting&&input.value.trim()!==username){$q(".c90-admin-dialog-error").textContent="نام کاربری دقیقاً مطابقت ندارد.";return}if(!deleting&&input.value.trim().length>40){$q(".c90-admin-dialog-error").textContent="حداکثر طول نام ۴۰ نویسه است.";return}close(deleting?true:input.value.trim())};
+  submit.onclick=()=>{if(deleting&&input.value.trim()!==username){$q(".c90-admin-dialog-error").textContent="نام کاربری دقیقاً مطابقت ندارد.";return}if(changingUsername&&!/^[a-z0-9][a-z0-9._-]{2,29}$/.test(input.value.trim().toLowerCase())){$q(".c90-admin-dialog-error").textContent="نام کاربری باید ۳ تا ۳۰ نویسه و فقط شامل حروف انگلیسی کوچک، عدد، نقطه، خط تیره یا زیرخط باشد.";return}if(!deleting&&!changingUsername&&input.value.trim().length>40){$q(".c90-admin-dialog-error").textContent="حداکثر طول نام ۴۰ نویسه است.";return}close(deleting?true:input.value.trim())};
   document.body.append(overlay);
   requestAnimationFrame(()=>{overlay.classList.add("show");input.focus();if(!deleting)input.select()});
  });
@@ -1836,22 +1843,40 @@ function drawUsers(){
    label.append(sub);
   }
   const actions=document.createElement("div");actions.className="user-actions";
-  const edit=document.createElement("button");edit.type="button";edit.className="user-edit";edit.title="تغییر نام نمایشی مدیریتی";edit.setAttribute("aria-label","تغییر نام مستعار");
+  const editWrap=document.createElement("div");editWrap.className="user-edit-wrap";
+  const edit=document.createElement("button");edit.type="button";edit.className="user-edit";edit.title="گزینه‌های ویرایش";edit.setAttribute("aria-label","گزینه‌های ویرایش");
   edit.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>';
-  edit.onclick=async ev=>{
-   ev.stopPropagation();
+  const editMenu=document.createElement("div");editMenu.className="user-edit-menu";
+  const aliasEdit=document.createElement("button");aliasEdit.type="button";aliasEdit.className="user-edit-alias";aliasEdit.title="تغییر نام نمایشی مدیریتی";aliasEdit.setAttribute("aria-label","تغییر نام نمایشی مدیریتی");aliasEdit.innerHTML=edit.innerHTML;
+  const usernameEdit=document.createElement("button");usernameEdit.type="button";usernameEdit.className="user-edit-username";usernameEdit.title="تغییر واقعی نام کاربری";usernameEdit.setAttribute("aria-label","تغییر واقعی نام کاربری");usernameEdit.innerHTML=edit.innerHTML;
+  edit.onclick=ev=>{ev.stopPropagation();editWrap.classList.toggle("open")};
+  const closeEditMenu=()=>editWrap.classList.remove("open");
+  aliasEdit.onclick=async ev=>{
+   ev.stopPropagation();closeEditMenu();
    const next=await c90AdminDialog({mode:"edit",title:"ویرایش نام نمایشی",description:"نامی تعیین کن که فقط در پنل مدیریت برای این حساب دیده شود.",username:"@"+x.username,value:x.admin_alias||""});
    if(next===null)return;
-   const alias=next.trim();
-   edit.disabled=true;
+   const alias=next.trim();aliasEdit.disabled=true;
    try{
     await request("/rest/v1/rpc/admin_set_user_alias",{method:"POST",headers:authHeaders(),body:JSON.stringify({p_target_user_id:x.user_id,p_alias:alias})});
-    x.admin_alias=alias||null;drawUsers();
-    if(alias)$("c90AdminSearch").value=alias;
+    x.admin_alias=alias||null;drawUsers();if(alias)$("c90AdminSearch").value=alias;
     alert(alias?"نام مدیریتی ذخیره شد.":"نام مستعار حذف شد؛ نام اصلی نمایش داده می‌شود.");
    }catch(err){alert("ذخیره نام انجام نشد: "+err.message)}
-   finally{edit.disabled=false}
+   finally{aliasEdit.disabled=false}
   };
+  usernameEdit.onclick=async ev=>{
+   ev.stopPropagation();closeEditMenu();
+   const next=await c90AdminDialog({mode:"username",title:"تغییر واقعی نام کاربری",description:"این تغییر روی شناسه ورود حساب نیز اعمال می‌شود.",username:"@"+x.username,value:x.username});
+   if(next===null)return;
+   const username=next.trim().toLowerCase();if(username===x.username)return;
+   usernameEdit.disabled=true;
+   try{
+    await request("/functions/v1/admin-change-username",{method:"POST",headers:authHeaders(),body:JSON.stringify({user_id:x.user_id,new_username:username})});
+    const old=x.username;x.username=username;x.admin_alias=null;drawUsers();$("c90AdminSearch").value=username;
+    alert("نام کاربری حساب از @"+old+" به @"+username+" تغییر کرد. ورود بعدی با نام جدید انجام می‌شود.");
+   }catch(err){alert("تغییر نام کاربری انجام نشد: "+err.message)}
+   finally{usernameEdit.disabled=false}
+  };
+  editMenu.append(aliasEdit,usernameEdit);editWrap.append(edit,editMenu);
   const del=document.createElement("button");del.type="button";del.className="user-delete";del.title="حذف حساب کاربری";del.setAttribute("aria-label","حذف حساب کاربری");
   del.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/><path d="M10 11v5M14 11v5"/></svg>';
   del.onclick=async ev=>{
@@ -1868,7 +1893,7 @@ function drawUsers(){
    }catch(err){alert("حذف حساب انجام نشد: "+err.message+"\\n\\nممکن است تابع امن حذف هنوز در Supabase مستقر نشده باشد.")}
    finally{del.disabled=false}
   };
-  actions.append(edit,del);
+  actions.append(editWrap,del);
   const details=document.createElement("div");details.className="user-details";
   row.append(label,actions);
   row.onclick=()=>{
