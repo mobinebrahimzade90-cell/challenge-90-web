@@ -1832,7 +1832,29 @@ function c90AdminDialog({mode="edit",title="",description="",username="",value="
 }
 
 let activeAdminDetail=null;
+let c90AdminEditDismissBound=false;
+function closeAllAdminEditMenus(){
+ document.querySelectorAll("#C90_ADMIN .user-edit-menu.open").forEach(menu=>{
+  menu.classList.remove("open");
+  menu.style.display="none";
+  if(menu._editWrap)menu._editWrap.classList.remove("open");
+ });
+}
+function bindAdminEditDismiss(){
+ if(c90AdminEditDismissBound)return;
+ c90AdminEditDismissBound=true;
+ document.addEventListener("pointerdown",ev=>{
+  const menu=ev.target.closest&&ev.target.closest(".user-edit-menu");
+  const button=ev.target.closest&&ev.target.closest("#C90_ADMIN .user-edit");
+  if(menu||button)return;
+  closeAllAdminEditMenus();
+ },true);
+ document.addEventListener("scroll",closeAllAdminEditMenus,true);
+ window.addEventListener("resize",closeAllAdminEditMenus);
+}
 function drawUsers(){
+ bindAdminEditDismiss();
+ closeAllAdminEditMenus();
  const q=$("c90AdminSearch").value.trim().toLowerCase();
  const list=allUsers.filter(x=>[x.username,x.display_name,x.admin_alias].some(v=>(v||"").toLowerCase().includes(q)));
  $("c90AdminUsers").innerHTML="";activeAdminDetail=null;
@@ -1855,7 +1877,8 @@ function drawUsers(){
   const editMenu=document.createElement("div");editMenu.className="user-edit-menu";
   const aliasEdit=document.createElement("button");aliasEdit.type="button";aliasEdit.className="user-edit-alias";aliasEdit.title="تغییر نام نمایشی مدیریتی";aliasEdit.setAttribute("aria-label","تغییر نام نمایشی مدیریتی");aliasEdit.innerHTML=edit.innerHTML;
   const usernameEdit=document.createElement("button");usernameEdit.type="button";usernameEdit.className="user-edit-username";usernameEdit.title="تغییر واقعی نام کاربری";usernameEdit.setAttribute("aria-label","تغییر واقعی نام کاربری");usernameEdit.innerHTML=edit.innerHTML;
-  edit.onclick=ev=>{ev.preventDefault();ev.stopPropagation();if(editMenu.classList.contains("open")){closeEditMenu();return;}document.querySelectorAll("#C90_ADMIN .user-edit-menu.open").forEach(m=>{m.classList.remove("open");m.style.display="none"});editWrap.classList.add("open");document.body.appendChild(editMenu);positionEditMenu();editMenu.classList.add("open");};
+  editMenu._editWrap=editWrap;editMenu._editButton=edit;
+   edit.onclick=ev=>{ev.preventDefault();ev.stopPropagation();if(editMenu.classList.contains("open")){closeEditMenu();return;}closeAllAdminEditMenus();editWrap.classList.add("open");document.body.appendChild(editMenu);positionEditMenu();editMenu.classList.add("open");};
   const closeEditMenu=()=>{editWrap.classList.remove("open");editMenu.classList.remove("open");editMenu.style.display="none";};
   const positionEditMenu=()=>{
    const r=edit.getBoundingClientRect();
@@ -1925,6 +1948,7 @@ function drawUsers(){
   const details=document.createElement("div");details.className="user-details";
   row.append(label,actions);
   row.onclick=()=>{
+   closeAllAdminEditMenus();
    if(entry.classList.contains("open")){entry.classList.remove("open");details.innerHTML="";activeAdminDetail=null;return}
    if(activeAdminDetail&&activeAdminDetail!==details){activeAdminDetail.innerHTML="";activeAdminDetail.parentElement.classList.remove("open")}
    activeAdminDetail=details;entry.classList.add("open");showUser(x,details);
