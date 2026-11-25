@@ -6,7 +6,7 @@
 <title>90</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;800;900&family=Noto+Sans+Runic&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;800;900&family=Noto+Sans+Runic&family=Lalezar&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0b0809;--card:#181113;--line:#30242a;--ink:#f3ebe6;--mute:#a1908a;--in:#0f0b0c;--btn:#21181b;--gold:#e8b339;--gt:#e8b339;--bad:#d62839;--glow:#7a1220;--hd:#2a0a10}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -135,18 +135,18 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
 @keyframes spRing{from{transform:rotateX(72deg) rotateZ(0) scale(.4)}to{transform:rotateX(72deg) rotateZ(360deg) scale(1.35)}}
 @keyframes spOut{to{opacity:0;transform:scale(1.15)}}
 /* صفحه‌ی اول */
-#setup{position:fixed;inset:0;z-index:25;background:#06040a;color:#f6efe8;display:none;flex-direction:column;overflow:hidden}
-#setup.on{display:flex}
+
+
 .stop{padding:calc(14px + env(safe-area-inset-top,0px)) 14px 0;text-align:center;position:relative;z-index:2}
 .stop .dtrio{font-size:2.3rem;color:#f6cc60;text-shadow:0 0 24px rgba(214,40,66,.6)}
 .stop .dtrio span{color:#8d7a78}
 .scap{font-size:.84rem;color:#cdb9b0}
-#sky{flex:1;min-height:0;width:100%;direction:ltr;margin-top:-6px}
+
 .shint{text-align:center;font-size:.8rem;color:#a99691;padding:0 14px 8px}
 .sbot{padding:0 14px calc(12px + env(safe-area-inset-bottom,0px))}
 .sbot button{width:100%;padding:14px;font-size:1.02rem}
-#sky text{font-family:Lalezar,Vazirmatn,Tahoma,sans-serif}
-#sky .rune{font-family:"Noto Sans Runic","Segoe UI Historic","Segoe UI Symbol",sans-serif;letter-spacing:.14em}
+
+
 #sys,#pl{transition:opacity .8s ease,transform .8s cubic-bezier(.3,1.1,.5,1)}
 #sys{transform-origin:180px 205px}
 #sys.off{opacity:0;transform:scale(.5);pointer-events:none}
@@ -282,7 +282,7 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
 </head>
 <body>
 <div id="pg1">
-<div class="top"><div class="gr">سلام <input class="di" id="gN1" placeholder="اسمت" maxlength="24" autocomplete="off"></div><h1>90</h1>
+<div class="top"><h1>90</h1>
   <div class="hring"><svg viewBox="0 0 120 120"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rp" id="rp" cx="60" cy="60" r="52"/></svg><div class="rc"><b id="rDay">—</b><span>از ۹۰</span></div></div>
   <div class="tl" id="tl"></div></div>
 
@@ -360,7 +360,7 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
 </div>
 <div id="pg2" class="hide">
   <div class="top">
-    <div class="gr">سلام <input class="di" id="gN2" placeholder="اسمت" maxlength="24" autocomplete="off"></div>
+    
     <h1>چالش خودهیپنوتیزمی</h1>
     <div class="gem"><i></i><i></i><i></i></div>
     <div class="tl" id="tl2"></div>
@@ -384,7 +384,7 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
 </div>
 <div id="pg3" class="hide">
   <div class="top">
-    <div class="gr">سلام <input class="di" id="gN3" placeholder="اسمت" maxlength="24" autocomplete="off"></div>
+    
     <h1>رنکینگ</h1>
     <div class="pod3"><i></i><i></i><i></i></div>
     <div class="tl" id="tl3"></div>
@@ -455,16 +455,6 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
     <div class="card sum" id="sum"></div>
   </div></div>
   <div class="dfoot"><button class="g" id="okSave">اوکی، ذخیره</button></div>
-</div>
-<div id="setup" role="dialog" aria-modal="true">
-  <div class="stop">
-    <div class="dtrio"><input class="di" id="sY" inputmode="numeric" maxlength="4" aria-label="سال"><span>/</span><input class="di" id="sM" inputmode="numeric" maxlength="2" aria-label="ماه"><span>/</span><input class="di" id="sD" inputmode="numeric" maxlength="2" aria-label="روز"></div>
-    <div class="scap" id="sCap"></div>
-    <button id="sBack" class="hide" style="margin-top:6px;padding:5px 14px;font-size:.82rem;background:rgba(255,255,255,.06);color:#f6efe8">بازگشت به منظومه</button>
-  </div>
-  <svg id="sky" viewBox="0 0 360 400" preserveAspectRatio="xMidYMid meet"></svg>
-  <div class="shint" id="sHint"></div>
-  <div class="sbot"><button class="g" id="sGo">شروع چالش</button></div>
 </div>
 <div id="intro" role="dialog" aria-modal="true">
   <div class="ib"><div>
@@ -553,6 +543,7 @@ window.C90_SET_START_DATE=function(value){if(String(value)!==C90_FIXED_START)thr
 window.C90_LOAD_USER_STATE=function(uid,authoritativeStart){KEY="challenge90.v1."+String(uid);S=load();if(!S||typeof S!=="object")S={days:{},vault:null};if(!S.days||typeof S.days!=="object")S.days={};S.start=C90_FIXED_START;save();ensureLv();render()};
 window.addEventListener("c90cloudupdate",e=>{const d=e.detail;if(!d||typeof d!=="object")return;if(JSON.stringify(S)===JSON.stringify(d))return;S=d;S.start=C90_FIXED_START;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(x){}if(page===2)hrender();else if(page===3)rrender();else render()});
 function later(){clearTimeout(t);t=setTimeout(save,300)}
+window.C90_TOAST=m=>toast(m);
 function toast(m){const e=$("toast");e.textContent=m;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",4000)}
 function day(i){const d=S.days[i]||(S.days[i]={st:"",pray:"",how:"",tasks:[],sec:"",why:"",tr:[]});if(!d.tr)d.tr=[];if(d.why==null)d.why="";if(d.pos==null)d.pos="";if(!d.tasks)d.tasks=[];d.tasks.forEach(x=>{if(x.s==null)x.s=x.d?"y":""});return d}
 function dayHasSavedData(d){
@@ -741,207 +732,15 @@ let fromHelp=false;
 function showIntro(h){fromHelp=h;$("intro").classList.add("on")}
 $("introGo").onclick=()=>{try{localStorage.setItem("c90.seen","1")}catch(e){}$("intro").classList.remove("on");if(!fromHelp)splash()};
 $("help").onclick=()=>showIntro(true);
-/* ---------- صفحه‌ی اول: منظومه‌ی ماه‌ها ---------- */
-const EN=["Farvardin","Ordibehesht","Khordad","Tir","Mordad","Shahrivar","Mehr","Aban","Azar","Dey","Bahman","Esfand"];
-const RM={A:"ᚨ",B:"ᛒ",C:"ᚲ",K:"ᚲ",Q:"ᚲ",D:"ᛞ",E:"ᛖ",F:"ᚠ",G:"ᚷ",H:"ᚺ",I:"ᛁ",J:"ᛁ",L:"ᛚ",M:"ᛗ",N:"ᚾ",O:"ᛟ",P:"ᛈ",R:"ᚱ",S:"ᛋ",T:"ᛏ",U:"ᚢ",V:"ᚢ",W:"ᚹ",X:"ᛪ",Y:"ᛦ",Z:"ᛉ"};
-const rune=w=>[...w.toUpperCase()].map(c=>RM[c]||c).join("");
-const NS="http://www.w3.org/2000/svg";
-const PK=[["earth",205,45,27],["gas",340,38,32],["earth",150,38,25],["gas",30,52,31],["rock",10,48,26],["ring",42,42,33],["rock",22,40,23],["ice",195,40,36],["gas",275,34,31],["ice",212,24,46],["earth",172,38,25],["ring",300,32,29]];
-let T={y:0,m:1,d:1},view="sys",seed=1,planets=[],built=false,raf=0,lastM=0,SP=[];
-const rnd=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646};
-const maxD=(y,m)=>m<=6?31:m<=11?30:(jalCal(y).leap===0?30:29);
-const clampD=()=>{T.d=Math.min(T.d,maxD(T.y,T.m))};
-const hsl=(h,s,l,a)=>"hsla("+h+","+s+"%,"+l+"%,"+(a==null?1:a)+")";
-function el(t,a,p){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
-function grad(defs,type,a,st){const g=el(type,a,defs);st.forEach(([o,c])=>el("stop",{offset:o,"stop-color":c},g));return g}
-function ringHalf(P,k,r,u,back){
-  const [,h]=PK[k],defs=$("sky").querySelector("defs"),id=(back?"rb":"rf")+u;
-  const old=defs.querySelector("#"+id);if(old)old.remove();
-  const cp=el("clipPath",{id},defs);el("rect",{x:-r*3,y:back?-r*3:0,width:r*6,height:r*3},cp);
-  const g=el("g",{transform:"rotate(-20)","clip-path":"url(#"+id+")"},P);
-  el("ellipse",{rx:r*1.85,ry:r*.46,fill:"none",stroke:"url(#rg"+k+")","stroke-width":r*.2},g);
-  el("ellipse",{rx:r*1.55,ry:r*.39,fill:"none",stroke:hsl(h,30,85,.5),"stroke-width":r*.05},g);
-}
-function makePlanet(P,k,r,big){
-  const [ty,h,s,l]=PK[k],u="p"+k+(big?"b":"s"),defs=$("sky").querySelector("defs");
-  el("circle",{r:r*1.3,fill:"url(#atm"+k+")"},P);
-  if(ty==="ring")ringHalf(P,k,r,u,true);
-  const old=defs.querySelector("#"+u);if(old)old.remove();
-  const cp=el("clipPath",{id:u},defs);el("circle",{r},cp);
-  const g=el("g",{},P);
-  el("circle",{r,fill:"url(#pg"+k+")"},g);
-  const c=el("g",{"clip-path":"url(#"+u+")"},g),f=el("g",big?{filter:"url(#fS)"}:{},c);
-  seed=k*131+7;
-  if(ty==="gas"||ty==="ring")for(let i=0;i<(big?11:4);i++){const y=(rnd()*2-1)*r*.9,hh=r*(.07+rnd()*.2);el("rect",{x:-r,y:y-hh/2,width:2*r,height:hh,fill:rnd()>.5?hsl(h,s,l+20,.38):hsl(h+14,s,l-24,.42)},f)}
-  if(ty==="earth"||ty==="ice"){
-    for(let i=0;i<(big?7:3);i++)el("ellipse",{cx:(rnd()*2-1)*r*.7,cy:(rnd()*2-1)*r*.7,rx:r*(.18+rnd()*.3),ry:r*(.1+rnd()*.14),fill:ty==="earth"?hsl(h-55,45,34,.7):hsl(h,30,92,.55)},f);
-    for(let i=0;i<(big?8:3);i++)el("ellipse",{cx:(rnd()*2-1)*r*.8,cy:(rnd()*2-1)*r*.8,rx:r*(.2+rnd()*.35),ry:r*(.05+rnd()*.07),fill:"#fff",opacity:.18+rnd()*.25},f);
-  }
-  if(ty==="rock")for(let i=0;i<(big?10:3);i++){const cr=r*(.06+rnd()*.12);el("circle",{cx:(rnd()*2-1)*r*.75,cy:(rnd()*2-1)*r*.75,r:cr,fill:hsl(h,s,l-18,.5),stroke:hsl(h,s,l+22,.4),"stroke-width":cr*.2},f)}
-  if(big)el("rect",{x:-r,y:-r,width:2*r,height:2*r,filter:"url(#nz"+k+")",opacity:.35,style:"mix-blend-mode:soft-light"},c);
-  el("circle",{r,fill:"url(#shade)"},g);
-  el("circle",{r,fill:"url(#spec)"},g);
-  el("circle",{r,fill:"none",stroke:"rgba(255,255,255,.22)","stroke-width":r*.025},g);
-  if(ty==="ring")ringHalf(P,k,r,u,false);
-}
-function buildSky(){
-  const sky=$("sky");sky.innerHTML="";const defs=el("defs",{},sky);
-  for(let k=0;k<12;k++){
-    const [,h,s,l]=PK[k];
-    grad(defs,"radialGradient",{id:"pg"+k,cx:".32",cy:".28",r:".9"},[["0",hsl(h,s,l+26)],[".5",hsl(h,s,l)],["1",hsl(h,s,l-30)]]);
-    grad(defs,"radialGradient",{id:"atm"+k},[["0",hsl(h,90,70,0)],[".74",hsl(h,90,70,0)],[".8",hsl(h,80,60,.22)],["1",hsl(h,90,72,0)]]);
-    grad(defs,"linearGradient",{id:"rg"+k,x1:"0",x2:"1",y1:"0",y2:"0"},[["0",hsl(h,40,80,0)],[".15",hsl(h,35,60,.55)],[".5",hsl(h,40,42,.8)],[".85",hsl(h,35,60,.55)],["1",hsl(h,40,80,0)]]);
-    const f=el("filter",{id:"nz"+k,x:"0",y:"0",width:"1",height:"1"},defs);
-    el("feTurbulence",{type:"fractalNoise",baseFrequency:".7",numOctaves:"2",seed:k+1},f);
-    el("feColorMatrix",{type:"matrix",values:"0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.4 -.45"},f);
-  }
-  grad(defs,"radialGradient",{id:"shade",cx:".3",cy:".27",r:".95"},[["0","rgba(0,0,0,0)"],[".45","rgba(0,0,0,.2)"],["1","rgba(0,0,0,.9)"]]);
-  grad(defs,"radialGradient",{id:"spec",cx:".3",cy:".27",r:".35"},[["0","rgba(255,255,255,.16)"],["1","rgba(255,255,255,0)"]]);
-  grad(defs,"radialGradient",{id:"halo"},[["0","rgba(0,0,0,0)"],[".4","rgba(0,0,0,0)"],[".52","rgba(255,170,60,.38)"],[".72","rgba(214,40,66,.16)"],["1","rgba(0,0,0,0)"]]);
-  grad(defs,"linearGradient",{id:"disk",x1:"0",x2:"1",y1:"0",y2:"0"},[["0","rgba(179,24,46,0)"],[".14","#b3182e"],[".38","#f2a43a"],[".5","#fff3d0"],[".62","#f2a43a"],[".86","#b3182e"],["1","rgba(179,24,46,0)"]]);
-  grad(defs,"radialGradient",{id:"neb1"},[["0","rgba(150,20,50,.3)"],["1","rgba(150,20,50,0)"]]);
-  grad(defs,"radialGradient",{id:"neb2"},[["0","rgba(232,179,57,.16)"],["1","rgba(232,179,57,0)"]]);
-  const fs=el("filter",{id:"fS"},defs);el("feGaussianBlur",{stdDeviation:"1.6"},fs);
-  const fb=el("filter",{id:"fB",x:"-20%",y:"-100%",width:"140%",height:"300%"},defs);el("feGaussianBlur",{stdDeviation:".9"},fb);
-  const cpL=el("clipPath",{id:"lowHalf"},defs);el("rect",{x:-60,y:0,width:120,height:60},cpL);
-  // پس‌زمینه
-  el("ellipse",{cx:80,cy:120,rx:190,ry:140,fill:"url(#neb1)"},sky);
-  el("ellipse",{cx:300,cy:320,rx:170,ry:130,fill:"url(#neb2)"},sky);
-  grad(defs,"linearGradient",{id:"trail",gradientUnits:"userSpaceOnUse",x1:"0",y1:"0",x2:"46",y2:"-16"},[["0","rgba(255,255,255,.95)"],["1","rgba(255,255,255,0)"]]);
-  seed=7;const bg=el("g",{},sky);
-  el("line",{x1:0,y1:0,x2:46,y2:-16,stroke:"url(#trail)","stroke-width":1.4,"stroke-linecap":"round",class:"shoot"},bg);
-  for(let i=0;i<90;i++){const c=el("circle",{cx:rnd()*360,cy:rnd()*400,r:.3+rnd()*.9,fill:"#fff",opacity:.15+rnd()*.6},bg);if(i%4===0){c.setAttribute("class","tw");c.style.animationDelay=(rnd()*4)+"s"}}
-  // منظومه
-  const sys=el("g",{id:"sys"},sky),rot=el("g",{transform:"rotate(-20 180 200)"},sys);planets=[];
-  for(let k=0;k<12;k++){
-    const rx=38+k*13.2,ry=rx*.6,o=el("ellipse",{cx:180,cy:200,rx,ry,class:"orb"},rot);
-    const g=el("g",{class:"pn",transform:"translate(180 200)"},rot),bd=el("g",{class:"bd"},g);
-    makePlanet(bd,k,11.5,false);
-    let mo=null;if(k%3===2){mo=el("g",{},g);el("circle",{r:2.4,fill:"#b9b2ad"},mo);el("circle",{r:2.4,fill:"url(#shade)"},mo)}
-        el("circle",{r:17,fill:"transparent"},g);
-    g.onclick=()=>{T.m=k+1;clampD();showView("pl");paintSetup()};
-    planets.push({g,o,rx,ry,a0:rnd()*6.28,sp:.5/(1+k*.28),wx:180,wy:200,mo});
-  }
-  const lk=el("g",{id:"lock",transform:"translate(180 200)"},sys);el("circle",{r:21,class:"lockr"},lk);
-  // سیاه‌چاله
-  el("circle",{cx:180,cy:200,r:62,fill:"url(#halo)",class:"hp"},sys);
-  const dk=()=>({cx:180,cy:200,rx:46,ry:11,transform:"rotate(-20 180 200)"});
-  el("ellipse",Object.assign(dk(),{fill:"url(#disk)",filter:"url(#fB)",opacity:.95}),sys);
-  el("ellipse",{cx:180,cy:200,rx:18,ry:26,fill:"none",stroke:"rgba(255,200,110,.45)","stroke-width":.7},sys);
-  el("circle",{cx:180,cy:200,r:17.5,fill:"#000"},sys);
-  el("circle",{cx:180,cy:200,r:18.2,fill:"none",stroke:"rgba(255,225,160,.9)","stroke-width":1.1},sys);
-  el("circle",{cx:180,cy:200,r:20.5,fill:"none",stroke:"rgba(255,170,60,.3)","stroke-width":3},sys);
-  const lf=el("g",{transform:"rotate(-20 180 200)"},sys),lg=el("g",{transform:"translate(180 200)","clip-path":"url(#lowHalf)"},lf);
-  el("ellipse",{rx:46,ry:11,fill:"url(#disk)",filter:"url(#fB)"},lg);
-  el("ellipse",Object.assign(dk(),{class:"sh"}),sys);
-  el("text",{x:180,y:207,"text-anchor":"middle","font-size":19,"font-weight":900,fill:"#f6cc60",style:"font-family:Arial,sans-serif;paint-order:stroke;stroke:rgba(0,0,0,.7);stroke-width:2px"},sys).textContent="M";
-  el("circle",{id:"wave",cx:180,cy:200,r:22,class:"wave"},sys);
-  el("text",{id:"yTxt",x:180,y:62,"text-anchor":"middle","font-size":36,fill:"#f6cc60",style:"paint-order:stroke;stroke:rgba(0,0,0,.5);stroke-width:3px"},sys);
-  el("text",{id:"mFa",x:180,y:352,"text-anchor":"middle","font-size":26,fill:"#fff"},sys);
-  // سیاره‌ی بزرگ
-  const pl=el("g",{id:"pl",class:"off"},sky);
-  el("g",{id:"pbig",transform:"translate(180 205)"},pl);
-  el("line",{id:"ray",stroke:"#f6cc60","stroke-width":.6,"stroke-dasharray":"2 3",opacity:0},pl);
-  el("g",{id:"stars"},pl);
-  built=true;
-}
-function rebuildBig(){
-  const P=$("pbig");P.innerHTML="";makePlanet(P,T.m-1,66,true);
-  const tx={"text-anchor":"middle",fill:"#fff",style:"paint-order:stroke;stroke:rgba(0,0,0,.55);stroke-width:3px"};
-  el("text",Object.assign({y:10,"font-size":32},tx),P).textContent=MONTHS[T.m-1];
-  lastM=T.m;
-}
-function drawStars(){
-  const g=$("stars");g.innerHTML="";const n=maxD(T.y,T.m);SP=[];seed=T.m*977+3;
-  for(let k=1;k<=n;k++){
-    let x,y,tries=0;
-    do{const a=rnd()*6.283,r=90+rnd()*60;x=180+Math.cos(a)*r;y=205+Math.sin(a)*r*1.12;tries++}while(tries<50&&SP.some(p=>(p[0]-x)**2+(p[1]-y)**2<27*27));
-    SP.push([x,y]);
-    const s=el("g",{class:"st",transform:"translate("+x.toFixed(1)+" "+y.toFixed(1)+")"},g);
-    const w=el("g",{transform:"scale("+(.7+rnd()*.5).toFixed(2)+")"},s),sx=el("g",{class:"sx"},w);
-    sx.style.setProperty("--d",(rnd()*3).toFixed(1)+"s");
-    el("path",{d:"M0-10C1-3 3-1 10 0 3 1 1 3 0 10-1 3-3 1-10 0-3-1-1-3 0-10Z"},sx);
-    el("circle",{r:1.3,fill:"#fff"},sx);
-    const hl=el("circle",{r:13,class:"halo"},s);hl.style.transformBox="fill-box";hl.style.transformOrigin="center";
-    el("text",{y:21,class:"sn"},s).textContent=fa(k);
-    el("circle",{r:16,fill:"transparent"},s);
-    s.onclick=()=>{T.d=k;paintSetup();if(navigator.vibrate)navigator.vibrate(12)};
-  }
-}
-function showView(v){
-  view=v;
-  if(v==="pl"){const p=planets[T.m-1];$("pl").style.transformOrigin=p.wx.toFixed(1)+"px "+p.wy.toFixed(1)+"px";if(lastM!==T.m)rebuildBig();drawStars()}
-  $("sys").classList.toggle("off",v!=="sys");$("pl").classList.toggle("off",v!=="pl");
-  $("sBack").classList.toggle("hide",v!=="pl");
-  $("sHint").textContent=v==="sys"?"یک سیاره را برای انتخاب ماه لمس کن":"یک ستاره را برای انتخاب روز لمس کن";
-}
-function paintSetup(){
-  setTrio(SID,T.y,T.m,T.d);$("sCap").textContent=fmtJ(j2d(T.y,T.m,T.d));
-  planets.forEach((p,k)=>{p.g.classList.toggle("sel",k+1===T.m);p.o.classList.toggle("sel",k+1===T.m)});
-  $("yTxt").textContent=fa(T.y);$("mFa").textContent=MONTHS[T.m-1];
-  if(view==="pl"){
-    if(lastM!==T.m)rebuildBig();
-    [...$("stars").children].forEach((s,i)=>s.classList.toggle("sel",i+1===T.d));
-    const p=SP[T.d-1],ray=$("ray");
-    if(p){const dx=180-p[0],dy=205-p[1],L=Math.hypot(dx,dy);ray.setAttribute("x1",p[0]);ray.setAttribute("y1",p[1]);ray.setAttribute("x2",180-dx/L*70);ray.setAttribute("y2",205-dy/L*70);ray.setAttribute("opacity",.55)}
-  }
-}
-function yearFx(){
-  const w=$("wave");w.classList.remove("go");void w.getBoundingClientRect();w.classList.add("go");
-  const y=$("yTxt");y.classList.remove("pop");void y.getBoundingClientRect();y.classList.add("pop");
-  if(navigator.vibrate)navigator.vibrate(25);
-}
-function loop(t){
-  if(!$("setup").classList.contains("on")){raf=0;return}
-  if(view==="sys"){
-    const s=t/1000,c=.9397,n=.342;
-    planets.forEach((p,k)=>{
-      const a=p.a0+s*p.sp,x=180+p.rx*Math.cos(a),y=200+p.ry*Math.sin(a),dx=x-180,dy=y-200;
-      p.g.setAttribute("transform","translate("+x.toFixed(1)+" "+y.toFixed(1)+")");
-      p.wx=180+dx*c+dy*n;p.wy=200-dx*n+dy*c;
-      if(p.mo)p.mo.setAttribute("transform","translate("+(19*Math.cos(s*1.3+k)).toFixed(1)+" "+(9*Math.sin(s*1.3+k)).toFixed(1)+")");
-      if(k+1===T.m)$("lock").setAttribute("transform","translate("+p.wx.toFixed(1)+" "+p.wy.toFixed(1)+")");
-      
-    });
-  }
-  raf=requestAnimationFrame(loop);
-}
-function buildSetupUI(){
-  SID.forEach(id=>{const e=$(id);e.onfocus=()=>e.select();e.onkeydown=k=>{if(k.key==="Enter")e.blur()};
-    e.onchange=()=>{
-      const v=readTrio(SID);if(!v){toast("تاریخ درست نیست");paintSetup();return}
-      const yc=v.y!==T.y;T={y:v.y,m:v.m,d:v.d};
-      if(view==="pl"){if(lastM!==T.m)rebuildBig();drawStars()}
-      if(yc)yearFx();paintSetup();
-    }});
-  $("sBack").onclick=()=>{showView("sys");paintSetup()};
-  $("sGo").onclick=()=>{
-    S.start=isoOf(d2g(j2d(T.y,T.m,T.d)));S.setup=true;save();
-    $("setup").classList.remove("on");render();toast("چالش شروع شد");
-  };
-}
-function openSetup(){
-  if(!built){buildSky();buildSetupUI()}
-  const has=Object.values(S.days).some(d=>d.st||(d.tasks&&d.tasks.length)),j=d2j(has?startJ():todayJ());
-  T={y:j[0],m:j[1],d:j[2]};lastM=0;
-  $("setup").classList.add("on");
-  showView("sys");paintSetup();if(!raf)raf=requestAnimationFrame(loop);
-}
-
 function boot(){
   let seen=false;try{seen=!!localStorage.getItem("c90.seen")}catch(e){}
   if(!S.setup)S.setup=true;
   seen?splash():showIntro(false);
-  if(seen&&S.name&&S.name.trim())setTimeout(()=>toast("سلام، "+S.name.trim()),1150);
 }
 
 /* ---------- نام، جابه‌جایی بین چالش‌ها، خودهیپنوتیزم ---------- */
 const NMS=["gN1","gN2","gN3"];
-function initName(){
-  NMS.forEach(id=>{const e=$(id);e.value=S.name||"";
-    e.oninput=()=>{S.name=e.value;NMS.forEach(o=>{if(o!==id)$(o).value=e.value});later()};
-    e.onkeydown=k=>{if(k.key==="Enter")e.blur()};if(id!=="sName")e.onfocus=()=>e.select()});
-}
+function initName(){}
 const NAVB=document.querySelectorAll("#nav button");
 function moveInd(){const b=document.querySelector('#nav button[data-p="'+page+'"]'),i=$("nvi");if(!b||!i)return;i.style.left=b.offsetLeft+"px";i.style.width=b.offsetWidth+"px";NAVB.forEach(x=>x.classList.toggle("on",x===b))}
 function setPage(n){
@@ -1198,8 +997,7 @@ function renderClassRanking(){
  box.querySelectorAll("[data-rank]").forEach(b=>{
   b.classList.toggle("on",b.dataset.rank===c90RankingTab);
   b.setAttribute("aria-pressed",b.dataset.rank===c90RankingTab?"true":"false");
-  b.onclick=()=>{
-   if(c90RankingTab===b.dataset.rank)return;
+  b.onclick=()=>{   if(c90RankingTab===b.dataset.rank)return;
    c90RankingTab=b.dataset.rank;
    box.querySelectorAll("[data-rank]").forEach(x=>{const active=x.dataset.rank===c90RankingTab;x.classList.toggle("on",active);x.setAttribute("aria-pressed",active?"true":"false")});
    renderRankingContent();
@@ -1536,6 +1334,7 @@ const fa=n=>Number(n||0).toLocaleString("fa-IR",{useGrouping:false});
 let session=null,profile=null,cloudTimer=null,allUsers=[];
 const authHeaders=()=>({"apikey":KEY,"Authorization":"Bearer "+session.access_token,"Content-Type":"application/json"});
 const msg=t=>$("c90AuthMsg").textContent=t;
+const validStartIso=v=>typeof v==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&!isNaN(Date.parse(v));
 const internalEmail=u=>u.toLowerCase()+"@example.com";
 async function request(path,opts={}){
  const {timeoutMs=15000,...fetchOpts}=opts;
@@ -1694,10 +1493,13 @@ function scheduleSync(data,retry=0){
   catch(e){
    console.warn("Cloud sync (local data preserved):",e&&e.message||e);
    if(session&&retry<5&&navigator.onLine){scheduleSync(data,retry+1);return}
-   if(!SE&&window.C90_TOAST)window.C90_TOAST("ذخیره آنلاین فعلاً انجام نشد؛ اطلاعات روی دستگاه محفوظ است.");
+   if(window.C90_TOAST)window.C90_TOAST("ذخیره آنلاین فعلاً انجام نشد؛ اطلاعات روی دستگاه محفوظ است.");
   }
  },delays[Math.min(retry,delays.length-1)]);
 }
+async function refreshSession(){if(!session||!session.refresh_token)return;try{const d=await request("/auth/v1/token?grant_type=refresh_token",{method:"POST",body:JSON.stringify({refresh_token:session.refresh_token})});if(d&&d.access_token){session={...session,...d,user:d.user||session.user};localStorage.setItem("c90.session",JSON.stringify(session));if(window.C90_RT_CLIENT)window.C90_RT_CLIENT.realtime.setAuth(session.access_token)}}catch(e){console.warn("Token refresh:",e.message)}}
+setInterval(refreshSession,40*60*1000);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&session&&session.expires_at&&session.expires_at*1000-Date.now()<300000)refreshSession()});
 async function enter(s){
  session=s;
  setLoaderStage(1,"در حال شناسایی حساب","اعتبارسنجی نشست کاربری");
@@ -1897,7 +1699,7 @@ function c90AdminDialog({mode="edit",title="",description="",username="",value="
   input.value=deleting?"":value;
   input.placeholder=deleting?username:changingUsername?"username جدید":"نام دلخواه برای نمایش در پنل";
   input.maxLength=deleting||changingUsername?30:40;
-  $q(".c90-admin-dialog-hint").textContent=deleting?"این عملیات دائمی است و اطلاعات حساب کاربر از سامانه حذف خواهد شد.":changingUsername?"نام کاربری ورود این حساب نیز تغییر می‌کند. نام قبلی دیگر برای ورود معتبر نخواهد بود. فقط حروف انگلیسی کوچک، عدد، نقطه، خط تیره و زیرخط مجاز است.":changingDisplayName?"این نام اصلی در رتبه‌بندی و بخش‌های عمومی سایت نمایش داده می‌شود. برای نام نمایشی نمی‌توان کادر را خالی گذا.":"این نام فقط در پنل مدیریت نمایش داده می‌شود و نام کاربری اصلی تغییر نمی‌کند. برای پاک‌کردن نام مستعار، کادر را خالی بگذار.";
+  $q(".c90-admin-dialog-hint").textContent=deleting?"این عملیات دائمی است و اطلاعات حساب کاربر از سامانه حذف خواهد شد.":changingUsername?"نام کاربری ورود این حساب نیز تغییر می‌کند. نام قبلی دیگر برای ورود معتبر نخواهد بود. فقط حروف انگلیسی کوچک، عدد، نقطه، خط تیره و زیرخط مجاز است.":changingDisplayName?"این نام اصلی در رتبه‌بندی و بخش‌های عمومی سایت نمایش داده می‌شود. برای نام نمایشی نمی‌توان کادر را خالی گذاشت.":"این نام فقط در پنل مدیریت نمایش داده می‌شود و نام کاربری اصلی تغییر نمی‌کند. برای پاک‌کردن نام مستعار، کادر را خالی بگذار.";
   const submit=$q(".c90-admin-dialog-submit");
   submit.textContent=deleting?"حذف دائمی حساب":changingUsername?"تغییر واقعی نام کاربری":changingDisplayName?"ذخیره نام نمایشی":"ذخیره تغییرات";
   submit.classList.toggle("danger",deleting);
@@ -2026,7 +1828,7 @@ function drawUsers(){
     if(activeAdminDetail&&activeAdminDetail.parentElement===entry)activeAdminDetail=null;
     drawUsers();
     alert("حساب @"+x.username+" حذف شد.");
-   }catch(err){alert("حذف حساب انجام نشد: "+err.message+"\\n\\nممکن است تابع امن حذف هنوز در Supabase مستقر نشده باشد.")}
+   }catch(err){alert("حذف حساب انجام نشد: "+err.message+"\n\nممکن است تابع امن حذف هنوز در Supabase مستقر نشده باشد.")}
    finally{del.disabled=false}
   };
   actions.append(editWrap,del);
@@ -2034,8 +1836,8 @@ function drawUsers(){
   row.append(label,actions);
   row.onclick=()=>{
    closeAllAdminEditMenus();
-   if(entry.classList.contains("open")){entry.classList.remove("open");details.innerHTML="";activeAdminDetail=null;return}
-   if(activeAdminDetail&&activeAdminDetail!==details){activeAdminDetail.innerHTML="";activeAdminDetail.parentElement.classList.remove("open")}
+   if(entry.classList.contains("open")){entry.classList.remove("open");setTimeout(()=>{if(!entry.classList.contains("open"))details.innerHTML=""},650);activeAdminDetail=null;return}
+   if(activeAdminDetail&&activeAdminDetail!==details){const dd=activeAdminDetail,pe=dd.parentElement;pe.classList.remove("open");setTimeout(()=>{if(!pe.classList.contains("open"))dd.innerHTML=""},650)}
    activeAdminDetail=details;entry.classList.add("open");showUser(x,details);
   };
   entry.append(row,details);$("c90AdminUsers").appendChild(entry);
@@ -2194,8 +1996,7 @@ async function runC90Auth(action,loadingText){
 $("c90Login").onclick=()=>runC90Auth(login,"در حال ورود به حساب…");
 function openC90AccountManager(){
  const previous=$("c90AccountManager");
- if(previous)previous.remove();
- if(!session||!profile){$("C90_AUTH_PANEL").style.display="flex";return;}
+ if(previous)previous.remove(); if(!session||!profile){$("C90_AUTH_PANEL").style.display="flex";return;}
  const overlay=document.createElement("div");
  overlay.id="c90AccountManager";
  overlay.style.cssText="position:fixed;inset:0;z-index:1800;background:#080609eF;display:grid;place-items:center;padding:18px;font-family:Vazirmatn,Tahoma,sans-serif;color:#f3ebe6";
@@ -2258,12 +2059,12 @@ document.addEventListener("click",ev=>{
 });
 (function showLoginForGuest(){
  const panel=$("C90_AUTH_PANEL");
- const intro=$("intro"),splashScreen=$("splash"),setupScreen=$("setup"),loader=$("c90Loading");
+ const intro=$("intro"),splashScreen=$("splash"),setupScreen=null,loader=$("c90Loading");
  if(intro)intro.classList.remove("on");
  if(splashScreen)splashScreen.classList.remove("on");
  if(setupScreen)setupScreen.classList.remove("on");
  if(loader)loader.classList.remove("on");
- if(panel)panel.style.display="flex";
+ if(panel&&!localStorage.getItem("c90.session"))panel.style.display="flex";
  document.body.style.overflow="hidden";
 })();
 (async()=>{
@@ -2285,7 +2086,7 @@ document.addEventListener("click",ev=>{
   sessionStorage.removeItem("c90.active_uid");
   clearTimeout(cloudTimer);clearInterval(window.C90_CLASS_RANK_TIMER);
   session=null;profile=null;window.C90_CURRENT_PROFILE=null;window.C90_CURRENT_USERNAME=null;
-  $("intro").classList.remove("on");$("splash").classList.remove("on");$("setup").classList.remove("on");
+  $("intro").classList.remove("on");$("splash").classList.remove("on");
   $("C90_AUTH_PANEL").style.display="flex";msg("بازیابی ورود ناموفق بود: "+(e&&e.message?e.message:"خطای نامشخص")+"؛ دوباره وارد شو.");
  }finally{hideLoader()}
 })();
@@ -2348,38 +2149,7 @@ document.addEventListener("click",ev=>{
 #C90_AUTH_PANEL .authmsg{min-height:25px;text-align:center;line-height:1.7}
 @media(max-height:720px){#C90_AUTH_PANEL{align-items:flex-start}#C90_AUTH_PANEL .authbox{margin:4px auto}}
 </style>
-<style>
-.rank-current-medal{width:86px;height:86px;display:grid;place-items:center;flex:0 0 86px;filter:drop-shadow(0 7px 13px color-mix(in srgb,var(--tier,#c89b48) 55%,transparent))}
-.rank-medal-svg{display:block;overflow:visible;filter:drop-shadow(0 2px 3px #0009)}
-.rank-level .rank-medal-svg{width:48px;height:48px}
-.rank-inline-badge{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;flex:0 0 auto;margin-inline-start:8px;width:34px;height:34px}
-.rank-inline-badge .rank-medal-svg{width:100%;height:100%}
-#c90RankList .rk{display:flex;align-items:center;gap:9px}
-#c90RankList .rk>span{display:flex;align-items:center;gap:5px;min-width:0}
-#c90RankList .rk .rank-inline-badge{margin-inline-start:3px}
-#c90RankTabs{direction:rtl;display:flex}
-#c90RankTabs [data-rank="person"]{order:0}
-#c90RankTabs [data-rank="class"]{order:1}
-#C90_AUTH_PANEL{overflow-y:auto;overscroll-behavior:contain;align-items:center;padding:24px 16px;background:radial-gradient(ellipse at 50% 8%,#43202c 0,#1b1018 38%,#08070b 78%);backdrop-filter:blur(12px)}
-#C90_AUTH_PANEL .authbox{position:relative;isolation:isolate;max-width:460px;margin:auto;padding:25px 22px 22px;border:1px solid #76543e;border-radius:25px;background:linear-gradient(150deg,#291a20 0%,#191117 48%,#100d13 100%);box-shadow:0 28px 90px #000c,inset 0 1px #ffffff18;overflow:hidden}
-#C90_AUTH_PANEL .authbox:before{content:"";position:absolute;z-index:-1;top:-95px;left:50%;width:230px;height:230px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle,#e9b84b25,transparent 68%);pointer-events:none}
-#C90_AUTH_PANEL .authbox:after{content:"90";display:block;text-align:center;font:900 2.6rem Georgia,serif;letter-spacing:.18em;color:#f0c45e;text-shadow:0 0 24px #e7a93266;margin:0 auto 8px}
-#C90_AUTH_PANEL .authbox>div:first-child{align-items:center!important;border-bottom:1px solid #ffffff13;padding-bottom:13px;margin-bottom:14px}
-#C90_AUTH_PANEL h2{font-size:1.2rem;letter-spacing:.01em}
-#C90_AUTH_PANEL #c90AuthIntro{color:#c8b8b9;font-size:.83rem;line-height:1.8;margin:0 0 15px}
-#C90_AUTH_PANEL input,#C90_AUTH_PANEL select{box-sizing:border-box;min-height:49px;margin:9px 0;padding:12px 14px;border-radius:13px;border:1px solid #59414a;background:#0d0a0f;color:#fff;outline:none;transition:border-color .2s,box-shadow .2s}
-#C90_AUTH_PANEL input:focus,#C90_AUTH_PANEL select:focus{border-color:#e8b339;box-shadow:0 0 0 3px #e8b33920}
-#C90_AUTH_PANEL .initial-prelogin{margin:13px 0 15px;padding:14px;border:1px solid #80603c;border-radius:16px;background:linear-gradient(135deg,#2b1d1e,#171116)}
-#C90_AUTH_PANEL .initial-pre-row button{border:1px solid #d6a63d;border-radius:11px;background:linear-gradient(135deg,#f4cc68,#d99727);color:#211407;font-weight:900}
-#C90_AUTH_PANEL .authrow{gap:10px;margin-top:10px}
-#C90_AUTH_PANEL .authrow button{min-height:49px;border-radius:13px;font-weight:900}
-#C90_AUTH_PANEL #c90Login{background:linear-gradient(135deg,#f4cb68,#d9982c);color:#211407;border:0}
-#C90_AUTH_PANEL #c90Signup{background:#2a1d27;color:#f2d99a;border:1px solid #76543e}
-#C90_AUTH_PANEL #c90AuthBack{border:1px solid #5e4650;border-radius:10px;background:#ffffff08;color:#cbb9b8}
-#C90_AUTH_PANEL .authmsg{min-height:25px;text-align:center;line-height:1.7}
-@media(max-width:390px){.rank-level-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.rank-current-medal{width:70px;height:70px;flex-basis:70px}}
-@media(max-height:720px){#C90_AUTH_PANEL{align-items:flex-start}#C90_AUTH_PANEL .authbox{margin:4px auto}}
-</style>
+
 
 <style>
 /* چیدمان قطعی رتبه‌ها: هر مدال یک ردیف، نام در مرکز، امتیاز در ستون ثابت چپ */
@@ -2520,8 +2290,7 @@ document.addEventListener("click",ev=>{
 @media(max-width:390px){#C90_ADMIN .admincircles{grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}#C90_ADMIN .admincircle{max-width:48px}}
 @media(prefers-reduced-motion:reduce){#C90_ADMIN .admin-view-page,#C90_ADMIN .admin-details,#C90_ADMIN .admin-search-pop{animation:none!important;transition:none!important}}
 </style>
-</body>
-</html>
+
 <style>
 .rank-progress-details{width:100%}
 .rank-progress-summary{display:flex;width:100%;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;min-height:64px;padding:0;border:0;background:transparent;color:inherit;text-align:right;font:inherit;border-radius:0}
@@ -2538,3 +2307,81 @@ document.addEventListener("click",ev=>{
 .rank-progress-card{padding:12px 14px}
 @media(prefers-reduced-motion:reduce){.rank-progress-content,.rank-progress-inner,.rank-collapse-icon{transition:none!important;transform:none!important}}
 </style>
+<style id="c90-v2">
+:root{--ease:cubic-bezier(.22,.8,.2,1)}
+/* سرعت: بلور و انیمیشن‌های بی‌پایان سنگین حذف شد */
+#nav{backdrop-filter:none;-webkit-backdrop-filter:none;background:color-mix(in srgb,var(--card) 94%,#000)}
+.card,.dbar,.dfoot,.rtab{backdrop-filter:none;-webkit-backdrop-filter:none}
+.pod3 i,.xp div,.hp,.tw{animation:none}
+.dot.today{animation:none}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+button,.dot,.chip{touch-action:manipulation}
+/* دسترسی راحت‌تر: هدف لمسی بزرگ‌تر و فوکوس واضح */
+button{min-height:44px}
+.dot{min-height:0}
+.task .tb{width:44px;height:44px}
+.task .dl,.cr .dl,.rk .dl{width:44px;height:44px}
+.chip{min-height:40px;padding:6px 15px}
+.acts button{min-height:40px}
+#nav button{min-height:44px;padding:9px 16px}
+.dfoot button,.sbot button{min-height:52px}
+.di{min-height:40px}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.dbody{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.wrap{padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+/* انیمیشن سبک بین صفحات و پنجره‌ها (فقط transform/opacity) */
+.pg-enter{animation:pgSlide .34s var(--ease) both}
+@keyframes pgSlide{from{opacity:0;transform:translateY(12px)}}
+.day.on,#intro.on{animation:sheetIn .3s var(--ease)}
+@keyframes sheetIn{from{opacity:0;transform:translateY(22px)}}
+.rank-progress-content{transition-duration:.45s,.3s,.4s,.35s}
+#C90_ADMIN .user-details{transition-duration:.42s,.25s,.35s,.3s}
+/* صفحهٔ ورود */
+#C90_AUTH_PANEL{background:radial-gradient(500px 360px at 90% 0,#d6283933,transparent 70%),radial-gradient(520px 380px at 5% 100%,#e8b33929,transparent 70%),#0b0809}
+#C90_AUTH_PANEL .authbox{animation:authIn .55s var(--ease) both}
+@keyframes authIn{from{opacity:0;transform:translateY(28px) scale(.97)}}
+#C90_AUTH_PANEL .authbox>*{animation:authItem .45s var(--ease) both}
+#C90_AUTH_PANEL .authbox>:nth-child(2){animation-delay:.06s}#C90_AUTH_PANEL .authbox>:nth-child(3){animation-delay:.1s}#C90_AUTH_PANEL .authbox>:nth-child(4){animation-delay:.14s}#C90_AUTH_PANEL .authbox>:nth-child(5){animation-delay:.18s}#C90_AUTH_PANEL .authbox>:nth-child(6){animation-delay:.22s}#C90_AUTH_PANEL .authbox>:nth-child(7){animation-delay:.26s}#C90_AUTH_PANEL .authbox>:nth-child(8){animation-delay:.3s}
+@keyframes authItem{from{opacity:0;transform:translateY(10px)}}
+#C90_AUTH_PANEL .authbox.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+#C90_AUTH_PANEL input,#C90_AUTH_PANEL select{transition:border-color .2s,box-shadow .2s,background-color .2s;background-repeat:no-repeat;background-size:20px;background-position:right 14px center}
+#C90_AUTH_PANEL #c90Username,#C90_AUTH_PANEL #c90Password,#C90_AUTH_PANEL #c90Display,#C90_AUTH_PANEL select{padding-right:46px}
+#C90_AUTH_PANEL #c90Username{direction:ltr;text-align:right;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e8b339' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 21c0-4 4-6 8-6s8 2 8 6'/%3E%3C/svg%3E")}
+#C90_AUTH_PANEL #c90Password{direction:ltr;text-align:right;padding-left:46px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e8b339' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5' y='11' width='14' height='9' rx='2'/%3E%3Cpath d='M8 11V8a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E")}
+#C90_AUTH_PANEL #c90Display{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e8b339' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='14' rx='3'/%3E%3Ccircle cx='9' cy='11' r='2'/%3E%3Cpath d='M14 10h4M14 14h3M6 16c.6-1.4 1.8-2 3-2s2.400.6 3 2'/%3E%3C/svg%3E")}
+#C90_AUTH_PANEL #c90Grade{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e8b339' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m2 9 10-5 10 5-10 5z'/%3E%3Cpath d='M6 11.500V16c3 2.500 9 2.500 12 0v-4.500'/%3E%3C/svg%3E")}
+#C90_AUTH_PANEL #c90Major{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e8b339' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12 3 9 5-9 5-9-5z'/%3E%3Cpath d='m3 13 9 5 9-5'/%3E%3C/svg%3E")}
+#C90_AUTH_PANEL #c90PreDays{padding-right:14px;background-image:none}
+#C90_AUTH_PANEL .pw-wrap{position:relative}
+#C90_AUTH_PANEL .pw-eye{position:absolute;left:6px;top:50%;margin-top:-20px;width:40px;height:40px;min-height:0;padding:0;flex:none;display:grid;place-items:center;border:0;border-radius:11px;background:transparent;color:#b89b72}
+#C90_AUTH_PANEL .pw-eye.on{color:#f2c75f}
+#C90_AUTH_PANEL .pw-eye svg,#C90_AUTH_PANEL .authrow button svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+#C90_AUTH_PANEL .authrow button{display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .18s var(--ease),box-shadow .25s,filter .2s}
+#C90_AUTH_PANEL #c90Login{box-shadow:0 12px 26px -10px #e8b339}
+#C90_AUTH_PANEL .authrow button:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.08)}
+#C90_AUTH_PANEL .authrow button:disabled{opacity:.55}
+#C90_AUTH_PANEL .authmsg:not(:empty){animation:authItem .35s var(--ease)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+["pg1","pg2","pg3"].forEach(id=>{const e=$(id);if(!e)return;let was=e.classList.contains("hide");
+ new MutationObserver(()=>{const h=e.classList.contains("hide");if(was&&!h){e.classList.remove("pg-enter");void e.offsetWidth;e.classList.add("pg-enter")}was=h}).observe(e,{attributes:true,attributeFilter:["class"]})});
+const pw=$("c90Password");
+if(pw&&!pw.parentElement.classList.contains("pw-wrap")){
+ const w=document.createElement("div");w.className="pw-wrap";pw.parentNode.insertBefore(w,pw);w.appendChild(pw);
+ const b=document.createElement("button");b.type="button";b.className="pw-eye";b.setAttribute("aria-label","نمایش رمز");
+ b.innerHTML='<svg viewBox="0 0 24 24"><path d="M2 12s3.600-7 10-7 10 7 10 7-3.600 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+ b.onclick=()=>{const show=pw.type==="password";pw.type=show?"text":"password";b.classList.toggle("on",show);b.setAttribute("aria-label",show?"پنهان کردن رمز":"نمایش رمز")};
+ w.appendChild(b)}
+const ico={c90Login:'<svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5M15 12H3"/></svg>',c90Signup:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3.500-6 7-6s7 2 7 6M19 8v6M16 11h6"/></svg>'};
+for(const id in ico){const b=$(id);if(b&&!b.querySelector("svg"))b.insertAdjacentHTML("afterbegin",ico[id])}
+const m=$("c90AuthMsg"),box=document.querySelector("#C90_AUTH_PANEL .authbox");
+if(m&&box)new MutationObserver(()=>{const t=m.textContent.trim();if(t&&!/…$/.test(t)){box.classList.remove("shake");void box.offsetWidth;box.classList.add("shake")}}).observe(m,{childList:true,characterData:true,subtree:true});
+})();
+</script>
+
+</body>
+</html>
