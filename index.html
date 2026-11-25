@@ -997,7 +997,8 @@ function renderClassRanking(){
  box.querySelectorAll("[data-rank]").forEach(b=>{
   b.classList.toggle("on",b.dataset.rank===c90RankingTab);
   b.setAttribute("aria-pressed",b.dataset.rank===c90RankingTab?"true":"false");
-  b.onclick=()=>{   if(c90RankingTab===b.dataset.rank)return;
+  b.onclick=()=>{
+   if(c90RankingTab===b.dataset.rank)return;
    c90RankingTab=b.dataset.rank;
    box.querySelectorAll("[data-rank]").forEach(x=>{const active=x.dataset.rank===c90RankingTab;x.classList.toggle("on",active);x.setAttribute("aria-pressed",active?"true":"false")});
    renderRankingContent();
@@ -1996,7 +1997,8 @@ async function runC90Auth(action,loadingText){
 $("c90Login").onclick=()=>runC90Auth(login,"در حال ورود به حساب…");
 function openC90AccountManager(){
  const previous=$("c90AccountManager");
- if(previous)previous.remove(); if(!session||!profile){$("C90_AUTH_PANEL").style.display="flex";return;}
+ if(previous)previous.remove();
+ if(!session||!profile){$("C90_AUTH_PANEL").style.display="flex";return;}
  const overlay=document.createElement("div");
  overlay.id="c90AccountManager";
  overlay.style.cssText="position:fixed;inset:0;z-index:1800;background:#080609eF;display:grid;place-items:center;padding:18px;font-family:Vazirmatn,Tahoma,sans-serif;color:#f3ebe6";
