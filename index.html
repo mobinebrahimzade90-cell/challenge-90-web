@@ -1124,17 +1124,29 @@ function initHyp(){
 }
 
 /* ---------- رنکینگ (ساده) ---------- */
+function c90TextFieldPoints(value){
+  const length=Array.from(String(value||"").trim()).length;
+  return Math.min(15,Math.floor(length/15));
+}
 function calcScore(){
-  let clean=0,fail=0,ty=0,tn=0;
-  for(let i=1;i<=N;i++){const d=S.days[i];
-    if(d&&d.st==="clean")clean++;
-    else if(d&&d.st==="fail")fail++;
-    if(d&&d.tasks)d.tasks.forEach(x=>{const s=sOf(x);if(s==="y")ty++;else if(s==="n")tn++});
+  let clean=0,fail=0,ty=0,tn=0,hypSessions=0,hypMinutes=0,writing=0;
+  for(let i=1;i<=N;i++){
+    const d=S.days[i];if(!d)continue;
+    if(d.st==="clean")clean++;else if(d.st==="fail")fail++;
+    if(d.tasks)d.tasks.forEach(x=>{const s=sOf(x);if(s==="y")ty++;else if(s==="n")tn++});
+    writing+=c90TextFieldPoints(d.pray)+c90TextFieldPoints(d.pos)+c90TextFieldPoints(d.why);
   }
-  let hypnosis=0;
-  if(S.hyp)for(let i=1;i<=HN;i++){const d=S.hyp.days[i];if(d&&d.st==="done")hypnosis+=Math.min(30,Math.max(0,Number(d.min)||0))}
+  if(S.hyp&&S.hyp.days){
+    for(let i=1;i<=HN;i++){
+      const d=S.hyp.days[i];if(!d)continue;
+      if(d.st==="done"){hypSessions++;hypMinutes+=Math.max(0,Number(d.min)||0)}
+      writing+=c90TextFieldPoints(d.sug)+c90TextFieldPoints(d.note);
+    }
+  }
+  const fiveMinuteBlocks=Math.floor(hypMinutes/5);
+  const hypnosis=hypSessions*10+fiveMinuteBlocks+(fiveMinuteBlocks*60);
   const main=clean*100-fail*150+ty*5-tn*2;
-  return{total:Math.max(0,main+hypnosis),main,hypnosis};
+  return{total:Math.max(0,main+hypnosis+writing),main,hypnosis,writing};
 }
 let rEdit=false;
 
@@ -1255,7 +1267,7 @@ function rrender(){
  const ext=Array.isArray(window.CHALLENGE_RANKING)?window.CHALLENGE_RANKING.map(x=>({n:String(x.display_name||x.username),s:+x.points||0,me:String(x.username)===String(window.C90_CURRENT_USERNAME||"")})):null;
  const arr=(ext||[{n:nm,s:sc.total,me:true}].concat(S.rank.members.map((m,i)=>({n:m.n,s:m.s,i})))).sort((a,b)=>b.s-a.s);
  const me=arr.findIndex(x=>x.me)+1;
- detail.textContent="چالش ۹۰ روزه: "+fa(sc.main)+" امتیاز | خودهیپنوتیزمی: "+fa(sc.hypnosis)+" امتیاز";
+ detail.textContent="چالش ۹۰ روزه: "+fa(sc.main)+" امتیاز | خودهیپنوتیزمی: "+fa(sc.hypnosis)+" امتیاز | نوشتاری: "+fa(sc.writing||0)+" امتیاز";
  $("tl3").textContent=me?"رتبه‌ی تو: "+fa(me)+" از "+fa(arr.length):"";
  $("rEd").classList.toggle("hide",!!ext);$("rForm").classList.toggle("hide",!rEdit||!!ext);
  const L=$("rList");L.innerHTML="";
