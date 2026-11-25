@@ -16,7 +16,7 @@ jobs:
   deploy:
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url || steps.deployment_retry_1.outputs.page_url || steps.deployment_retry_2.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -44,11 +44,15 @@ jobs:
       - uses: actions/upload-pages-artifact@v4
         with:
           path: .
-      - name: Wait until Pages artifact is visible to GitHub API
+      - name: Wait for Pages artifact metadata to stabilize
         uses: actions/github-script@v7
         with:
           script: |
-            const maxAttempts = 12;
+            const requiredStableReads = 4;
+            const maxAttempts = 24;
+            let stableReads = 0;
+            let lastArtifactId = null;
+
             for (let attempt = 1; attempt <= maxAttempts; attempt++) {
               const { data } = await github.rest.actions.listWorkflowRunArtifacts({
                 owner: context.repo.owner,
@@ -58,13 +62,62 @@ jobs:
               const artifact = data.artifacts.find(item =>
                 item.name === "github-pages" && !item.expired
               );
-              if (artifact) {
-                core.info(`Pages artifact is visible (ID: ${artifact.id}, attempt: ${attempt}).`);
+
+              if (artifact && artifact.id === lastArtifactId) {
+                stableReads++;
+              } else if (artifact) {
+                lastArtifactId = artifact.id;
+                stableReads = 1;
+              } else {
+                lastArtifactId = null;
+                stableReads = 0;
+              }
+
+              core.info(`Artifact metadata stability: ${stableReads}/${requiredStableReads} (attempt ${attempt}/${maxAttempts}).`);
+              if (stableReads >= requiredStableReads) {
+                core.info(`Artifact ${artifact.id} remained visible across consecutive checks. Waiting 15 seconds for Pages metadata propagation.`);
+                await new Promise(resolve => setTimeout(resolve, 15000));
                 return;
               }
-              core.info(`Pages artifact not visible yet (attempt ${attempt}/${maxAttempts}). Waiting 5 seconds.`);
               await new Promise(resolve => setTimeout(resolve, 5000));
             }
-            throw new Error("GitHub did not expose the uploaded github-pages artifact after 60 seconds.");
+            throw new Error("Pages artifact metadata did not stabilize within 120 seconds.");
+
       - id: deployment
+        name: Deploy GitHub Pages (first attempt)
         uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      - name: Wait before retrying Pages deployment
+        if: steps.deployment.outcome == 'failure'
+        run: sleep 15
+
+      - id: deployment_retry_1
+        name: Deploy GitHub Pages (retry 1)
+        if: steps.deployment.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      - name: Wait before second Pages deployment retry
+        if: steps.deployment.outcome == 'failure' && steps.deployment_retry_1.outcome == 'failure'
+        run: sleep 30
+
+      - id: deployment_retry_2
+        name: Deploy GitHub Pages (retry 2)
+        if: steps.deployment.outcome == 'failure' && steps.deployment_retry_1.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      - name: Verify Pages deployment result
+        if: always()
+        env:
+          FIRST: ${{ steps.deployment.outcome }}
+          RETRY_ONE: ${{ steps.deployment_retry_1.outcome }}
+          RETRY_TWO: ${{ steps.deployment_retry_2.outcome }}
+        run: |
+          if [ "$FIRST" = "success" ] || [ "$RETRY_ONE" = "success" ] || [ "$RETRY_TWO" = "success" ]; then
+            echo "GitHub Pages deployment completed successfully."
+          else
+            echo "::error::All three GitHub Pages deployment attempts failed."
+            exit 1
+          fi
