@@ -2365,6 +2365,45 @@ button{min-height:44px}
 #C90_AUTH_PANEL .authrow button:disabled{opacity:.55}
 #C90_AUTH_PANEL .authmsg:not(:empty){animation:authItem .35s var(--ease)}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+<style id="c90-admin-icon-layout-fix">
+/* Isolated repair: prevent admin action icons and disclosure chevron from stretching */
+#C90_ADMIN .user-actions{align-items:center!important;align-self:center!important;flex-wrap:nowrap!important}
+#C90_ADMIN .user-edit-wrap{width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;flex:0 0 36px!important;align-self:center!important;display:flex!important;align-items:center!important;justify-content:center!important}
+#C90_ADMIN .user-edit,
+#C90_ADMIN .user-delete{
+ box-sizing:border-box!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ width:36px!important;min-width:36px!important;max-width:36px!important;
+ height:36px!important;min-height:36px!important;max-height:36px!important;
+ flex:0 0 36px!important;align-self:center!important;
+ padding:0!important;line-height:1!important;overflow:hidden!important;
+}
+#C90_ADMIN .user-edit svg,
+#C90_ADMIN .user-delete svg,
+#C90_ADMIN .user-edit-menu button svg{
+ display:block!important;width:17px!important;min-width:17px!important;max-width:17px!important;
+ height:17px!important;min-height:17px!important;max-height:17px!important;
+ flex:0 0 17px!important;align-self:center!important;overflow:visible!important;
+}
+#C90_ADMIN .user-edit-menu{align-items:center!important;justify-content:center!important;flex-wrap:nowrap!important}
+#C90_ADMIN .user-edit-menu button{
+ box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;
+ width:36px!important;min-width:36px!important;max-width:36px!important;
+ height:36px!important;min-height:36px!important;max-height:36px!important;
+ flex:0 0 36px!important;padding:0!important;line-height:1!important;overflow:hidden!important;
+}
+#C90_ADMIN .userrow:after{
+ content:""!important;display:block!important;box-sizing:border-box!important;
+ width:8px!important;min-width:8px!important;max-width:8px!important;
+ height:8px!important;min-height:8px!important;max-height:8px!important;
+ flex:0 0 8px!important;align-self:center!important;
+ margin-inline-start:4px!important;margin-top:0!important;
+ border:solid #e8b339!important;border-width:0 1.8px 1.8px 0!important;
+ transform:rotate(45deg)!important;line-height:0!important;font-size:0!important;
+}
+#C90_ADMIN .user-entry.open>.userrow:after{transform:rotate(225deg)!important}
+</style>
 </style>
 <script>
 (()=>{
