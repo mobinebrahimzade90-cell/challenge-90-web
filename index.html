@@ -1214,7 +1214,13 @@ function renderRankingContent(){
  const classMode=c90RankingTab==="class";
  list.classList.toggle("individual",!classMode);
  const rows=classMode?window.CHALLENGE_CLASSES:window.CHALLENGE_INDIVIDUALS;
- if(!Array.isArray(rows)){note.textContent="برای مشاهده رتبه‌بندی آنلاین وارد حساب کاربری شو.";return}
+ if(!Array.isArray(rows)){
+   const error=classMode?window.C90_RANK_ERRORS&&window.C90_RANK_ERRORS.classes:window.C90_RANK_ERRORS&&window.C90_RANK_ERRORS.individuals;
+   note.textContent=window.C90_CURRENT_USERNAME
+    ?(error?"خطا در دریافت رتبه‌بندی: "+error:"در حال دریافت رتبه‌بندی آنلاین…")
+    :"برای مشاهده رتبه‌بندی آنلاین وارد حساب کاربری شو.";
+   return;
+  }
  if(!rows.length){note.textContent="هنوز اطلاعاتی برای رتبه‌بندی ثبت نشده است.";return}
 
  let visibleRows;
@@ -1717,23 +1723,26 @@ async function enter(s){
   else console.warn("Start date setup deferred; authentication remains active.");
  }catch(startDateError){console.warn("Start date setup deferred:",startDateError.message)}
  window.C90_RANK_SIGNATURE=null;
+ window.C90_RANK_ERRORS={classes:null,individuals:null};
  window.C90_LOAD_RANKING=async()=>{
-  const classes=await request("/rest/v1/rpc/class_ranking",{method:"POST",headers:authHeaders(),body:"{}"});
-  let individuals=null;
-  try{
-    individuals=await request("/rest/v1/rpc/individual_ranking",{method:"POST",headers:authHeaders(),body:"{}"});
-  }catch(individualError){
-    console.warn("Individual ranking RPC is not installed yet:",individualError.message);
-  }
-  const signature=JSON.stringify([classes,individuals]);
+  const [classResult,individualResult]=await Promise.allSettled([
+   request("/rest/v1/rpc/class_ranking",{method:"POST",headers:authHeaders(),body:"{}"}),
+   request("/rest/v1/rpc/individual_ranking",{method:"POST",headers:authHeaders(),body:"{}"})
+  ]);
+  const classes=classResult.status==="fulfilled"&&Array.isArray(classResult.value)?classResult.value:null;
+  const individuals=individualResult.status==="fulfilled"&&Array.isArray(individualResult.value)?individualResult.value:null;
+  window.C90_RANK_ERRORS={
+   classes:classResult.status==="rejected"?String(classResult.reason&&classResult.reason.message||classResult.reason):null,
+   individuals:individualResult.status==="rejected"?String(individualResult.reason&&individualResult.reason.message||individualResult.reason):null
+  };
   window.CHALLENGE_CLASSES=classes;
   window.CHALLENGE_INDIVIDUALS=individuals;
-  // Update the visible ranking only when the server data actually changes.
+  const signature=JSON.stringify([classes,individuals,window.C90_RANK_ERRORS]);
   if(signature!==window.C90_RANK_SIGNATURE){
-    window.C90_RANK_SIGNATURE=signature;
-    window.dispatchEvent(new Event("c90ranking"));
+   window.C90_RANK_SIGNATURE=signature;
+   window.dispatchEvent(new Event("c90ranking"));
   }
-  return {classes,individuals};
+  return {classes,individuals,errors:window.C90_RANK_ERRORS};
  };
  try{
   if(window.supabase&&window.supabase.createClient){
