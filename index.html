@@ -2103,7 +2103,47 @@ async function runC90Auth(action,loadingText){
  }
 }
 $("c90Login").onclick=()=>runC90Auth(login,"در حال ورود به حساب…");
-$("c90AccountOpen").onclick=()=>{$("C90_AUTH_PANEL").style.display="flex"};
+function openC90AccountManager(){
+ const previous=$("c90AccountManager");
+ if(previous)previous.remove();
+ if(!session||!profile){$("C90_AUTH_PANEL").style.display="flex";return;}
+ const overlay=document.createElement("div");
+ overlay.id="c90AccountManager";
+ overlay.style.cssText="position:fixed;inset:0;z-index:1800;background:#080609eF;display:grid;place-items:center;padding:18px;font-family:Vazirmatn,Tahoma,sans-serif;color:#f3ebe6";
+ const panel=document.createElement("section");
+ panel.style.cssText="width:min(100%,430px);max-height:85vh;overflow:auto;background:#181113;border:1px solid #715332;border-radius:18px;padding:20px;box-shadow:0 22px 70px #000b";
+ const head=document.createElement("div");
+ head.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px";
+ const title=document.createElement("h2");title.textContent="مدیریت حساب";title.style.cssText="margin:0;color:#e8b339;font-size:1.2rem";
+ const close=document.createElement("button");close.type="button";close.textContent="بستن";close.onclick=()=>overlay.remove();
+ head.append(title,close);panel.append(head);
+ const rows=[
+  ["نام کاربری",profile.username||"—"],
+  ["نام نمایشی",profile.display_name||"—"],
+  ["پایه",profile.grade||"ثبت نشده"],
+  ["رشته",profile.major||"ثبت نشده"],
+  ["وضعیت",profile.role==="admin"?"مدیر":"شرکت‌کننده"]
+ ];
+ rows.forEach(([label,value])=>{
+  const row=document.createElement("div");
+  row.style.cssText="display:flex;justify-content:space-between;gap:12px;padding:10px 2px;border-bottom:1px solid #49343b";
+  const key=document.createElement("span");key.textContent=label;key.style.color="#a1908a";
+  const val=document.createElement("strong");val.textContent=String(value);val.style.textAlign="left";
+  row.append(key,val);panel.append(row);
+ });
+ const actions=document.createElement("div");
+ actions.style.cssText="display:flex;gap:10px;margin-top:18px";
+ const logout=document.createElement("button");logout.type="button";logout.textContent="خروج از حساب";logout.style.cssText="flex:1;background:#8f1e2b;border-color:#8f1e2b;color:#fff";
+ logout.onclick=()=>{overlay.remove();const button=$("c90Logout");if(button)button.click();};
+ const done=document.createElement("button");done.type="button";done.textContent="تمام";done.style.flex="1";done.onclick=()=>overlay.remove();
+ actions.append(logout,done);panel.append(actions);overlay.append(panel);
+ overlay.addEventListener("click",ev=>{if(ev.target===overlay)overlay.remove();});
+ document.body.append(overlay);
+}
+$("c90AccountOpen").onclick=()=>{
+ if(session&&profile){openC90AccountManager();return;}
+ $("C90_AUTH_PANEL").style.display="flex";
+};
 $("c90AuthBack").onclick=()=>{$("C90_AUTH_PANEL").style.display="none";msg("");};
 $("c90Signup").onclick=()=>runC90Auth(signup,"در حال ساخت حساب…");
 $("c90Password").onkeydown=e=>{if(e.key==="Enter")$("c90Login").click()};
