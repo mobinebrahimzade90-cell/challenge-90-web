@@ -1705,17 +1705,19 @@ async function enter(s){
  const finalClass=(profile.grade?"پایه "+profile.grade:"پایه ثبت نشده")+(profile.major?" · "+profile.major:"");
  setLoaderStage(4,"حساب آماده است","اطلاعات حساب با موفقیت بازیابی شد",shownName,finalClass);
  $("C90_AUTH_PANEL").style.display="none";
+ // Rebuild only the session controls; repeated entry/restore never duplicates UI or listeners.
+ document.querySelectorAll(".c90-accountbar[data-c90-session-ui='1']").forEach(node=>node.remove());
  if(profile.role==="admin"){
-  const b=document.createElement("div");b.className="c90-accountbar";
-  b.innerHTML='<button id="c90AdminOpen">پنل مدیریت</button>';
-  document.querySelector(".wrap").prepend(b);
-  $("c90AdminOpen").onclick=openAdmin;
+  const b=document.createElement("div");b.className="c90-accountbar";b.dataset.c90SessionUi="1";
+  const adminButton=document.createElement("button");adminButton.id="c90AdminOpen";adminButton.textContent="پنل مدیریت";
+  b.append(adminButton);document.querySelector(".wrap").prepend(b);adminButton.onclick=openAdmin;
  }
- const out=document.createElement("div");out.className="c90-accountbar";
- out.innerHTML='<span style="color:var(--mute)">حساب: '+String(profile.username||"").replace(/[&<>"]/g,"")+'</span><button id="c90Logout">ترک حساب</button>';
- document.querySelector(".wrap").prepend(out);
- $("c90Logout").onclick=async()=>{const button=$("c90Logout");button.disabled=true;button.textContent="در حال ترک حساب…";try{await request("/auth/v1/logout",{method:"POST",headers:authHeaders()})}catch(e){}clearTimeout(cloudTimer);clearInterval(window.C90_CLASS_RANK_TIMER);if(window.C90_RT_CLIENT&&window.C90_RT_CHANNEL){try{await window.C90_RT_CLIENT.removeChannel(window.C90_RT_CHANNEL)}catch(e){}}localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");sessionStorage.removeItem("c90.loaded");sessionStorage.removeItem("c90.active_uid");session=null;profile=null;window.C90_CURRENT_PROFILE=null;window.C90_CURRENT_USERNAME=null;location.reload()};
- window.addEventListener("c90save",e=>scheduleSync(e.detail));
+ const out=document.createElement("div");out.className="c90-accountbar";out.dataset.c90SessionUi="1";
+ const accountLabel=document.createElement("span");accountLabel.style.color="var(--mute)";accountLabel.textContent="حساب: "+String(profile.username||"");
+ const logoutButton=document.createElement("button");logoutButton.id="c90Logout";logoutButton.textContent="ترک حساب";
+ out.append(accountLabel,logoutButton);document.querySelector(".wrap").prepend(out);
+ logoutButton.onclick=async()=>{logoutButton.disabled=true;logoutButton.textContent="در حال ترک حساب…";try{await request("/auth/v1/logout",{method:"POST",headers:authHeaders()})}catch(e){}clearTimeout(cloudTimer);clearInterval(window.C90_CLASS_RANK_TIMER);if(window.C90_RT_CLIENT&&window.C90_RT_CHANNEL){try{await window.C90_RT_CLIENT.removeChannel(window.C90_RT_CHANNEL)}catch(e){}}localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");sessionStorage.removeItem("c90.loaded");sessionStorage.removeItem("c90.active_uid");session=null;profile=null;window.C90_CURRENT_PROFILE=null;window.C90_CURRENT_USERNAME=null;location.reload()};
+ if(!window.C90_SAVE_SYNC_BOUND){window.addEventListener("c90save",e=>scheduleSync(e.detail));window.C90_SAVE_SYNC_BOUND=true;}
  if(navigator.onLine){const local=localStorage.getItem("challenge90.v1."+session.user.id);if(local){try{await syncCloud(JSON.parse(local))}catch(e){console.warn(e)}}}
 }
 async function ensureSchoolInfo(){
@@ -2093,6 +2095,12 @@ async function runC90Auth(action,loadingText){
  showLoader(loadingText);
  try{await action()}
  catch(e){
+  // A failed bootstrap must not leave a half-authenticated session in memory or storage.
+  if(session){
+   clearTimeout(cloudTimer);clearInterval(window.C90_CLASS_RANK_TIMER);
+   localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");
+   session=null;profile=null;window.C90_CURRENT_PROFILE=null;window.C90_CURRENT_USERNAME=null;
+  }
   let error=String(e&&e.message||e||"خطای نامشخص");
   if(/invalid login credentials|invalid_grant/i.test(error))error="نام کاربری یا رمز عبور اشتباه است.";
   else if(/email not confirmed/i.test(error))error="تأیید ایمیل Supabase روشن است؛ برای این برنامه باید خاموش باشد.";
@@ -2197,6 +2205,8 @@ document.addEventListener("click",ev=>{
  }catch(e){
   localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");
   sessionStorage.removeItem("c90.active_uid");
+  clearTimeout(cloudTimer);clearInterval(window.C90_CLASS_RANK_TIMER);
+  session=null;profile=null;window.C90_CURRENT_PROFILE=null;window.C90_CURRENT_USERNAME=null;
   $("intro").classList.remove("on");$("splash").classList.remove("on");$("setup").classList.remove("on");
   $("C90_AUTH_PANEL").style.display="flex";msg("بازیابی ورود ناموفق بود: "+(e&&e.message?e.message:"خطای نامشخص")+"؛ دوباره وارد شو.");
  }finally{hideLoader()}
