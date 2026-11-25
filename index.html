@@ -294,7 +294,34 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
     <div id="endLine" class="note" style="text-align:center"></div>
   </div>
 
-  <div class="card" id="c90AccountCard"><h3>حساب و مشخصات</h3><div id="c90AccountStatus" class="note">بدون حساب هم می‌توانی از برنامه استفاده کنی.</div><button id="c90AccountOpen" style="margin-top:10px">ورود یا ساخت حساب</button></div>
+  <div class="card" id="c90AccountCard"><h3>حساب و مشخصات</h3><div id="c90AccountStatus" class="note">بدون حساب هم می‌توانی از برنامه استفاده کنی.</div><button id="c90AccountOpen" type="button" style="margin-top:10px">ورود یا ساخت حساب</button>
+<script>
+(function(){
+ const button=document.getElementById("c90AccountOpen");
+ if(!button||button.dataset.c90ClickReady==="1")return;
+ button.dataset.c90ClickReady="1";
+ button.addEventListener("click",function(event){
+  event.preventDefault();
+  event.stopPropagation();
+  const panel=document.getElementById("C90_AUTH_PANEL");
+  if(window.C90_OPEN_ACCOUNT_MANAGER&&window.C90_CURRENT_PROFILE){
+   window.C90_OPEN_ACCOUNT_MANAGER();
+   return;
+  }
+  if(!panel){
+   console.error("Challenge90: auth panel is missing from the document.");
+   return;
+  }
+  panel.style.display="flex";
+  panel.style.visibility="visible";
+  panel.style.pointerEvents="auto";
+  panel.setAttribute("aria-hidden","false");
+  document.body.style.overflow="hidden";
+  const username=document.getElementById("c90Username");
+  if(username)setTimeout(()=>username.focus({preventScroll:true}),80);
+ },{capture:true});
+})();
+</script></div>
   <div class="card rank-progress-card" id="c90RankProgress" aria-live="polite"></div>
   
   <div class="card stats">
@@ -2168,10 +2195,7 @@ function openC90AccountManager(){
  overlay.addEventListener("click",ev=>{if(ev.target===overlay)overlay.remove();});
  document.body.append(overlay);
 }
-$("c90AccountOpen").onclick=()=>{
- if(session&&profile){openC90AccountManager();return;}
- $("C90_AUTH_PANEL").style.display="flex";
-};
+window.C90_OPEN_ACCOUNT_MANAGER=openC90AccountManager;
 $("c90AuthBack").onclick=()=>{$("C90_AUTH_PANEL").style.display="none";msg("");};
 $("c90Signup").onclick=()=>runC90Auth(signup,"در حال ساخت حساب…");
 $("c90Password").onkeydown=e=>{if(e.key==="Enter")$("c90Login").click()};
