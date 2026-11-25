@@ -1559,9 +1559,12 @@ async function ensureInitialDays(){
  if(pending!==null){
   const days=Number(pending);
   if(Number.isInteger(days)&&days>=0&&days<=90){
-   try{await saveInitialDays(days);return}catch(e){console.warn("Pending initial-days save:",e.message)}
+   try{await saveInitialDays(days);return}catch(e){console.warn("Pending initial-days save deferred:",e.message);return}
   }
  }
+ // No pre-login selection means zero bonus. Do not block account access with a mandatory modal.
+ try{await saveInitialDays(0)}catch(e){console.warn("Default initial-days value could not be saved yet:",e.message)}
+ return;
  const modal=$("C90_INITIAL_DAYS"),input=$("c90InitialInput"),button=$("c90InitialSave"),message=$("c90InitialMsg"),reward=$("c90InitialReward");
  const meter=[...modal.querySelectorAll(".initial-meter span")];
  const updatePreview=()=>{
@@ -1650,7 +1653,17 @@ async function enter(s){
  }
  window.C90_CURRENT_USERNAME=profile.username;
  setLoaderStage(2,"در حال آماده‌سازی پروفایل","بررسی وضعیت حساب",shownName,shownClass);
- if(profile.start_date){if(typeof window.C90_SET_START_DATE!=="function")throw new Error("ماژول برنامه بارگذاری نشده است؛ صفحه را تازه‌سازی کن.");window.C90_SET_START_DATE(profile.start_date)}else{const initialized=await request("/rest/v1/rpc/c90_initialize_start_date",{method:"POST",headers:authHeaders(),body:"{}"});const candidates=[initialized,initialized&&initialized.c90_initialize_start_date,initialized&&initialized.start_date,Array.isArray(initialized)&&initialized[0],Array.isArray(initialized)&&initialized[0]&&initialized[0].c90_initialize_start_date];const todayIso=candidates.find(v=>typeof v==="string"&&validStartIso(v));if(!todayIso)throw new Error("تاریخ شروع حساب از سرور با قالب معتبر دریافت نشد؛ تاریخ حساب باید بررسی شود.");profile.start_date=todayIso;if(typeof window.C90_SET_START_DATE!=="function")throw new Error("ماژول برنامه بارگذاری نشده است؛ صفحه را تازه‌سازی کن.");window.C90_SET_START_DATE(todayIso)}
+ // Starting-date initialization is ancillary to authentication. Never reject valid credentials because this RPC/module is temporarily unavailable.
+ try{
+  if(!profile.start_date){
+   const initialized=await request("/rest/v1/rpc/c90_initialize_start_date",{method:"POST",headers:authHeaders(),body:"{}"});
+   const candidates=[initialized,initialized&&initialized.c90_initialize_start_date,initialized&&initialized.start_date,Array.isArray(initialized)&&initialized[0],Array.isArray(initialized)&&initialized[0]&&initialized[0].c90_initialize_start_date];
+   const todayIso=candidates.find(v=>typeof v==="string"&&validStartIso(v));
+   if(todayIso)profile.start_date=todayIso;
+  }
+  if(profile.start_date&&typeof window.C90_SET_START_DATE==="function")window.C90_SET_START_DATE(profile.start_date);
+  else console.warn("Start date setup deferred; authentication remains active.");
+ }catch(startDateError){console.warn("Start date setup deferred:",startDateError.message)}
  window.C90_RANK_SIGNATURE=null;
  window.C90_LOAD_RANKING=async()=>{
   const classes=await request("/rest/v1/rpc/class_ranking",{method:"POST",headers:authHeaders(),body:"{}"});
@@ -1693,13 +1706,20 @@ async function enter(s){
  $("c90AccountOpen").textContent="مدیریت حساب";
  
  setLoaderStage(3,"در حال آماده‌سازی اطلاعات","بازیابی اطلاعات حساب",shownName,shownClass);
- if(typeof window.C90_LOAD_USER_STATE!=="function")throw new Error("ماژول اطلاعات حساب بارگذاری نشده است؛ صفحه را تازه‌سازی کن.");
- window.C90_LOAD_USER_STATE(session.user.id,profile.start_date);
+ // Load optional account modules without making them a condition for sign-in.
+ if(typeof window.C90_LOAD_USER_STATE==="function"){
+  try{window.C90_LOAD_USER_STATE(session.user.id,profile.start_date)}
+  catch(stateError){console.warn("Local account state initialization deferred:",stateError.message)}
+ }else console.warn("Account state module not ready; sign-in continues.");
  hideLoader();
- await ensureInitialDays();
+ try{await ensureInitialDays()}catch(initialDaysError){console.warn("Initial-days setup deferred:",initialDaysError.message)}
  showLoader("در حال تکمیل ورود…");
  setLoaderStage(3,"در حال تکمیل اطلاعات","بررسی مشخصات و امتیازها",shownName,shownClass);
- await ensureSchoolInfo();
+ if(profile.grade&&profile.major){
+  try{await ensureSchoolInfo()}catch(schoolError){console.warn("School metadata sync deferred:",schoolError.message)}
+ }else{
+  console.warn("School details are incomplete; ranking setup can be completed later.");
+ }
  const cloudRestored=await loadCloud();
  if(!cloudRestored)console.warn("Cloud restore needs retry:",cloudReadError&&cloudReadError.message);
  const finalClass=(profile.grade?"پایه "+profile.grade:"پایه ثبت نشده")+(profile.major?" · "+profile.major:"");
