@@ -1827,7 +1827,7 @@ async function enter(s){
  }catch(rtError){window.C90_RT_ACTIVE=false;console.warn("Realtime subscription unavailable; using refresh fallback.",rtError)}
  clearInterval(window.C90_CLASS_RANK_TIMER);
  window.C90_CLASS_RANK_TIMER=setInterval(()=>{
-  if(!window.C90_RT_ACTIVE&&session&&navigator.onLine&&document.visibilityState==="visible")window.C90_LOAD_RANKING().catch(()=>{});
+  if(session&&navigator.onLine&&document.visibilityState==="visible")window.C90_LOAD_RANKING().catch(()=>{});
  },120000);
  window.C90_RENDER_HEADER_ACCOUNT(session,profile);
  
