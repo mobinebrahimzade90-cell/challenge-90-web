@@ -214,7 +214,17 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
 #nav{position:fixed;bottom:calc(14px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);display:flex;padding:4px;border:1px solid var(--line);border-radius:999px;background:color-mix(in srgb,var(--card) 78%,transparent);backdrop-filter:blur(14px);z-index:8;box-shadow:0 10px 30px rgba(0,0,0,.45)}
 #nav button{position:relative;z-index:1;border:0;background:transparent;border-radius:999px;padding:9px 18px;font-size:.86rem;color:var(--mute);white-space:nowrap;transition:color .3s}
 #nav button.on{color:#1a1204}
-#nvi{position:absolute;top:4px;bottom:4px;left:4px;width:80px;border-radius:999px;background:var(--gold);transition:left .5s cubic-bezier(.5,0,.2,1),width .5s cubic-bezier(.5,0,.2,1),background .6s;z-index:0}
+#nvi{position:absolute;top:4px;bottom:4px;left:4px;width:80px;border-radius:999px;background:var(--gold);z-index:0;pointer-events:none}
+#nvi.c90-pouring{animation:c90NavPour .72s cubic-bezier(.2,.72,.25,1) both}
+@keyframes c90NavPour{
+ 0%{left:var(--nav-from);width:var(--nav-from-width);top:4px;bottom:4px;transform:scaleY(1);border-radius:999px}
+ 22%{left:calc(var(--nav-from) + (var(--nav-to) - var(--nav-from))*.12);top:calc(100% - 1px);bottom:auto;height:17px;width:calc(var(--nav-from-width)*.48);transform:scaleY(1);border-radius:50% 50% 65% 65%}
+ 48%{left:var(--nav-to);top:-12px;bottom:auto;height:20px;width:calc(var(--nav-to-width)*.42);transform:scaleY(.9);border-radius:50% 50% 55% 55%}
+ 68%{left:var(--nav-to);top:4px;bottom:4px;height:auto;width:var(--nav-to-width);transform:scaleY(.35);border-radius:45% 45% 999px 999px}
+ 84%{transform:scaleY(1.08);border-radius:999px}
+ 100%{left:var(--nav-to);top:4px;bottom:4px;height:auto;width:var(--nav-to-width);transform:scaleY(1);border-radius:999px}
+}
+@media(prefers-reduced-motion:reduce){#nvi.c90-pouring{animation:none!important}}
 #wipe{position:fixed;inset:0;z-index:7;pointer-events:none;display:none}
 #wipe.on{display:block}
 #sess{position:fixed;inset:0;z-index:30;background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--glow) 40%,#050812),#03050c 75%);display:none;flex-direction:column;align-items:center;justify-content:center;gap:34px;color:#e8f1f5}
@@ -375,33 +385,7 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
 #pg1 .wrap>.card:has(#mY),
 #pg1 #c90RankProgress{display:none!important}
 
-/* Liquid-drop tab indicator: arcs from the old tab to the new tab, then settles. */
-#c90RankTabs{position:relative!important;isolation:isolate;overflow:visible!important}
-#c90RankTabs button{position:relative;z-index:2!important;background:transparent!important;transition:color .25s ease!important}
-#c90RankTabs button.on{color:#211708!important}
-#c90RankTabs:before{
- content:"";position:absolute;z-index:1;top:3px;bottom:3px;left:3px;width:calc(50% - 6px);
- border-radius:10px;background:linear-gradient(145deg,#ffe9a7 0%,#e8b339 52%,#a66b19 100%);
- box-shadow:inset 0 1px 2px #fff9,0 3px 12px #e8b33935;
- transform:translateX(0);transition:transform .48s cubic-bezier(.2,.8,.25,1);
- pointer-events:none;
-}
-#c90RankTabs:has([data-rank="class"].on):before{transform:translateX(calc(100% + 6px))}
-#c90RankTabs.c90-water-moving:before{
- animation:c90WaterArc .58s cubic-bezier(.2,.72,.25,1) both;
-}
-#c90RankTabs.c90-water-to-class:before{--water-end:calc(100% + 6px)}
-#c90RankTabs.c90-water-to-person:before{--water-end:0px}
-@keyframes c90WaterArc{
- 0%{transform:translateX(var(--water-start,0px)) translateY(0) scale(1,1);border-radius:10px}
- 28%{transform:translateX(calc((var(--water-start,0px) + var(--water-end))/2)) translateY(-13px) scale(.92,1.13);border-radius:55% 55% 48% 48%}
- 52%{transform:translateX(var(--water-end)) translateY(-5px) scale(1.05,.94);border-radius:48% 48% 55% 55%}
- 72%{transform:translateX(var(--water-end)) translateY(2px) scale(.98,1.04);border-radius:12px}
- 100%{transform:translateX(var(--water-end)) translateY(0) scale(1,1);border-radius:10px}
-}
-@media(prefers-reduced-motion:reduce){
- #c90RankTabs:before{transition:none!important;animation:none!important}
-}
+/* Ranking tabs retain their original appearance and behavior. */
 </style>
 
 </head>
@@ -867,14 +851,15 @@ function boot(){
 const NMS=["gN1","gN2","gN3"];
 function initName(){}
 const NAVB=document.querySelectorAll("#nav button");
-function moveInd(){const b=document.querySelector('#nav button[data-p="'+page+'"]'),i=$("nvi");if(!b||!i)return;i.style.left=b.offsetLeft+"px";i.style.width=b.offsetWidth+"px";NAVB.forEach(x=>x.classList.toggle("on",x===b))}
+function moveInd(previousPage){const b=document.querySelector('#nav button[data-p="'+page+'"]'),i=$("nvi");if(!b||!i)return;const from=document.querySelector('#nav button[data-p="'+previousPage+'"]');if(previousPage&&from&&previousPage!==page){i.style.setProperty("--nav-from",from.offsetLeft+"px");i.style.setProperty("--nav-from-width",from.offsetWidth+"px");i.style.setProperty("--nav-to",b.offsetLeft+"px");i.style.setProperty("--nav-to-width",b.offsetWidth+"px");i.classList.remove("c90-pouring");void i.offsetWidth;i.classList.add("c90-pouring");i.addEventListener("animationend",()=>i.classList.remove("c90-pouring"),{once:true})}else{i.style.left=b.offsetLeft+"px";i.style.width=b.offsetWidth+"px"}NAVB.forEach(x=>x.classList.toggle("on",x===b))}
 function setPage(n){
   n=Number(n);
   if(![1,2,3].includes(n)||n===page)return;
   if(SE&&n!==2)endSess(false);
+  const previousPage=page;
   page=n;
   [1,2,3].forEach(i=>{const panel=$("pg"+i);if(panel)panel.classList.toggle("hide",i!==n)});
-  moveInd();
+  moveInd(previousPage);
   applyTheme();
   try{window.scrollTo(0,0)}catch(e){}
   const activePanel=$("pg"+n);if(activePanel)activePanel.classList.remove("tab-enter");
@@ -1124,26 +1109,18 @@ function renderClassRanking(){
   b.setAttribute("aria-pressed",b.dataset.rank===c90RankingTab?"true":"false");
   b.onclick=()=>{
    if(c90RankingTab===b.dataset.rank)return;
-   const previousTab=c90RankingTab;
    c90RankingTab=b.dataset.rank;
-   const tabs=box.querySelector("#c90RankTabs");
-   if(tabs){
-    tabs.classList.remove("c90-water-moving","c90-water-to-class","c90-water-to-person");
-    tabs.style.setProperty("--water-start",previousTab==="class"?"calc(100% + 6px)":"0px");
-    tabs.classList.add("c90-water-to-"+c90RankingTab,"c90-water-moving");
-    setTimeout(()=>tabs.classList.remove("c90-water-moving","c90-water-to-class","c90-water-to-person"),650);
-   }
    box.querySelectorAll("[data-rank]").forEach(x=>{const active=x.dataset.rank===c90RankingTab;x.classList.toggle("on",active);x.setAttribute("aria-pressed",active?"true":"false")});
-   renderRankingContent();
+   renderRankingContent(c90RankingTab);
   };
  });
  renderRankingContent();
 }
-function renderRankingContent(){
+function renderRankingContent(mode=c90RankingTab){
  const list=document.getElementById("c90RankList"),note=document.getElementById("c90RankNote");
  if(!list||!note)return;
  list.innerHTML="";
- const classMode=c90RankingTab==="class";
+ const classMode=mode==="class";
  list.classList.toggle("individual",!classMode);
  const rows=classMode?window.CHALLENGE_CLASSES:window.CHALLENGE_INDIVIDUALS;
  if(!Array.isArray(rows)){
