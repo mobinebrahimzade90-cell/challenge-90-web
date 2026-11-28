@@ -1285,6 +1285,9 @@ initDate();initHyp();initRank();render();boot();
 #C90_ADMIN .admin-search-pop.open{display:block}
 #C90_ADMIN .admin-search-pop label{display:block;color:#e8b339;font-size:.8rem;margin:0 2px 7px}
 #C90_ADMIN .admin-search-pop input{background:#100c0e;border-color:#6a4e32}
+#C90_ADMIN .admin-filter-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+#C90_ADMIN .admin-filter-grid label{display:block;min-width:0;color:#d9bd82;font-size:.75rem}
+#C90_ADMIN .admin-filter-grid select{display:block;width:100%;min-width:0;margin-top:5px;padding:9px 8px;border:1px solid #6a4e32;border-radius:9px;background:#100c0e;color:#f5e8d0;font:inherit;font-size:.82rem}
 #C90_ADMIN .admin-search-note{font-size:.72rem;color:#aa9991;margin:7px 3px 0}
 
 #C90_ADMIN .user-entry{margin-top:8px;border:1px solid #49343b;border-radius:13px;overflow:hidden;background:#120e10}
@@ -1413,6 +1416,14 @@ function hideLoader(){const e=document.getElementById("c90Loading");if(e)e.class
   <div id="c90AdminSearchPop" class="admin-search-pop">
    <label for="c90AdminSearch">جست‌وجوی کاربران و نام‌های دلخواه</label>
    <input id="c90AdminSearch" placeholder="نام، نام کاربری یا نام مستعار…">
+   <div class="admin-filter-grid">
+    <label>فیلتر کلاس
+     <select id="c90AdminGrade"><option value="">همه پایه‌ها</option><option value="10">دهم</option><option value="11">یازدهم</option><option value="12">دوازدهم</option></select>
+    </label>
+    <label>فیلتر رشته
+     <select id="c90AdminMajor"><option value="">همه رشته‌ها</option><option value="کامپیوتر">کامپیوتر</option><option value="معماری">معماری</option><option value="گرافیک">گرافیک</option></select>
+    </label>
+   </div>
    <div class="admin-search-note">نام مستعار فقط در پنل مدیریت دیده می‌شود.</div>
   </div>
   <button type="button" id="c90AdminSearchFab" class="admin-search-fab" aria-label="جست‌وجوی کاربران">
@@ -1845,7 +1856,12 @@ function drawUsers(){
  bindAdminEditDismiss();
  closeAllAdminEditMenus();
  const q=$("c90AdminSearch").value.trim().toLowerCase();
- const list=allUsers.filter(x=>[x.username,x.display_name,x.admin_alias].some(v=>(v||"").toLowerCase().includes(q)));
+ const grade=$("c90AdminGrade").value,major=$("c90AdminMajor").value;
+ const list=allUsers.filter(x=>
+  (!q||[x.username,x.display_name,x.admin_alias].some(v=>(v||"").toLowerCase().includes(q)))&&
+  (!grade||String(x.grade||"")===grade)&&
+  (!major||String(x.major||"").trim()===major)
+ );
  $("c90AdminUsers").innerHTML="";activeAdminDetail=null;
  list.forEach(x=>{
   const entry=document.createElement("div");entry.className="user-entry";
@@ -2149,6 +2165,8 @@ window.addEventListener("popstate",e=>{
  }
 });
 $("c90AdminSearch").oninput=drawUsers;
+$("c90AdminGrade").onchange=drawUsers;
+$("c90AdminMajor").onchange=drawUsers;
 $("c90AdminSearchFab").onclick=ev=>{
  ev.preventDefault();ev.stopPropagation();
  const pop=$("c90AdminSearchPop");const opening=!pop.classList.contains("open");
