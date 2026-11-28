@@ -26,9 +26,12 @@ h1,h3,.lab,.stats b,.rc b,.ib h2,.dbar b,.dtrio,.quote,.ii i{font-family:Lalezar
 #c90AccountName{max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem}
 #c90AccountTrigger .c90-account-chevron{font-size:.72rem;color:var(--gold)}
 #c90RankTrigger{right:12px;width:52px;height:52px;padding:4px;border-radius:50%;display:grid;place-items:center;color:var(--gold)}
-#c90RankTrigger .c90-rank-trigger-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
-#c90RankTrigger .c90-rank-trigger-medal{font-size:1.2rem}
-#c90RankTrigger .c90-rank-trigger-points{font-size:.58rem;margin-top:2px;white-space:nowrap}
+#c90AccountInitial svg{display:block;width:21px;height:21px}
+#c90RankTrigger{width:auto;min-width:76px;height:52px;padding:5px 10px}
+#c90RankTrigger .c90-rank-trigger-inner{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:7px;line-height:1;direction:rtl}
+#c90RankTrigger .c90-rank-trigger-medal{display:grid;place-items:center;width:29px;height:29px;flex:none}
+#c90RankTrigger .c90-rank-trigger-medal .rank-medal-image{width:27px!important;height:27px!important;background-size:300% 300%}
+#c90RankTrigger .c90-rank-trigger-points{font-size:.72rem;font-weight:800;white-space:nowrap;margin:0;color:var(--gold)}
 .c90-head-menu{position:absolute;top:65px;left:12px;z-index:20;width:min(250px,calc(100vw - 32px));padding:8px;border:1px solid #765735;border-radius:17px;background:linear-gradient(145deg,#281c20f5,#100d11f7);box-shadow:0 18px 48px #000b;backdrop-filter:blur(16px);opacity:0;visibility:hidden;transform:translateY(-8px) scale(.98);transform-origin:top left;transition:opacity .18s,transform .18s,visibility .18s}
 .c90-head-menu.open{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
 .c90-head-menu button{display:flex;width:100%;min-height:46px;align-items:center;justify-content:flex-start;text-align:right;padding:9px 12px;border:0;background:transparent;border-radius:10px;font-size:.86rem}
@@ -1110,7 +1113,7 @@ function renderC90HeaderAccount(){
  const trigger=$("c90AccountTrigger"),initial=$("c90AccountInitial"),name=$("c90AccountName"),menu=$("c90AccountMenu");
  if(!trigger||!initial||!name||!menu)return;
  const logged=!!(session&&profile),fullName=logged?String(profile.display_name||profile.username||"کاربر"):"ورود";
- initial.textContent=logged?(Array.from(fullName.trim())[0]||"؟"):"؟";name.textContent=fullName;trigger.setAttribute("aria-label",logged?"منوی حساب "+fullName:"ورود یا ساخت حساب");
+ if(logged){initial.textContent=Array.from(fullName.trim())[0]||"؟";initial.innerHTML="";initial.textContent=Array.from(fullName.trim())[0]||"؟"}else{initial.innerHTML='<svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.7-3.5 3.1-5.3 7-5.3s6.3 1.8 7 5.3"/></svg>'}name.textContent=fullName;trigger.setAttribute("aria-label",logged?"منوی حساب "+fullName:"ورود یا ساخت حساب");
  menu.querySelectorAll("#c90MenuAdmin,#c90MenuLogout").forEach(node=>node.remove());
  $("c90MenuManage").textContent=logged?"مدیریت حساب":"ورود یا ساخت حساب";
  if(logged&&profile.role==="admin"){
@@ -1142,8 +1145,9 @@ function c90ConfirmLogout(){
 function renderC90HeaderRank(){
  const medal=$("c90RankTriggerMedal"),pointsNode=$("c90RankTriggerPoints");if(!medal||!pointsNode)return;
  const points=c90CurrentPoints(),rank=c90RankForPoints(points);
- medal.textContent=rank.key==="starter"?"✦":"●";medal.style.color=rank.tone==="gold"||rank.tone==="titan"||rank.tone==="legendary"?"#f3c75e":rank.tone==="silver"?"#dce4ef":"#d99b59";
- medal.setAttribute("aria-label",rank.name);pointsNode.textContent=fa(points);
+ medal.innerHTML=c90RankIcon(rank,27);medal.setAttribute("aria-label",rank.name);
+ pointsNode.textContent=fa(points);
+ const trigger=$("c90RankTrigger");if(trigger)trigger.setAttribute("aria-label","رتبهٔ "+rank.name+"، "+fa(points)+" امتیاز؛ نمایش همهٔ رتبه‌ها");
 }
 function c90OpenRankModal(){
  const points=c90CurrentPoints(),current=c90RankForPoints(points),next=C90_RANK_LEVELS.find(level=>points<level.min)||null;
