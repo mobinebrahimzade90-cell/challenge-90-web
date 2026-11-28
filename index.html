@@ -1784,6 +1784,11 @@ async function enter(s){
  }catch(startDateError){console.warn("Start date setup deferred:",startDateError.message)}
  window.C90_RANK_SIGNATURE=null;
  window.C90_RANK_ERRORS={classes:null,individuals:null};
+ let rankRefreshTimer=null;
+ const scheduleRankRefresh=()=>{
+  clearTimeout(rankRefreshTimer);
+  rankRefreshTimer=setTimeout(()=>{if(session&&navigator.onLine&&document.visibilityState==="visible")window.C90_LOAD_RANKING().catch(()=>{})},1200);
+ };
  window.C90_LOAD_RANKING=async()=>{
   const [classResult,individualResult]=await Promise.allSettled([
    request("/rest/v1/rpc/class_ranking",{method:"POST",headers:authHeaders(),body:"{}"}),
@@ -1810,19 +1815,21 @@ async function enter(s){
    await window.C90_RT_CLIENT.realtime.setAuth(session.access_token);
    if(window.C90_RT_CHANNEL)await window.C90_RT_CLIENT.removeChannel(window.C90_RT_CHANNEL);
    window.C90_RT_CHANNEL=window.C90_RT_CLIENT.channel("challenge90-class-ranking")
-    .on("postgres_changes",{event:"*",schema:"public",table:"daily_reports"},()=>window.C90_LOAD_RANKING().catch(()=>{}))
-    .on("postgres_changes",{event:"*",schema:"public",table:"profiles"},()=>window.C90_LOAD_RANKING().catch(()=>{}))
+    .on("postgres_changes",{event:"*",schema:"public",table:"daily_reports"},scheduleRankRefresh)
+    .on("postgres_changes",{event:"*",schema:"public",table:"profiles"},scheduleRankRefresh)
     .on("postgres_changes",{event:"*",schema:"public",table:"daily_reports",filter:"user_id=eq."+session.user.id},payload=>{
       const row=payload.new;
       if(!row||row.report_date!=="2000-01-01"||!row.payload)return;
       const local=localStorage.getItem("challenge90.v1."+session.user.id);
       try{if(JSON.stringify(JSON.parse(local||"null"))!==JSON.stringify(row.payload))window.dispatchEvent(new CustomEvent("c90cloudupdate",{detail:row.payload}))}catch(e){}
     })
-    .subscribe();
+    .subscribe(status=>{window.C90_RT_ACTIVE=status==="SUBSCRIBED"});
   }
- }catch(rtError){console.warn("Realtime subscription unavailable; using refresh fallback.",rtError)}
+ }catch(rtError){window.C90_RT_ACTIVE=false;console.warn("Realtime subscription unavailable; using refresh fallback.",rtError)}
  clearInterval(window.C90_CLASS_RANK_TIMER);
- window.C90_CLASS_RANK_TIMER=setInterval(()=>{if(session&&navigator.onLine&&document.visibilityState==='visible')window.C90_LOAD_RANKING().catch(()=>{})},15000);
+ window.C90_CLASS_RANK_TIMER=setInterval(()=>{
+  if(!window.C90_RT_ACTIVE&&session&&navigator.onLine&&document.visibilityState==="visible")window.C90_LOAD_RANKING().catch(()=>{});
+ },120000);
  window.C90_RENDER_HEADER_ACCOUNT(session,profile);
  
  setLoaderStage(3,"در حال آماده‌سازی اطلاعات","بازیابی اطلاعات حساب",shownName,shownClass);
@@ -2639,7 +2646,7 @@ button{min-height:44px}
 #C90_AUTH_PANEL .authrow button:disabled{opacity:.55}
 #C90_AUTH_PANEL .authmsg:not(:empty){animation:authItem .35s var(--ease)}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
-
+</style>
 <style id="c90-admin-icon-layout-fix">
 /* Isolated repair: prevent admin action icons and disclosure chevron from stretching */
 #C90_ADMIN .user-actions{align-items:center!important;align-self:center!important;flex-wrap:nowrap!important}
@@ -2677,7 +2684,6 @@ button{min-height:44px}
  transform:rotate(45deg)!important;line-height:0!important;font-size:0!important;
 }
 #C90_ADMIN .user-entry.open>.userrow:after{transform:rotate(225deg)!important}
-</style>
 </style>
 <script>
 (()=>{
