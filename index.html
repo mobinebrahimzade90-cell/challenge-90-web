@@ -1090,10 +1090,10 @@ const C90_RANK_LEVELS=[
  {key:"bronze",name:"برنزی",min:300,tone:"bronze"},
  {key:"silver",name:"نقره‌ای",min:600,tone:"silver"},
  {key:"gold",name:"طلایی",min:900,tone:"gold"},
- {key:"diamond",name:"الماس",min:2000,tone:"diamond"},
- {key:"champion",name:"قهرمان",min:4000,tone:"champion"},
- {key:"titan",name:"تایتان",min:7500,tone:"titan"},
- {key:"legendary",name:"لجندری",min:9000,tone:"legendary"}
+ {key:"diamond",name:"الماس",min:3500,tone:"diamond"},
+ {key:"champion",name:"قهرمان",min:6000,tone:"champion"},
+ {key:"titan",name:"تایتان",min:10000,tone:"titan"},
+ {key:"legendary",name:"لجندری",min:15000,tone:"legendary"}
 ];
 function c90CurrentPoints(){
  const currentProfile=window.C90_CURRENT_PROFILE||null;
@@ -1164,7 +1164,7 @@ function c90OpenRankModal(){
  const remaining=next?Math.max(0,next.min-points):0;
  const overlay=document.createElement("div");overlay.className="c90-rank-modal open";overlay.id="c90RankModal";
  const panel=document.createElement("section");panel.className="c90-rank-panel";panel.setAttribute("role","dialog");panel.setAttribute("aria-modal","true");panel.setAttribute("aria-labelledby","c90RankModalTitle");
- panel.innerHTML='<div class="c90-rank-head"><h2 id="c90RankModalTitle">مدال‌ها و رتبه‌ها</h2><button type="button" class="c90-rank-close" aria-label="بستن پنجره">×</button></div><div class="c90-rank-current"><div class="rank-current-medal">'+c90RankIcon(current,64)+'</div><div class="c90-rank-current-copy"><small>رتبهٔ فعلی · '+fa(points)+' امتیاز</small><strong>'+current.name+'</strong><span>'+(next?'برای رتبهٔ '+next.name+' به '+fa(remaining)+' امتیاز دیگر نیاز داری.':'بالاترین رتبهٔ فعلی را داری.')+'</span></div></div><div class="c90-rank-progress"><i style="width:'+pct+'%"></i></div><div class="c90-rank-progress-label"><span>'+fa(current.min)+' امتیاز</span><span>'+(next?fa(next.min):"۹۰۰۰+")+' امتیاز</span></div><div class="c90-rank-list" id="c90RankModalList"></div>';
+ panel.innerHTML='<div class="c90-rank-head"><h2 id="c90RankModalTitle">مدال‌ها و رتبه‌ها</h2><button type="button" class="c90-rank-close" aria-label="بستن پنجره">×</button></div><div class="c90-rank-current"><div class="rank-current-medal">'+c90RankIcon(current,64)+'</div><div class="c90-rank-current-copy"><small>رتبهٔ فعلی · '+fa(points)+' امتیاز</small><strong>'+current.name+'</strong><span>'+(next?'برای رتبهٔ '+next.name+' به '+fa(remaining)+' امتیاز دیگر نیاز داری.':'بالاترین رتبهٔ فعلی را داری.')+'</span></div></div><div class="c90-rank-progress"><i style="width:'+pct+'%"></i></div><div class="c90-rank-progress-label"><span>'+fa(current.min)+' امتیاز</span><span>'+(next?fa(next.min):"۱۵۰۰۰+")+' امتیاز</span></div><div class="c90-rank-list" id="c90RankModalList"></div>';
  const list=panel.querySelector("#c90RankModalList");
  const starter=document.createElement("div");starter.className="c90-rank-row"+(current.key==="starter"?" current":"");starter.innerHTML='<span class="rank-medal-image" role="img" aria-label="تازه‌وارد" style="width:42px;height:42px;background-position:50% 100%"></span><span class="c90-rank-row-copy"><b>تازه‌وارد</b><small>شروع از ۰ امتیاز</small></span><span class="c90-rank-row-status">'+(current.key==="starter"?"رتبهٔ فعلی":"")+'</span>';list.append(starter);
  C90_RANK_LEVELS.forEach(level=>{
