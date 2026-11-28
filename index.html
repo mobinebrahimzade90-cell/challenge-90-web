@@ -1449,32 +1449,55 @@ const authHeaders=()=>({"apikey":KEY,"Authorization":"Bearer "+session.access_to
 const msg=t=>$("c90AuthMsg").textContent=t;
 const validStartIso=v=>typeof v==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&!isNaN(Date.parse(v));
 const internalEmail=u=>u.toLowerCase()+"@example.com";
+let c90RefreshPromise=null;
+async function c90RefreshAccessToken(){
+ if(c90RefreshPromise)return c90RefreshPromise;
+ if(!session||!session.refresh_token)throw new Error("نشست مدیریتی منقضی شده است. دوباره وارد حساب شو.");
+ c90RefreshPromise=(async()=>{
+  const response=await fetch(URL+"/auth/v1/token?grant_type=refresh_token",{method:"POST",headers:{apikey:KEY,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:session.refresh_token})});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok||!data.access_token)throw new Error("تمدید نشست ناموفق بود؛ دوباره وارد حساب مدیریتی شو.");
+  session={...session,...data,user:data.user||session.user};
+  localStorage.setItem("c90.session",JSON.stringify(session));
+  if(window.C90_RT_CLIENT)try{window.C90_RT_CLIENT.realtime.setAuth(session.access_token)}catch(e){}
+  return session.access_token;
+ })().finally(()=>{c90RefreshPromise=null});
+ return c90RefreshPromise;
+}
 async function request(path,opts={}){
  const {timeoutMs=15000,...fetchOpts}=opts;
  const method=String(fetchOpts.method||"GET").toUpperCase();
  const headers={apikey:KEY,...(fetchOpts.body?{"Content-Type":"application/json"}:{}),...(opts.headers||{})};
- let lastError=null;
- // Retry one transient browser/network failure. Do not retry HTTP errors such as invalid credentials.
+ let lastError=null,authRetried=false;
  for(let attempt=0;attempt<2;attempt++){
-  const controller=new AbortController();
-  const timer=setTimeout(()=>controller.abort(),timeoutMs);
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
   try{
    const r=await fetch(URL+path,{...fetchOpts,signal:controller.signal,headers});
    const d=await r.json().catch(()=>({}));
-   if(!r.ok)throw new Error(d.msg||d.message||d.error_description||d.error||("HTTP "+r.status));
+   if(!r.ok){
+    const expired=r.status===401||/jwt expired|token expired|invalid jwt/i.test(String(d.msg||d.message||d.error_description||d.error||""));
+    if(expired&&!authRetried&&session&&session.refresh_token&&!path.startsWith("/auth/v1/token")){
+     authRetried=true;headers.Authorization="Bearer "+await c90RefreshAccessToken();attempt--;continue;
+    }
+    throw new Error(d.msg||d.message||d.error_description||d.error||("HTTP "+r.status));
+   }
    return d;
   }catch(e){
    if(e.name==="AbortError")throw new Error("زمان پاسخ سرویس تمام شد ("+method+" "+path+"). اتصال اینترنت یا دسترسی به سرویس را بررسی کن.");
    if(e instanceof TypeError||/failed to fetch|networkerror|load failed/i.test(String(e&&e.message||e))){
-    lastError=e;
-    if(attempt===0){await new Promise(resolve=>setTimeout(resolve,700));continue}
-    const online=navigator.onLine;
-    throw new Error("ارتباط مرورگر با سرویس برقرار نشد ("+method+" "+path+"). "+(online?"احتمالاً درخواست شبکه یا دسترسی این شبکه به Supabase مسدود/قطع شده است. یک‌بار با اینترنت دیگری امتحان کن.":"دستگاه در حال حاضر آفلاین است."));
+    lastError=e;if(attempt===0){await new Promise(resolve=>setTimeout(resolve,700));continue}
+    throw new Error("ارتباط مرورگر با سرویس برقرار نشد ("+method+" "+path+"). "+(navigator.onLine?"احتمالاً دسترسی شبکه به Supabase قطع شده است.":"دستگاه آفلاین است."));
    }
    throw e;
   }finally{clearTimeout(timer)}
  }
  throw lastError||new Error("ارتباط با سرویس برقرار نشد.");
+}
+function c90AdminToast(message,type="success"){
+ let node=document.getElementById("c90AdminToast");
+ if(!node){node=document.createElement("div");node.id="c90AdminToast";node.setAttribute("role","status");node.setAttribute("aria-live","polite");document.body.append(node)}
+ node.textContent=message;node.dataset.type=type;node.classList.add("show");
+ clearTimeout(node._hideTimer);node._hideTimer=setTimeout(()=>node.classList.remove("show"),3200);
 }
 async function getProfile(){
  let a;
@@ -1900,9 +1923,9 @@ function drawUsers(){
    const alias=next.trim();aliasEdit.disabled=true;
    try{
     await request("/rest/v1/rpc/admin_set_user_alias",{method:"POST",headers:authHeaders(),body:JSON.stringify({p_target_user_id:x.user_id,p_alias:alias})});
-    x.admin_alias=alias||null;drawUsers();if(alias)$("c90AdminSearch").value=alias;
-    alert(alias?"نام مدیریتی ذخیره شد.":"نام مستعار حذف شد؛ نام اصلی نمایش داده می‌شود.");
-   }catch(err){alert("ذخیره نام انجام نشد: "+err.message)}
+    x.admin_alias=alias||null;if(alias)$("c90AdminSearch").value=alias;drawUsers();
+    c90AdminToast(alias?"نام مدیریتی ذخیره شد.":"نام مستعار حذف شد؛ نام اصلی نمایش داده می‌شود.");
+   }catch(err){c90AdminToast("ذخیره نام انجام نشد: "+err.message,"error")}
    finally{aliasEdit.disabled=false}
   };
   usernameEdit.onclick=async ev=>{
@@ -1913,9 +1936,9 @@ function drawUsers(){
    usernameEdit.disabled=true;
    try{
     await request("/functions/v1/admin-change-username",{method:"POST",headers:authHeaders(),body:JSON.stringify({user_id:x.user_id,new_username:username})});
-    const old=x.username;x.username=username;x.admin_alias=null;drawUsers();$("c90AdminSearch").value=username;
-    alert("نام کاربری حساب از @"+old+" به @"+username+" تغییر کرد. ورود بعدی با نام جدید انجام می‌شود.");
-   }catch(err){alert("تغییر نام کاربری انجام نشد: "+err.message)}
+    const old=x.username;x.username=username;x.admin_alias=null;$("c90AdminSearch").value=username;drawUsers();
+    c90AdminToast("نام کاربری از @"+old+" به @"+username+" تغییر کرد.");
+   }catch(err){c90AdminToast("تغییر نام کاربری انجام نشد: "+err.message,"error")}
    finally{usernameEdit.disabled=false}
   };
   const displayNameEdit=document.createElement("button");displayNameEdit.type="button";displayNameEdit.className="user-edit-displayname";displayNameEdit.title="تغییر نام نمایشی اصلی";displayNameEdit.setAttribute("aria-label","تغییر نام نمایشی اصلی");displayNameEdit.innerHTML=edit.innerHTML;
@@ -1927,9 +1950,9 @@ function drawUsers(){
    displayNameEdit.disabled=true;
    try{
     await request("/rest/v1/rpc/admin_set_user_display_name",{method:"POST",headers:authHeaders(),body:JSON.stringify({p_target_user_id:x.user_id,p_display_name:displayName})});
-    x.display_name=displayName;drawUsers();$("c90AdminSearch").value=displayName;
-    alert("نام نمایشی اصلی کاربر ذخیره شد.");
-   }catch(err){alert("تغییر نام نمایشی انجام نشد: "+err.message)}
+    x.display_name=displayName;$("c90AdminSearch").value=displayName;drawUsers();
+    c90AdminToast("نام نمایشی اصلی کاربر ذخیره شد.");
+   }catch(err){c90AdminToast("تغییر نام نمایشی انجام نشد: "+err.message,"error")}
    finally{displayNameEdit.disabled=false}
   };
   editMenu.append(aliasEdit,usernameEdit,displayNameEdit);editWrap.append(edit);
@@ -2354,6 +2377,9 @@ document.addEventListener("click",ev=>{
 
 <style>
 /* Admin action dialogs — matched to the Challenge 90 visual system */
+#c90AdminToast{position:fixed;z-index:2147483600;left:50%;bottom:22px;transform:translate(-50%,18px);width:max-content;max-width:calc(100vw - 32px);padding:12px 16px;border:1px solid #8e7547;border-radius:14px;background:linear-gradient(145deg,#292027,#171116);color:#f4dfb0;box-shadow:0 12px 36px #000b;font:600 .82rem/1.8 Vazirmatn,Tahoma,sans-serif;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+#c90AdminToast.show{opacity:1;transform:translate(-50%,0)}
+#c90AdminToast[data-type="error"]{border-color:#a94c59;color:#ffd2d5}
 .c90-admin-dialog{position:fixed;inset:0;z-index:2600;display:grid;place-items:center;padding:18px;background:rgba(5,3,5,.78);backdrop-filter:blur(12px);opacity:0;transition:opacity .2s ease;font-family:Vazirmatn,Tahoma,sans-serif}
 .c90-admin-dialog.show{opacity:1}
 .c90-admin-dialog-card{position:relative;width:min(100%,430px);padding:22px 20px 18px;border:1px solid #76543e;border-radius:23px;background:radial-gradient(ellipse at 50% 0%,#49302b55,transparent 55%),linear-gradient(150deg,#291a20,#191117 58%,#100d13);box-shadow:0 28px 90px #000d,inset 0 1px #ffffff18;transform:translateY(16px) scale(.97);transition:transform .28s cubic-bezier(.2,.8,.2,1);overflow:hidden}
