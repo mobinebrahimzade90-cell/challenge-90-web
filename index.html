@@ -1629,6 +1629,7 @@ async function getProfile(){
  window.C90_CURRENT_PROFILE=profile;
 }
 let cloudReadFailed=false,cloudReadInProgress=false,cloudReadSucceeded=false,cloudReadPromise=null,cloudReadError=null;
+const cloudConflictKey=uid=>"challenge90.conflict."+String(uid);
 async function loadCloud(options={}){
  if(cloudReadPromise)return cloudReadPromise;
  cloudReadFailed=false;cloudReadSucceeded=false;cloudReadError=null;cloudReadInProgress=true;
@@ -1636,8 +1637,28 @@ async function loadCloud(options={}){
   try{
    const a=await request("/rest/v1/daily_reports?select=payload&report_date=eq.2000-01-01&user_id=eq."+encodeURIComponent(session.user.id),{headers:authHeaders(),timeoutMs:12000});
    if(a.length&&a[0].payload&&typeof a[0].payload==="object"&&options.apply!==false){
-    localStorage.setItem("challenge90.v1."+session.user.id,JSON.stringify(a[0].payload));
-    window.dispatchEvent(new CustomEvent("c90cloudupdate",{detail:a[0].payload}));
+    const localKey="challenge90.v1."+session.user.id;
+    const localRaw=localStorage.getItem(localKey);
+    const cloudRaw=JSON.stringify(a[0].payload);
+    if(localRaw){
+     let differs=true;
+     try{differs=JSON.stringify(JSON.parse(localRaw))!==cloudRaw}catch(parseError){differs=true}
+     if(differs){
+      const backupKey=cloudConflictKey(session.user.id);
+      if(!localStorage.getItem(backupKey)){
+       const backup=JSON.stringify({version:1,user_id:session.user.id,created_at:new Date().toISOString(),local:JSON.parse(localRaw),cloud:a[0].payload});
+       localStorage.setItem(backupKey,backup);
+       if(localStorage.getItem(backupKey)!==backup)throw new Error("نسخه پشتیبان تعارض ذخیره نشد؛ بازیابی ابری متوقف شد.");
+      }
+      console.warn("Cloud restore paused: local/cloud snapshots preserved for conflict review.");
+     }else{
+      localStorage.setItem(localKey,cloudRaw);
+      window.dispatchEvent(new CustomEvent("c90cloudupdate",{detail:a[0].payload}));
+     }
+    }else{
+     localStorage.setItem(localKey,cloudRaw);
+     window.dispatchEvent(new CustomEvent("c90cloudupdate",{detail:a[0].payload}));
+    }
    }
    cloudReadSucceeded=true;
    return true;
@@ -1726,6 +1747,7 @@ $("c90PreSave").onclick=()=>{
 refreshPreInitialDays();
 async function syncCloud(data){
  if(!session||!data)throw new Error("برای ذخیره آنلاین باید وارد حساب کاربری شوی.");
+ if(localStorage.getItem(cloudConflictKey(session.user.id)))throw new Error("دو نسخه متفاوت از اطلاعات محلی و ابری وجود دارد؛ برای جلوگیری از حذف داده، همگام‌سازی خودکار متوقف شده است.");
  if(!cloudReadSucceeded){
   const restored=await loadCloud({apply:false});
   if(!restored)throw new Error("بازیابی اطلاعات از سرور ناموفق بود: "+String(cloudReadError&&cloudReadError.message||"خطای ناشناخته"));
@@ -1878,6 +1900,10 @@ async function enter(s){
  }
  const cloudRestored=await loadCloud();
  if(!cloudRestored)console.warn("Cloud restore needs retry:",cloudReadError&&cloudReadError.message);
+ if(localStorage.getItem(cloudConflictKey(session.user.id))){
+  console.warn("Cloud/local conflict detected. Both snapshots are preserved; automatic upload is blocked.");
+  if(window.C90_TOAST)window.C90_TOAST("دو نسخه متفاوت از اطلاعات پیدا شد؛ هر دو حفظ شده‌اند و همگام‌سازی خودکار برای جلوگیری از حذف اطلاعات متوقف شد.");
+ }
  const finalClass=(profile.grade?"پایه "+profile.grade:"پایه ثبت نشده")+(profile.major?" · "+profile.major:"");
  setLoaderStage(4,"حساب آماده است","اطلاعات حساب با موفقیت بازیابی شد",shownName,finalClass);
  $("C90_AUTH_PANEL").style.display="none";
