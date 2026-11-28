@@ -1735,18 +1735,48 @@ async function syncCloud(data){
 }
 // Expose the authenticated sync function to the main app script, which runs outside this IIFE.
 window.syncCloud=syncCloud;
+let cloudSyncLatest=null,cloudSyncInFlight=false,cloudSyncRetry=0,cloudSyncRevision=0,cloudSyncNextDelay=1000;
+async function flushCloudSync(){
+ if(!session||!cloudSyncLatest)return;
+ if(cloudSyncInFlight){cloudTimer=setTimeout(flushCloudSync,250);return}
+ const snapshot=cloudSyncLatest,revision=cloudSyncRevision;
+ cloudSyncLatest=null;cloudTimer=null;cloudSyncInFlight=true;
+ try{
+  await syncCloud(snapshot);
+  cloudSyncRetry=0;
+ }catch(e){
+  console.warn("Cloud sync (local data preserved):",e&&e.message||e);
+  if(session){
+   if(revision===cloudSyncRevision&&!cloudSyncLatest){
+    cloudSyncLatest=snapshot;
+    cloudSyncRetry=Math.min(cloudSyncRetry+1,5);
+    cloudSyncNextDelay=[1000,2000,5000,10000,20000,30000][cloudSyncRetry];
+   }else if(cloudSyncLatest){
+    cloudSyncNextDelay=250;
+   }else if(window.C90_TOAST){
+    window.C90_TOAST("ذخیره آنلاین فعلاً انجام نشد؛ اطلاعات روی دستگاه محفوظ است.");
+   }
+  }
+ }finally{
+  cloudSyncInFlight=false;
+  if(session&&cloudSyncLatest){
+   clearTimeout(cloudTimer);
+   cloudTimer=setTimeout(flushCloudSync,cloudSyncNextDelay);
+  }
+ }
+}
 function scheduleSync(data,retry=0){
  if(!session)return;
+ try{cloudSyncLatest=JSON.parse(JSON.stringify(data))}
+ catch(e){console.warn("Cloud sync snapshot failed:",e);return}
+ cloudSyncRevision++;
+ cloudSyncRetry=Math.min(retry,5);
+ cloudSyncNextDelay=[1000,2000,5000,10000,20000,30000][cloudSyncRetry];
  clearTimeout(cloudTimer);
- const delays=[1000,2000,5000,10000,20000,30000];
- cloudTimer=setTimeout(async()=>{
-  try{await syncCloud(data)}
-  catch(e){
-   console.warn("Cloud sync (local data preserved):",e&&e.message||e);
-   if(session&&retry<5&&navigator.onLine){scheduleSync(data,retry+1);return}
-   if(window.C90_TOAST)window.C90_TOAST("ذخیره آنلاین فعلاً انجام نشد؛ اطلاعات روی دستگاه محفوظ است.");
-  }
- },delays[Math.min(retry,delays.length-1)]);
+ cloudTimer=setTimeout(flushCloudSync,cloudSyncNextDelay);
+}
+function clearCloudSyncQueue(){
+ clearTimeout(cloudTimer);cloudTimer=null;cloudSyncLatest=null;cloudSyncRetry=0;cloudSyncRevision++;
 }
 async function refreshSession(){if(!session||!session.refresh_token)return;try{const d=await request("/auth/v1/token?grant_type=refresh_token",{method:"POST",body:JSON.stringify({refresh_token:session.refresh_token})});if(d&&d.access_token){session={...session,...d,user:d.user||session.user};localStorage.setItem("c90.session",JSON.stringify(session));if(window.C90_RT_CLIENT)window.C90_RT_CLIENT.realtime.setAuth(session.access_token)}}catch(e){console.warn("Token refresh:",e.message)}}
 setInterval(refreshSession,40*60*1000);
@@ -1919,7 +1949,7 @@ window.C90_OPEN_ADMIN_PANEL=()=>openAdmin();
 window.C90_LOGOUT_ACCOUNT=async()=>{
  if(!session)return;
  try{await request("/auth/v1/logout",{method:"POST",headers:authHeaders()})}catch(e){if(!navigator.onLine)throw e}
- clearTimeout(cloudTimer);clearInterval(window.C90_CLASS_RANK_TIMER);
+ clearCloudSyncQueue();clearInterval(window.C90_CLASS_RANK_TIMER);
  if(window.C90_RT_CLIENT&&window.C90_RT_CHANNEL){try{await window.C90_RT_CLIENT.removeChannel(window.C90_RT_CHANNEL)}catch(e){}}
  localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");
  sessionStorage.removeItem("c90.loaded");sessionStorage.removeItem("c90.active_uid");
@@ -2247,7 +2277,7 @@ async function runC90Auth(action,loadingText){
  catch(e){
   // Keep a valid token saved if profile loading failed transiently; the next load can resume sign-in.
   if(session){
-   clearTimeout(cloudTimer);clearInterval(window.C90_CLASS_RANK_TIMER);
+   clearCloudSyncQueue();clearInterval(window.C90_CLASS_RANK_TIMER);
    session=null;profile=null;window.C90_CURRENT_PROFILE=null;window.C90_CURRENT_USERNAME=null;
   }
   let error=String(e&&e.message||e||"خطای نامشخص");
@@ -2359,7 +2389,7 @@ document.addEventListener("click",ev=>{
   }else{
    console.warn("Session restoration deferred; saved credentials retained:",errorText);
   }
-  clearTimeout(cloudTimer);clearInterval(window.C90_CLASS_RANK_TIMER);
+  clearCloudSyncQueue();clearInterval(window.C90_CLASS_RANK_TIMER);
   session=null;profile=null;window.C90_CURRENT_PROFILE=null;window.C90_CURRENT_USERNAME=null;
   $("intro").classList.remove("on");$("splash").classList.remove("on");
   $("C90_AUTH_PANEL").style.display="flex";
