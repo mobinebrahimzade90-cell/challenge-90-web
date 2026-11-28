@@ -369,6 +369,41 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
 }
 </style>
 
+
+<style id="c90-clean-home-and-water-tabs">
+/* Hide only the requested home cards; retain their DOM fields for existing date/rank logic. */
+#pg1 .wrap>.card:has(#mY),
+#pg1 #c90RankProgress{display:none!important}
+
+/* Liquid-drop tab indicator: arcs from the old tab to the new tab, then settles. */
+#c90RankTabs{position:relative!important;isolation:isolate;overflow:visible!important}
+#c90RankTabs button{position:relative;z-index:2!important;background:transparent!important;transition:color .25s ease!important}
+#c90RankTabs button.on{color:#211708!important}
+#c90RankTabs:before{
+ content:"";position:absolute;z-index:1;top:3px;bottom:3px;left:3px;width:calc(50% - 6px);
+ border-radius:10px;background:linear-gradient(145deg,#ffe9a7 0%,#e8b339 52%,#a66b19 100%);
+ box-shadow:inset 0 1px 2px #fff9,0 3px 12px #e8b33935;
+ transform:translateX(0);transition:transform .48s cubic-bezier(.2,.8,.25,1);
+ pointer-events:none;
+}
+#c90RankTabs:has([data-rank="class"].on):before{transform:translateX(calc(100% + 6px))}
+#c90RankTabs.c90-water-moving:before{
+ animation:c90WaterArc .58s cubic-bezier(.2,.72,.25,1) both;
+}
+#c90RankTabs.c90-water-to-class:before{--water-end:calc(100% + 6px)}
+#c90RankTabs.c90-water-to-person:before{--water-end:0px}
+@keyframes c90WaterArc{
+ 0%{transform:translateX(var(--water-start,0px)) translateY(0) scale(1,1);border-radius:10px}
+ 28%{transform:translateX(calc((var(--water-start,0px) + var(--water-end))/2)) translateY(-13px) scale(.92,1.13);border-radius:55% 55% 48% 48%}
+ 52%{transform:translateX(var(--water-end)) translateY(-5px) scale(1.05,.94);border-radius:48% 48% 55% 55%}
+ 72%{transform:translateX(var(--water-end)) translateY(2px) scale(.98,1.04);border-radius:12px}
+ 100%{transform:translateX(var(--water-end)) translateY(0) scale(1,1);border-radius:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ #c90RankTabs:before{transition:none!important;animation:none!important}
+}
+</style>
+
 </head>
 <body>
 <div id="pg1">
@@ -1089,7 +1124,15 @@ function renderClassRanking(){
   b.setAttribute("aria-pressed",b.dataset.rank===c90RankingTab?"true":"false");
   b.onclick=()=>{
    if(c90RankingTab===b.dataset.rank)return;
+   const previousTab=c90RankingTab;
    c90RankingTab=b.dataset.rank;
+   const tabs=box.querySelector("#c90RankTabs");
+   if(tabs){
+    tabs.classList.remove("c90-water-moving","c90-water-to-class","c90-water-to-person");
+    tabs.style.setProperty("--water-start",previousTab==="class"?"calc(100% + 6px)":"0px");
+    tabs.classList.add("c90-water-to-"+c90RankingTab,"c90-water-moving");
+    setTimeout(()=>tabs.classList.remove("c90-water-moving","c90-water-to-class","c90-water-to-person"),650);
+   }
    box.querySelectorAll("[data-rank]").forEach(x=>{const active=x.dataset.rank===c90RankingTab;x.classList.toggle("on",active);x.setAttribute("aria-pressed",active?"true":"false")});
    renderRankingContent();
   };
