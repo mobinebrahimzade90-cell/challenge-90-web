@@ -1628,32 +1628,33 @@ async function getProfile(){
  profile=a[0];
  window.C90_CURRENT_PROFILE=profile;
 }
-let cloudReadFailed=false,cloudReadInProgress=false,cloudReadSucceeded=false,cloudReadPromise=null,cloudReadError=null;
+let cloudReadFailed=false,cloudReadInProgress=false,cloudReadSucceeded=false,cloudReadPromise=null,cloudReadError=null,cloudReadPayload=null;
 const cloudConflictKey=uid=>"challenge90.conflict."+String(uid);
 async function loadCloud(options={}){
  if(cloudReadPromise)return cloudReadPromise;
- cloudReadFailed=false;cloudReadSucceeded=false;cloudReadError=null;cloudReadInProgress=true;
+ cloudReadFailed=false;cloudReadSucceeded=false;cloudReadError=null;cloudReadPayload=null;cloudReadInProgress=true;
  cloudReadPromise=(async()=>{
   try{
    const a=await request("/rest/v1/daily_reports?select=payload&report_date=eq.2000-01-01&user_id=eq."+encodeURIComponent(session.user.id),{headers:authHeaders(),timeoutMs:12000});
-   if(a.length&&a[0].payload&&typeof a[0].payload==="object"&&options.apply!==false){
+   cloudReadPayload=a.length&&a[0].payload&&typeof a[0].payload==="object"?a[0].payload:null;
+   if(cloudReadPayload&&options.apply!==false){
     const localKey="challenge90.v1."+session.user.id;
     const localRaw=localStorage.getItem(localKey);
-    const cloudRaw=JSON.stringify(a[0].payload);
+    const cloudRaw=JSON.stringify(cloudReadPayload);
     if(window.C90_LOCAL_STATE_EXISTED&&localRaw){
      let differs=true;
      try{differs=JSON.stringify(JSON.parse(localRaw))!==cloudRaw}catch(parseError){differs=true}
      if(differs){
       const backupKey=cloudConflictKey(session.user.id);
       if(!localStorage.getItem(backupKey)){
-       const backup=JSON.stringify({version:1,user_id:session.user.id,created_at:new Date().toISOString(),local:JSON.parse(localRaw),cloud:a[0].payload});
+       const backup=JSON.stringify({version:1,user_id:session.user.id,created_at:new Date().toISOString(),local:JSON.parse(localRaw),cloud:cloudReadPayload});
        localStorage.setItem(backupKey,backup);
        if(localStorage.getItem(backupKey)!==backup)throw new Error("نسخه پشتیبان تعارض ذخیره نشد؛ بازیابی ابری متوقف شد.");
       }
       console.warn("Cloud restore paused: local/cloud snapshots preserved for conflict review.");
      }else{
       localStorage.setItem(localKey,cloudRaw);
-      window.dispatchEvent(new CustomEvent("c90cloudupdate",{detail:a[0].payload}));
+      window.dispatchEvent(new CustomEvent("c90cloudupdate",{detail:cloudReadPayload}));
      }
     }else{
      localStorage.setItem(localKey,cloudRaw);
@@ -1751,6 +1752,22 @@ async function syncCloud(data){
  if(!cloudReadSucceeded){
   const restored=await loadCloud({apply:false});
   if(!restored)throw new Error("بازیابی اطلاعات از سرور ناموفق بود: "+String(cloudReadError&&cloudReadError.message||"خطای ناشناخته"));
+ }
+ if(cloudReadPayload){
+  let same=false;
+  try{same=JSON.stringify(data)===JSON.stringify(cloudReadPayload)}catch(compareError){}
+  if(!same){
+   const backupKey=cloudConflictKey(session.user.id);
+   if(!localStorage.getItem(backupKey)){
+    const localRaw=localStorage.getItem("challenge90.v1."+session.user.id);
+    let localSnapshot=data;
+    if(localRaw){try{localSnapshot=JSON.parse(localRaw)}catch(parseError){}}
+    const backup=JSON.stringify({version:1,user_id:session.user.id,created_at:new Date().toISOString(),local:localSnapshot,cloud:cloudReadPayload});
+    localStorage.setItem(backupKey,backup);
+    if(localStorage.getItem(backupKey)!==backup)throw new Error("نسخه پشتیبان تعارض ذخیره نشد؛ ذخیره ابری متوقف شد.");
+   }
+   throw new Error("نسخه محلی و ابری متفاوت‌اند؛ هر دو حفظ شده‌اند و ذخیره خودکار متوقف شد.");
+  }
  }
  const payload={user_id:session.user.id,report_date:"2000-01-01",payload:data,updated_at:new Date().toISOString()};
  await request("/rest/v1/daily_reports?on_conflict=user_id,report_date",{method:"POST",headers:{...authHeaders(),Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(payload)});
