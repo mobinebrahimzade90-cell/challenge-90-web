@@ -1064,7 +1064,7 @@ function c90TextFieldPoints(value){
   return Math.min(15,Math.floor(length/15));
 }
 function calcScore(){
-  let clean=0,fail=0,ty=0,tn=0,hypSessions=0,hypMinutes=0,writing=0;
+  let clean=0,fail=0,ty=0,tn=0,hypMinutes=0,writing=0;
   for(let i=1;i<=N;i++){
     const d=S.days[i];if(!d)continue;
     if(d.st==="clean")clean++;else if(d.st==="fail")fail++;
@@ -1074,12 +1074,11 @@ function calcScore(){
   if(S.hyp&&S.hyp.days){
     for(let i=1;i<=HN;i++){
       const d=S.hyp.days[i];if(!d)continue;
-      if(d.st==="done"){hypSessions++;hypMinutes+=Math.max(0,Number(d.min)||0)}
-      writing+=c90TextFieldPoints(d.sug)+c90TextFieldPoints(d.note);
+      if(d.st==="done")hypMinutes+=Math.max(0,Number(d.min)||0);
     }
   }
   const fiveMinuteBlocks=Math.floor(hypMinutes/5);
-  const hypnosis=hypSessions*10+fiveMinuteBlocks+(fiveMinuteBlocks*60);
+  const hypnosis=fiveMinuteBlocks*60;
   const main=clean*100-fail*150+ty*5-tn*2;
   return{total:Math.max(0,main+hypnosis+writing),main,hypnosis,writing};
 }
@@ -1860,10 +1859,7 @@ async function enter(s){
 async function ensureSchoolInfo(){
  if(profile.grade&&profile.major){
   const class_name="پایه "+profile.grade+" - "+profile.major;
-  if(profile.class_name!==class_name){
-   await request("/rest/v1/profiles?user_id=eq."+encodeURIComponent(session.user.id),{method:"PATCH",headers:{...authHeaders(),Prefer:"return=representation"},body:JSON.stringify({class_name})});
-   profile.class_name=class_name;
-  }
+  profile.class_name=class_name;
   return;
  }
  const box=document.createElement("div");
@@ -1878,7 +1874,7 @@ async function ensureSchoolInfo(){
    if(![10,11,12].includes(grade)||!["کامپیوتر","گرافیک","معماری"].includes(major)){box.querySelector("#c90SetMsg").textContent="پایه و رشته را انتخاب کن.";return}
    const class_name="پایه "+grade+" - "+major;
    try{
-    await request("/rest/v1/profiles?user_id=eq."+encodeURIComponent(session.user.id),{method:"PATCH",headers:{...authHeaders(),Prefer:"return=representation"},body:JSON.stringify({grade,major,class_name})});
+    await request("/rest/v1/profiles?user_id=eq."+encodeURIComponent(session.user.id),{method:"PATCH",headers:{...authHeaders(),Prefer:"return=representation"},body:JSON.stringify({grade,major})});
     profile.grade=grade;profile.major=major;profile.class_name=class_name;box.remove();resolve();
    }catch(e){box.querySelector("#c90SetMsg").textContent=e.message}
   };
