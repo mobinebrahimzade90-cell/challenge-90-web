@@ -32,6 +32,16 @@ h1,h3,.lab,.stats b,.rc b,.ib h2,.dbar b,.dtrio,.quote,.ii i{font-family:Lalezar
 #c90RankTrigger .c90-rank-trigger-medal{display:grid;place-items:center;width:36px;height:36px;flex:none;overflow:visible}
 #c90RankTrigger .c90-rank-trigger-medal .rank-medal-image{width:35px!important;height:35px!important;background-size:300% 300%;image-rendering:auto;filter:drop-shadow(0 1px 2px #0009)}
 #c90RankTrigger .c90-rank-trigger-points{font-size:.76rem;font-weight:900;white-space:nowrap;margin:0;color:var(--gold);text-shadow:0 1px 8px #e8b33933;padding:0 2px}
+#c90RankTrigger .c90-rank-trigger-points{display:none!important}
+#c90RankTrigger.c90-head-action{right:12px;width:48px;min-width:48px;height:48px;min-height:48px;padding:2px;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;backdrop-filter:none!important}
+#c90RankTrigger .c90-rank-trigger-inner{width:44px;height:44px;gap:0}
+#c90RankTrigger .c90-rank-trigger-medal{width:44px;height:44px}
+#c90RankTrigger .c90-rank-trigger-medal .rank-medal-image{width:42px!important;height:42px!important;filter:drop-shadow(0 2px 3px #000b)}
+#c90AccountTrigger.c90-head-action{left:12px;width:48px;min-width:48px;height:48px;min-height:48px;padding:2px;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;display:grid;place-items:center}
+#c90AccountInitial{width:34px;height:34px;background:transparent!important;color:var(--gold)!important;border-radius:0!important}
+#c90AccountInitial svg{width:29px!important;height:29px!important;display:block;stroke:currentColor;filter:drop-shadow(0 1px 3px #0009)}
+#c90AccountName,#c90AccountTrigger .c90-account-chevron{display:none!important}
+#c90AccountTrigger:focus-visible,#c90RankTrigger:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:10px!important}
 .c90-head-menu{position:absolute;top:65px;left:12px;z-index:20;width:min(250px,calc(100vw - 32px));padding:8px;border:1px solid #765735;border-radius:17px;background:linear-gradient(145deg,#281c20f5,#100d11f7);box-shadow:0 18px 48px #000b;backdrop-filter:blur(16px);opacity:0;visibility:hidden;transform:translateY(-8px) scale(.98);transform-origin:top left;transition:opacity .18s,transform .18s,visibility .18s}
 .c90-head-menu.open{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
 .c90-head-menu button{display:flex;width:100%;min-height:46px;align-items:center;justify-content:flex-start;text-align:right;padding:9px 12px;border:0;background:transparent;border-radius:10px;font-size:.86rem}
@@ -426,7 +436,7 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
 <div id="pg1">
 <div class="top">
   <button type="button" id="c90AccountTrigger" class="c90-head-action" aria-label="منوی حساب کاربری" aria-expanded="false" aria-controls="c90AccountMenu">
-   <span id="c90AccountInitial">؟</span><span id="c90AccountName">ورود</span><span class="c90-account-chevron" aria-hidden="true">⌄</span>
+   <span id="c90AccountInitial"><svg viewBox="0 0 24 24" width="29" height="29" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.8 20c.7-3.6 3.1-5.5 7.2-5.5s6.5 1.9 7.2 5.5"/></svg></span><span id="c90AccountName">ورود</span><span class="c90-account-chevron" aria-hidden="true">⌄</span>
   </button>
   <div id="c90AccountMenu" class="c90-head-menu" aria-hidden="true">
    <button type="button" id="c90MenuManage">مدیریت حساب</button>
@@ -1113,7 +1123,7 @@ function renderC90HeaderAccount(authSession=null,authProfile=null){
  const trigger=$("c90AccountTrigger"),initial=$("c90AccountInitial"),name=$("c90AccountName"),menu=$("c90AccountMenu");
  if(!trigger||!initial||!name||!menu)return;
  const logged=!!(authSession&&authProfile),fullName=logged?String(authProfile.display_name||authProfile.username||"کاربر"):"ورود";
- if(logged){initial.textContent=Array.from(fullName.trim())[0]||"؟";initial.innerHTML="";initial.textContent=Array.from(fullName.trim())[0]||"؟"}else{initial.innerHTML='<svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.7-3.5 3.1-5.3 7-5.3s6.3 1.8 7 5.3"/></svg>'}name.textContent=fullName;trigger.setAttribute("aria-label",logged?"منوی حساب "+fullName:"ورود یا ساخت حساب");
+ initial.innerHTML='<svg viewBox="0 0 24 24" width="29" height="29" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.8 20c.7-3.6 3.1-5.5 7.2-5.5s6.5 1.9 7.2 5.5"/></svg>';name.textContent=fullName;trigger.setAttribute("aria-label",logged?"منوی حساب "+fullName:"ورود یا ساخت حساب");
  menu.querySelectorAll("#c90MenuAdmin,#c90MenuLogout").forEach(node=>node.remove());
  $("c90MenuManage").textContent=logged?"مدیریت حساب":"ورود یا ساخت حساب";
  if(logged&&authProfile.role==="admin"){
