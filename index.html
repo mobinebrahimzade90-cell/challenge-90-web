@@ -1069,7 +1069,7 @@ function calcScore(){
     const d=S.days[i];if(!d)continue;
     if(d.st==="clean")clean++;else if(d.st==="fail")fail++;
     if(d.tasks)d.tasks.forEach(x=>{const s=sOf(x);if(s==="y")ty++;else if(s==="n")tn++});
-    writing+=c90TextFieldPoints(d.pray)+c90TextFieldPoints(d.pos)+c90TextFieldPoints(d.why);
+    writing+=c90TextFieldPoints(d.pray)+c90TextFieldPoints(d.pos)+c90TextFieldPoints(d.why)+c90TextFieldPoints(d.how)+(typeof d.sec==="string"&&d.sec.length>0?10:0);
   }
   if(S.hyp&&S.hyp.days){
     for(let i=1;i<=HN;i++){
