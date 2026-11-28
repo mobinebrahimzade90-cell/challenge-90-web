@@ -636,7 +636,7 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
 
 <script>
 (()=>{
-const N=90;let KEY="challenge90.v1."+(localStorage.getItem("c90.uid")||"guest");const $=id=>document.getElementById(id);
+const N=90,RANK_SMOOTHING_M=5;let KEY="challenge90.v1."+(localStorage.getItem("c90.uid")||"guest");const $=id=>document.getElementById(id);
 const fa=n=>Number(n).toLocaleString("fa-IR",{useGrouping:false});
 const MONTHS=["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"];
 const WEEK=["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنجشنبه","جمعه","شنبه"];
@@ -1222,13 +1222,41 @@ function renderClassRanking(){
  });
  renderRankingContent();
 }
+function c90SmoothClassRanking(sourceRows){
+ const rows=sourceRows.map(x=>{
+  const countValue=Number(x&&x.member_count);
+  const members=Number.isFinite(countValue)?Math.max(0,Math.floor(countValue)):0;
+  const safeMetric=value=>{
+   const n=Number(value);
+   return Number.isFinite(n)?Math.max(0,Math.min(100,n)):0;
+  };
+  const averageDaily=safeMetric(x&&x.average_daily_points);
+  const participation=safeMetric(x&&x.participation_pct);
+  const consistency=safeMetric(x&&x.consistency_pct);
+  const rawScore=averageDaily*.50+participation*.30+consistency*.20;
+  return {...x,__c90Members:members,__c90AverageDaily:averageDaily,__c90Participation:participation,__c90Consistency:consistency,__c90RawScore:rawScore};
+ });
+ const totalMembers=rows.reduce((sum,x)=>sum+x.__c90Members,0);
+ const globalMean=totalMembers>0?(
+  rows.reduce((sum,x)=>sum+x.__c90AverageDaily*x.__c90Members,0)/totalMembers*.50+
+  rows.reduce((sum,x)=>sum+x.__c90Participation*x.__c90Members,0)/totalMembers*.30+
+  rows.reduce((sum,x)=>sum+x.__c90Consistency*x.__c90Members,0)/totalMembers*.20
+ ):0;
+ return rows.map(x=>{
+  const denominator=x.__c90Members+RANK_SMOOTHING_M;
+  const smoothed=denominator>0?(x.__c90Members*x.__c90RawScore+RANK_SMOOTHING_M*globalMean)/denominator:globalMean;
+  const score=Math.round((smoothed+Number.EPSILON)*100)/100;
+  return {...x,ranking_score:score};
+ }).sort((a,b)=>(Number(b.ranking_score)||0)-(Number(a.ranking_score)||0)||String(a.class_name||"").localeCompare(String(b.class_name||""),"fa"));
+}
 function renderRankingContent(mode=c90RankingTab){
  const list=document.getElementById("c90RankList"),note=document.getElementById("c90RankNote");
  if(!list||!note)return;
  list.innerHTML="";
  const classMode=mode==="class";
  list.classList.toggle("individual",!classMode);
- const rows=classMode?window.CHALLENGE_CLASSES:window.CHALLENGE_INDIVIDUALS;
+ const sourceRows=classMode?window.CHALLENGE_CLASSES:window.CHALLENGE_INDIVIDUALS;
+ const rows=classMode&&Array.isArray(sourceRows)?c90SmoothClassRanking(sourceRows):sourceRows;
  if(!Array.isArray(rows)){
    const error=classMode?window.C90_RANK_ERRORS&&window.C90_RANK_ERRORS.classes:window.C90_RANK_ERRORS&&window.C90_RANK_ERRORS.individuals;
    note.textContent=window.C90_CURRENT_USERNAME
@@ -1264,14 +1292,14 @@ function renderRankingContent(mode=c90RankingTab){
   row.className="rk"+(rank<=3?" r"+rank:"")+(x.is_my_class||x.is_me?" me":"");
   const score=classMode?(+x.ranking_score||0):(+x.points||0);
   row.innerHTML="<u>"+fa(rank)+"</u><span class=\"rk-medal-slot\"></span><span class=\"rk-name\"></span><em>"+fa(score)+"</em>";
-  row.querySelector(".rk-name").textContent=classMode?x.class_name:(x.display_name||x.username)+(x.is_me?" (تو)":"");
+  row.querySelector(".rk-name").textContent=classMode?String(x.class_name||"کلاس بدون نام")+" · "+fa(Math.max(0,Math.floor(Number(x.member_count)||0)))+" نفر":(x.display_name||x.username)+(x.is_me?" (تو)":"");
   const level=C90_RANK_LEVELS.reduce((best,item)=>score>=item.min?item:best,null)||{key:"starter",name:"تازه‌وارد",tone:"starter"};
   const badge=document.createElement("span");badge.className="rank-inline-badge";badge.title=level.name;badge.innerHTML=c90RankIcon(level,30);row.querySelector(".rk-medal-slot").appendChild(badge);
   fragment.appendChild(row);
  });
  list.appendChild(fragment);
  note.textContent=classMode
-  ?"رتبه‌بندی سراسری همهٔ کلاس‌ها بر اساس امتیاز کلاسی."
+  ?"امتیاز کلاس = ۵۰٪ میانگین امتیاز روزانه + ۳۰٪ مشارکت + ۲۰٪ استمرار؛ سپس با میانگین کل و ضریب هموارسازی ۵ (Bayesian Average) تعدیل می‌شود. تعداد اعضا کنار نام کلاس آمده است."
   :"۱۰ نفر اول رتبه‌بندی سراسری؛ اگر رتبهٔ شما بیشتر از ۱۰ باشد، رتبهٔ واقعی شما جداگانه نمایش داده می‌شود.";
  renderRankProgress();
 }
