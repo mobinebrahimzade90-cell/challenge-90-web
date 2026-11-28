@@ -675,7 +675,7 @@ const fmtJ=j=>{const[y,m,d]=d2j(j);return WEEK[mod(j+1,7)]+" "+fa(d)+" "+MONTHS[
 function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d)return d}catch(e){}return{start:"",days:{},vault:null}}
 function save(){mainDirty=true;try{localStorage.setItem(KEY,JSON.stringify(S));window.dispatchEvent(new CustomEvent("c90save",{detail:S}))}catch(e){}}
 window.C90_SET_START_DATE=function(value){if(!validStartIso(String(value)))throw new Error("تاریخ شروع معتبر نیست");S.start=String(value);save();if(page===1)render()};
-window.C90_LOAD_USER_STATE=function(uid,authoritativeStart){KEY="challenge90.v1."+String(uid);S=load();if(!S||typeof S!=="object")S={days:{},vault:null};if(!S.days||typeof S.days!=="object")S.days={};S.start=validStartIso(authoritativeStart)?authoritativeStart:(validStartIso(S.start)?S.start:C90_FIXED_START);save();ensureLv();render()};
+window.C90_LOAD_USER_STATE=function(uid,authoritativeStart){KEY="challenge90.v1."+String(uid);window.C90_LOCAL_STATE_EXISTED=!!localStorage.getItem(KEY);S=load();if(!S||typeof S!=="object")S={days:{},vault:null};if(!S.days||typeof S.days!=="object")S.days={};S.start=validStartIso(authoritativeStart)?authoritativeStart:(validStartIso(S.start)?S.start:C90_FIXED_START);save();ensureLv();render()};
 window.addEventListener("c90cloudupdate",e=>{const d=e.detail;if(!d||typeof d!=="object")return;if(JSON.stringify(S)===JSON.stringify(d))return;const authoritativeStart=S.start;S=d;S.start=authoritativeStart;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(x){}if(page===2)hrender();else if(page===3)rrender();else render()});
 function later(){clearTimeout(t);t=setTimeout(save,300)}
 window.C90_TOAST=m=>toast(m);
@@ -1640,7 +1640,7 @@ async function loadCloud(options={}){
     const localKey="challenge90.v1."+session.user.id;
     const localRaw=localStorage.getItem(localKey);
     const cloudRaw=JSON.stringify(a[0].payload);
-    if(localRaw){
+    if(window.C90_LOCAL_STATE_EXISTED&&localRaw){
      let differs=true;
      try{differs=JSON.stringify(JSON.parse(localRaw))!==cloudRaw}catch(parseError){differs=true}
      if(differs){
