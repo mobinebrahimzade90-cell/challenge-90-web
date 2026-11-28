@@ -16,10 +16,49 @@ input,textarea{outline:none}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:Vazirmatn,Tahoma,"Segoe UI",sans-serif;line-height:1.8;transition:background .8s,color .8s}
 body::before{content:"";position:fixed;inset:0;background:radial-gradient(60% 38% at 50% 0,color-mix(in srgb,var(--glow) 40%,transparent),transparent);pointer-events:none;z-index:-1;transition:.8s}
 h1,h3,.lab,.stats b,.rc b,.ib h2,.dbar b,.dtrio,.quote,.ii i{font-family:Lalezar,Vazirmatn,Tahoma,sans-serif;font-weight:400}
-.top{padding:24px 16px 26px;text-align:center;background:linear-gradient(180deg,var(--hd),transparent);border-bottom:1px solid var(--line);transition:.8s}
-.top h1{margin:0;font-size:1.8rem;color:var(--gt);letter-spacing:.3px}
+.top{position:relative;padding:58px 16px 13px;text-align:center;background:linear-gradient(180deg,var(--hd),transparent);border-bottom:1px solid var(--line);transition:.8s}
+.top h1{display:none}
 .tl{color:var(--mute);font-size:.86rem;min-height:1.6em}
-.hring{position:relative;width:108px;height:108px;margin:12px auto 4px}
+.hring{position:relative;width:92px;height:92px;margin:0 auto 3px}
+.c90-head-action{position:absolute;top:10px;z-index:5;min-height:48px;border:1px solid #80613a;background:linear-gradient(145deg,#2c2022dd,#120e12e8);box-shadow:0 6px 20px #0005;backdrop-filter:blur(10px)}
+#c90AccountTrigger{left:12px;display:flex;align-items:center;gap:8px;max-width:min(44vw,190px);padding:5px 10px 5px 7px;border-radius:999px}
+#c90AccountInitial{width:34px;height:34px;flex:none;display:grid;place-items:center;border-radius:50%;background:linear-gradient(145deg,#e8b339,#98631b);color:#211509;font-weight:900}
+#c90AccountName{max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem}
+#c90AccountTrigger .c90-account-chevron{font-size:.72rem;color:var(--gold)}
+#c90RankTrigger{right:12px;width:52px;height:52px;padding:4px;border-radius:50%;display:grid;place-items:center;color:var(--gold)}
+#c90RankTrigger .c90-rank-trigger-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
+#c90RankTrigger .c90-rank-trigger-medal{font-size:1.2rem}
+#c90RankTrigger .c90-rank-trigger-points{font-size:.58rem;margin-top:2px;white-space:nowrap}
+.c90-head-menu{position:absolute;top:65px;left:12px;z-index:20;width:min(250px,calc(100vw - 32px));padding:8px;border:1px solid #765735;border-radius:17px;background:linear-gradient(145deg,#281c20f5,#100d11f7);box-shadow:0 18px 48px #000b;backdrop-filter:blur(16px);opacity:0;visibility:hidden;transform:translateY(-8px) scale(.98);transform-origin:top left;transition:opacity .18s,transform .18s,visibility .18s}
+.c90-head-menu.open{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+.c90-head-menu button{display:flex;width:100%;min-height:46px;align-items:center;justify-content:flex-start;text-align:right;padding:9px 12px;border:0;background:transparent;border-radius:10px;font-size:.86rem}
+.c90-head-menu button+button{border-top:1px solid #ffffff0d}
+.c90-head-menu button.c90-menu-logout{color:#f18a91}
+.c90-rank-modal{position:fixed;inset:0;z-index:2400;display:grid;place-items:center;padding:16px;background:#050306c9;backdrop-filter:blur(10px);opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s}
+.c90-rank-modal.open{opacity:1;visibility:visible}
+.c90-rank-panel{width:min(100%,460px);max-height:min(86vh,760px);overflow:auto;border:1px solid #80613a;border-radius:22px;padding:18px;background:radial-gradient(ellipse at 50% 0,#65451d33,transparent 58%),linear-gradient(150deg,#261b20,#110e12);box-shadow:0 24px 80px #000c;transform:translateY(12px) scale(.98);transition:transform .22s}
+.c90-rank-modal.open .c90-rank-panel{transform:none}
+.c90-rank-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.c90-rank-head h2{margin:0;color:var(--gold);font-size:1.1rem}
+.c90-rank-close{width:44px;height:44px;padding:0;border-radius:50%;font-size:1.3rem}
+.c90-rank-current{display:flex;align-items:center;gap:14px;padding:13px;border:1px solid #8a683b;border-radius:15px;background:#e8b33910}
+.c90-rank-current-copy{display:flex;flex-direction:column;gap:2px}
+.c90-rank-current-copy small{color:var(--mute)}
+.c90-rank-current-copy strong{font-size:1.08rem;color:var(--gold)}
+.c90-rank-current-copy span{font-size:.78rem;color:var(--mute)}
+.c90-rank-progress{height:7px;margin:14px 0 5px;border-radius:99px;background:#ffffff16;overflow:hidden}
+.c90-rank-progress i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#a56a20,#f4d276);transition:width .35s}
+.c90-rank-progress-label{display:flex;justify-content:space-between;color:var(--mute);font-size:.72rem}
+.c90-rank-list{display:grid;gap:8px;margin-top:15px}
+.c90-rank-row{display:flex;align-items:center;gap:12px;min-height:64px;padding:8px 11px;border:1px solid #ffffff12;border-radius:13px;background:#ffffff05}
+.c90-rank-row.current{border-color:var(--gold);background:#e8b33913;box-shadow:inset 0 0 0 1px #e8b33922}
+.c90-rank-row .rank-medal-image{flex:none}
+.c90-rank-row-copy{display:flex;flex:1;flex-direction:column;min-width:0}
+.c90-rank-row-copy b{font-size:.86rem}
+.c90-rank-row-copy small{color:var(--mute);font-size:.72rem}
+.c90-rank-row-status{font-size:.7rem;color:var(--gold);white-space:nowrap}
+@media(max-width:380px){#c90AccountName{max-width:66px}.top{padding-top:56px}}
+@media(prefers-reduced-motion:reduce){.c90-head-menu,.c90-rank-modal,.c90-rank-panel,.c90-rank-progress i{transition:none!important}}
 .hring svg{width:100%;height:100%;transform:rotate(-90deg)}
 .hring circle{fill:none;stroke-width:3}
 .hring .rt{stroke:var(--line)}
@@ -382,7 +421,18 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
 </head>
 <body>
 <div id="pg1">
-<div class="top"><h1>90</h1>
+<div class="top">
+  <button type="button" id="c90AccountTrigger" class="c90-head-action" aria-label="منوی حساب کاربری" aria-expanded="false" aria-controls="c90AccountMenu">
+   <span id="c90AccountInitial">؟</span><span id="c90AccountName">ورود</span><span class="c90-account-chevron" aria-hidden="true">⌄</span>
+  </button>
+  <div id="c90AccountMenu" class="c90-head-menu" aria-hidden="true">
+   <button type="button" id="c90MenuManage">مدیریت حساب</button>
+   <button type="button" id="c90MenuAdmin">پنل مدیریت</button>
+   <button type="button" id="c90MenuLogout" class="c90-menu-logout">ترک حساب</button>
+  </div>
+  <button type="button" id="c90RankTrigger" class="c90-head-action" aria-label="نمایش رتبه و امتیاز فعلی">
+   <span class="c90-rank-trigger-inner"><span class="c90-rank-trigger-medal" id="c90RankTriggerMedal">✦</span><span class="c90-rank-trigger-points" id="c90RankTriggerPoints">۰</span></span>
+  </button>
   <div class="hring"><svg viewBox="0 0 120 120"><circle class="rt" cx="60" cy="60" r="52"/><circle class="rp" id="rp" cx="60" cy="60" r="52"/></svg><div class="rc"><b id="rDay">—</b><span>از ۹۰</span></div></div>
   <div class="tl" id="tl"></div></div>
 
@@ -394,34 +444,6 @@ button:focus-visible{box-shadow:0 0 0 2px var(--gold)}
     <div id="endLine" class="note" style="text-align:center"></div>
   </div>
 
-  <div class="card" id="c90AccountCard"><h3>حساب و مشخصات</h3><div id="c90AccountStatus" class="note">بدون حساب هم می‌توانی از برنامه استفاده کنی.</div><button id="c90AccountOpen" type="button" style="margin-top:10px">ورود یا ساخت حساب</button>
-<script>
-(function(){
- const button=document.getElementById("c90AccountOpen");
- if(!button||button.dataset.c90ClickReady==="1")return;
- button.dataset.c90ClickReady="1";
- button.addEventListener("click",function(event){
-  event.preventDefault();
-  event.stopPropagation();
-  const panel=document.getElementById("C90_AUTH_PANEL");
-  if(window.C90_OPEN_ACCOUNT_MANAGER&&window.C90_CURRENT_PROFILE){
-   window.C90_OPEN_ACCOUNT_MANAGER();
-   return;
-  }
-  if(!panel){
-   console.error("Challenge90: auth panel is missing from the document.");
-   return;
-  }
-  panel.style.display="flex";
-  panel.style.visibility="visible";
-  panel.style.pointerEvents="auto";
-  panel.setAttribute("aria-hidden","false");
-  document.body.style.overflow="hidden";
-  const username=document.getElementById("c90Username");
-  if(username)setTimeout(()=>username.focus({preventScroll:true}),80);
- },{capture:true});
-})();
-</script></div>
   <div class="card rank-progress-card" id="c90RankProgress" aria-live="polite"></div>
   
   <div class="card stats">
@@ -1075,6 +1097,87 @@ function c90RankIcon(level,size=54){
  return "<span class='rank-medal-image' role='img' aria-label='"+(level.name||"مدال")+"' style='width:"+size+"px;height:"+size+"px;background-position:"+pos+"'></span>";
 }
 function c90RankForPoints(points){let rank=null;for(const level of C90_RANK_LEVELS){if(points>=level.min)rank=level;else break}return rank||{key:"starter",name:"تازه‌وارد",min:0,tone:"starter"}}
+function c90OpenLoginPanel(){
+ const panel=$("C90_AUTH_PANEL");if(!panel)return;
+ panel.style.display="flex";panel.style.visibility="visible";panel.style.pointerEvents="auto";panel.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";
+ const username=$("c90Username");if(username)setTimeout(()=>username.focus({preventScroll:true}),80);
+}
+function c90CloseAccountMenu(){
+ const menu=$("c90AccountMenu"),trigger=$("c90AccountTrigger");if(!menu||!trigger)return;
+ menu.classList.remove("open");menu.setAttribute("aria-hidden","true");trigger.setAttribute("aria-expanded","false");
+}
+function renderC90HeaderAccount(){
+ const trigger=$("c90AccountTrigger"),initial=$("c90AccountInitial"),name=$("c90AccountName"),menu=$("c90AccountMenu");
+ if(!trigger||!initial||!name||!menu)return;
+ const logged=!!(session&&profile),fullName=logged?String(profile.display_name||profile.username||"کاربر"):"ورود";
+ initial.textContent=logged?(Array.from(fullName.trim())[0]||"؟"):"؟";name.textContent=fullName;trigger.setAttribute("aria-label",logged?"منوی حساب "+fullName:"ورود یا ساخت حساب");
+ menu.querySelectorAll("#c90MenuAdmin,#c90MenuLogout").forEach(node=>node.remove());
+ $("c90MenuManage").textContent=logged?"مدیریت حساب":"ورود یا ساخت حساب";
+ if(logged&&profile.role==="admin"){
+  const admin=document.createElement("button");admin.type="button";admin.id="c90MenuAdmin";admin.textContent="پنل مدیریت";menu.insertBefore(admin,$("c90MenuLogout"));admin.addEventListener("click",()=>{c90CloseAccountMenu();openAdmin()});
+ }
+ if(logged){
+  const logout=document.createElement("button");logout.type="button";logout.id="c90MenuLogout";logout.className="c90-menu-logout";logout.textContent="ترک حساب";menu.append(logout);
+  logout.addEventListener("click",()=>{c90CloseAccountMenu();c90ConfirmLogout()});
+ }
+ $("c90MenuManage").onclick=()=>{c90CloseAccountMenu();if(logged&&window.C90_OPEN_ACCOUNT_MANAGER)window.C90_OPEN_ACCOUNT_MANAGER();else c90OpenLoginPanel()};
+ renderC90HeaderRank();
+}
+function c90ConfirmLogout(){
+ if(!session)return;
+ const overlay=document.createElement("div");overlay.className="c90-rank-modal open";overlay.style.zIndex="2600";
+ const panel=document.createElement("section");panel.className="c90-rank-panel";panel.setAttribute("role","alertdialog");panel.setAttribute("aria-modal","true");panel.setAttribute("aria-labelledby","c90LogoutTitle");
+ panel.innerHTML='<div class="c90-rank-head"><h2 id="c90LogoutTitle">ترک حساب</h2><button type="button" class="c90-rank-close" aria-label="بستن">×</button></div><p class="note">از حساب کاربری خارج می‌شوی. برای ادامه تأیید کن.</p><div style="display:flex;gap:9px;margin-top:16px"><button type="button" data-cancel style="flex:1;min-height:46px">انصراف</button><button type="button" data-confirm style="flex:1;min-height:46px;background:#8f2633;border-color:#a53c49;color:#fff">خروج از حساب</button></div>';
+ overlay.append(panel);document.body.append(overlay);
+ const close=()=>overlay.remove();panel.querySelector(".c90-rank-close").onclick=close;panel.querySelector("[data-cancel]").onclick=close;overlay.addEventListener("click",ev=>{if(ev.target===overlay)close()});
+ panel.querySelector("[data-confirm]").onclick=async ev=>{
+  const button=ev.currentTarget;button.disabled=true;button.textContent="در حال خروج…";
+  try{await request("/auth/v1/logout",{method:"POST",headers:authHeaders()})}catch(e){}
+  clearTimeout(cloudTimer);clearInterval(window.C90_CLASS_RANK_TIMER);
+  if(window.C90_RT_CLIENT&&window.C90_RT_CHANNEL){try{await window.C90_RT_CLIENT.removeChannel(window.C90_RT_CHANNEL)}catch(e){}}
+  localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");sessionStorage.removeItem("c90.loaded");sessionStorage.removeItem("c90.active_uid");session=null;profile=null;window.C90_CURRENT_PROFILE=null;window.C90_CURRENT_USERNAME=null;location.reload();
+ };
+ panel.querySelector(".c90-rank-close").focus();
+}
+function renderC90HeaderRank(){
+ const medal=$("c90RankTriggerMedal"),pointsNode=$("c90RankTriggerPoints");if(!medal||!pointsNode)return;
+ const points=c90CurrentPoints(),rank=c90RankForPoints(points);
+ medal.textContent=rank.key==="starter"?"✦":"●";medal.style.color=rank.tone==="gold"||rank.tone==="titan"||rank.tone==="legendary"?"#f3c75e":rank.tone==="silver"?"#dce4ef":"#d99b59";
+ medal.setAttribute("aria-label",rank.name);pointsNode.textContent=fa(points);
+}
+function c90OpenRankModal(){
+ const points=c90CurrentPoints(),current=c90RankForPoints(points),next=C90_RANK_LEVELS.find(level=>points<level.min)||null;
+ const pct=next?Math.max(0,Math.min(100,((points-current.min)/(next.min-current.min))*100)):100;
+ const remaining=next?Math.max(0,next.min-points):0;
+ const overlay=document.createElement("div");overlay.className="c90-rank-modal open";overlay.id="c90RankModal";
+ const panel=document.createElement("section");panel.className="c90-rank-panel";panel.setAttribute("role","dialog");panel.setAttribute("aria-modal","true");panel.setAttribute("aria-labelledby","c90RankModalTitle");
+ panel.innerHTML='<div class="c90-rank-head"><h2 id="c90RankModalTitle">مدال‌ها و رتبه‌ها</h2><button type="button" class="c90-rank-close" aria-label="بستن پنجره">×</button></div><div class="c90-rank-current"><div class="rank-current-medal">'+c90RankIcon(current,64)+'</div><div class="c90-rank-current-copy"><small>رتبهٔ فعلی · '+fa(points)+' امتیاز</small><strong>'+current.name+'</strong><span>'+(next?'برای رتبهٔ '+next.name+' به '+fa(remaining)+' امتیاز دیگر نیاز داری.':'بالاترین رتبهٔ فعلی را داری.')+'</span></div></div><div class="c90-rank-progress"><i style="width:'+pct+'%"></i></div><div class="c90-rank-progress-label"><span>'+fa(current.min)+' امتیاز</span><span>'+(next?fa(next.min):"۹۰۰۰+")+' امتیاز</span></div><div class="c90-rank-list" id="c90RankModalList"></div>';
+ const list=panel.querySelector("#c90RankModalList");
+ const starter=document.createElement("div");starter.className="c90-rank-row"+(current.key==="starter"?" current":"");starter.innerHTML='<span class="rank-medal-image" role="img" aria-label="تازه‌وارد" style="width:42px;height:42px;background-position:50% 100%"></span><span class="c90-rank-row-copy"><b>تازه‌وارد</b><small>شروع از ۰ امتیاز</small></span><span class="c90-rank-row-status">'+(current.key==="starter"?"رتبهٔ فعلی":"")+'</span>';list.append(starter);
+ C90_RANK_LEVELS.forEach(level=>{
+  const unlocked=points>=level.min,row=document.createElement("div");row.className="c90-rank-row"+(current.key===level.key?" current":"");
+  const icon=document.createElement("span");icon.innerHTML=c90RankIcon(level,42);
+  const copy=document.createElement("span");copy.className="c90-rank-row-copy";const title=document.createElement("b");title.textContent=level.name;const threshold=document.createElement("small");threshold.textContent="از "+fa(level.min)+" امتیاز";copy.append(title,threshold);
+  const status=document.createElement("span");status.className="c90-rank-row-status";status.textContent=current.key===level.key?"رتبهٔ فعلی":unlocked?"دریافت‌شده":"قفل";
+  row.append(icon.firstElementChild,copy,status);list.append(row);
+ });
+ panel.querySelector(".c90-rank-close").onclick=()=>overlay.remove();overlay.addEventListener("click",ev=>{if(ev.target===overlay)overlay.remove()});
+ overlay.append(panel);document.body.append(overlay);panel.querySelector(".c90-rank-close").focus();
+}
+document.addEventListener("click",ev=>{const menu=$("c90AccountMenu"),trigger=$("c90AccountTrigger");if(menu&&menu.classList.contains("open")&&!menu.contains(ev.target)&&!trigger.contains(ev.target))c90CloseAccountMenu()});
+document.addEventListener("keydown",ev=>{
+ if(ev.key!=="Escape")return;
+ if($("c90RankModal"))$("c90RankModal").remove();
+ else if($("c90AccountMenu")&&$("c90AccountMenu").classList.contains("open")){c90CloseAccountMenu();$("c90AccountTrigger").focus()}
+ else if($("c90LogoutConfirm"))$("c90LogoutConfirm").remove();
+});
+$("c90AccountTrigger").addEventListener("click",()=>{
+ const menu=$("c90AccountMenu"),trigger=$("c90AccountTrigger"),open=menu.classList.toggle("open");
+ menu.setAttribute("aria-hidden",String(!open));trigger.setAttribute("aria-expanded",String(open));
+});
+$("c90RankTrigger").addEventListener("click",c90OpenRankModal);
+window.addEventListener("c90ranking",renderC90HeaderRank);
+
 function renderRankProgress(){
  const box=document.getElementById("c90RankProgress");if(!box)return;
  const points=c90CurrentPoints(),current=c90RankForPoints(points);
@@ -1701,8 +1804,7 @@ async function enter(s){
  }catch(rtError){console.warn("Realtime subscription unavailable; using refresh fallback.",rtError)}
  clearInterval(window.C90_CLASS_RANK_TIMER);
  window.C90_CLASS_RANK_TIMER=setInterval(()=>{if(session&&navigator.onLine&&document.visibilityState==='visible')window.C90_LOAD_RANKING().catch(()=>{})},15000);
- $("c90AccountStatus").textContent="حساب: "+(profile.display_name||profile.username)+" | پایه: "+(profile.grade||"—")+" | رشته: "+(profile.major||"—");
- $("c90AccountOpen").textContent="مدیریت حساب";
+ renderC90HeaderAccount();
  
  setLoaderStage(3,"در حال آماده‌سازی اطلاعات","بازیابی اطلاعات حساب",shownName,shownClass);
  // Load optional account modules without making them a condition for sign-in.
@@ -1724,18 +1826,8 @@ async function enter(s){
  const finalClass=(profile.grade?"پایه "+profile.grade:"پایه ثبت نشده")+(profile.major?" · "+profile.major:"");
  setLoaderStage(4,"حساب آماده است","اطلاعات حساب با موفقیت بازیابی شد",shownName,finalClass);
  $("C90_AUTH_PANEL").style.display="none";
- // Rebuild only the session controls; repeated entry/restore never duplicates UI or listeners.
- document.querySelectorAll(".c90-accountbar[data-c90-session-ui='1']").forEach(node=>node.remove());
- if(profile.role==="admin"){
-  const b=document.createElement("div");b.className="c90-accountbar";b.dataset.c90SessionUi="1";
-  const adminButton=document.createElement("button");adminButton.id="c90AdminOpen";adminButton.textContent="پنل مدیریت";
-  b.append(adminButton);document.querySelector(".wrap").prepend(b);adminButton.onclick=openAdmin;
- }
- const out=document.createElement("div");out.className="c90-accountbar";out.dataset.c90SessionUi="1";
- const accountLabel=document.createElement("span");accountLabel.style.color="var(--mute)";accountLabel.textContent="حساب: "+String(profile.username||"");
- const logoutButton=document.createElement("button");logoutButton.id="c90Logout";logoutButton.textContent="ترک حساب";
- out.append(accountLabel,logoutButton);document.querySelector(".wrap").prepend(out);
- logoutButton.onclick=async()=>{logoutButton.disabled=true;logoutButton.textContent="در حال ترک حساب…";try{await request("/auth/v1/logout",{method:"POST",headers:authHeaders()})}catch(e){}clearTimeout(cloudTimer);clearInterval(window.C90_CLASS_RANK_TIMER);if(window.C90_RT_CLIENT&&window.C90_RT_CHANNEL){try{await window.C90_RT_CLIENT.removeChannel(window.C90_RT_CHANNEL)}catch(e){}}localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");sessionStorage.removeItem("c90.loaded");sessionStorage.removeItem("c90.active_uid");session=null;profile=null;window.C90_CURRENT_PROFILE=null;window.C90_CURRENT_USERNAME=null;location.reload()};
+ // Header controls are rebuilt idempotently; admin-only menu entry is created only for admins.
+ renderC90HeaderAccount();
  if(!window.C90_SAVE_SYNC_BOUND){window.addEventListener("c90save",e=>scheduleSync(e.detail));window.C90_SAVE_SYNC_BOUND=true;}
  if(navigator.onLine){const local=localStorage.getItem("challenge90.v1."+session.user.id);if(local){try{await syncCloud(JSON.parse(local))}catch(e){console.warn(e)}}}
 }
