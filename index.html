@@ -1126,6 +1126,8 @@ function renderC90HeaderAccount(){
  $("c90MenuManage").onclick=()=>{c90CloseAccountMenu();if(logged&&window.C90_OPEN_ACCOUNT_MANAGER)window.C90_OPEN_ACCOUNT_MANAGER();else c90OpenLoginPanel()};
  renderC90HeaderRank();
 }
+// The auth workflow is declared in a separate script/IIFE; expose only this UI refresh bridge.
+window.C90_RENDER_HEADER_ACCOUNT=()=>renderC90HeaderAccount();
 function c90ConfirmLogout(){
  if(!session)return;
  const overlay=document.createElement("div");overlay.className="c90-rank-modal open";overlay.style.zIndex="2600";
@@ -1745,6 +1747,12 @@ setInterval(refreshSession,40*60*1000);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&session&&session.expires_at&&session.expires_at*1000-Date.now()<300000)refreshSession()});
 async function enter(s){
  session=s;
+ // Persist valid credentials before profile/network initialization so a temporary fetch failure
+ // cannot discard a successful login or newly-created account.
+ if(s&&s.access_token&&s.user&&s.user.id){
+  localStorage.setItem("c90.session",JSON.stringify(s));
+  localStorage.setItem("c90.uid",s.user.id);
+ }
  setLoaderStage(1,"در حال شناسایی حساب","اعتبارسنجی نشست کاربری");
  await getProfile();
  const shownName=profile.display_name||profile.username||"کاربر";
@@ -1808,7 +1816,7 @@ async function enter(s){
  }catch(rtError){console.warn("Realtime subscription unavailable; using refresh fallback.",rtError)}
  clearInterval(window.C90_CLASS_RANK_TIMER);
  window.C90_CLASS_RANK_TIMER=setInterval(()=>{if(session&&navigator.onLine&&document.visibilityState==='visible')window.C90_LOAD_RANKING().catch(()=>{})},15000);
- renderC90HeaderAccount();
+ window.C90_RENDER_HEADER_ACCOUNT();
  
  setLoaderStage(3,"در حال آماده‌سازی اطلاعات","بازیابی اطلاعات حساب",shownName,shownClass);
  // Load optional account modules without making them a condition for sign-in.
@@ -1831,7 +1839,7 @@ async function enter(s){
  setLoaderStage(4,"حساب آماده است","اطلاعات حساب با موفقیت بازیابی شد",shownName,finalClass);
  $("C90_AUTH_PANEL").style.display="none";
  // Header controls are rebuilt idempotently; admin-only menu entry is created only for admins.
- renderC90HeaderAccount();
+ window.C90_RENDER_HEADER_ACCOUNT();
  if(!window.C90_SAVE_SYNC_BOUND){window.addEventListener("c90save",e=>scheduleSync(e.detail));window.C90_SAVE_SYNC_BOUND=true;}
  if(navigator.onLine){const local=localStorage.getItem("challenge90.v1."+session.user.id);if(local){try{await syncCloud(JSON.parse(local))}catch(e){console.warn(e)}}}
 }
@@ -2216,10 +2224,9 @@ async function runC90Auth(action,loadingText){
  showLoader(loadingText);
  try{await action()}
  catch(e){
-  // A failed bootstrap must not leave a half-authenticated session in memory or storage.
+  // Keep a valid token saved if profile loading failed transiently; the next load can resume sign-in.
   if(session){
    clearTimeout(cloudTimer);clearInterval(window.C90_CLASS_RANK_TIMER);
-   localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");
    session=null;profile=null;window.C90_CURRENT_PROFILE=null;window.C90_CURRENT_USERNAME=null;
   }
   let error=String(e&&e.message||e||"خطای نامشخص");
@@ -2323,12 +2330,19 @@ document.addEventListener("click",ev=>{
   }
   old.user=u;await enter(old);
  }catch(e){
-  localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");
-  sessionStorage.removeItem("c90.active_uid");
+  const errorText=String(e&&e.message||e||"خطای نامشخص");
+  const temporary=/failed to fetch|networkerror|load failed|زمان پاسخ|HTTP 5\\d\\d|اتصال مرورگر/i.test(errorText);
+  if(!temporary){
+   localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");
+   sessionStorage.removeItem("c90.active_uid");
+  }else{
+   console.warn("Session restoration deferred; saved credentials retained:",errorText);
+  }
   clearTimeout(cloudTimer);clearInterval(window.C90_CLASS_RANK_TIMER);
   session=null;profile=null;window.C90_CURRENT_PROFILE=null;window.C90_CURRENT_USERNAME=null;
   $("intro").classList.remove("on");$("splash").classList.remove("on");
-  $("C90_AUTH_PANEL").style.display="flex";msg("بازیابی ورود ناموفق بود: "+(e&&e.message?e.message:"خطای نامشخص")+"؛ دوباره وارد شو.");
+  $("C90_AUTH_PANEL").style.display="flex";
+  msg(temporary?"اتصال موقتاً برقرار نشد؛ نشست ذخیره شده و با بارگذاری دوباره قابل بازیابی است.": "بازیابی ورود ناموفق بود: "+errorText+"؛ دوباره وارد شو.");
  }finally{hideLoader()}
 })();
 })();
