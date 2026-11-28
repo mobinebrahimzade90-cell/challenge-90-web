@@ -1109,15 +1109,15 @@ function c90CloseAccountMenu(){
  const menu=$("c90AccountMenu"),trigger=$("c90AccountTrigger");if(!menu||!trigger)return;
  menu.classList.remove("open");menu.setAttribute("aria-hidden","true");trigger.setAttribute("aria-expanded","false");
 }
-function renderC90HeaderAccount(){
+function renderC90HeaderAccount(authSession=null,authProfile=null){
  const trigger=$("c90AccountTrigger"),initial=$("c90AccountInitial"),name=$("c90AccountName"),menu=$("c90AccountMenu");
  if(!trigger||!initial||!name||!menu)return;
- const logged=!!(session&&profile),fullName=logged?String(profile.display_name||profile.username||"کاربر"):"ورود";
+ const logged=!!(authSession&&authProfile),fullName=logged?String(authProfile.display_name||authProfile.username||"کاربر"):"ورود";
  if(logged){initial.textContent=Array.from(fullName.trim())[0]||"؟";initial.innerHTML="";initial.textContent=Array.from(fullName.trim())[0]||"؟"}else{initial.innerHTML='<svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.7-3.5 3.1-5.3 7-5.3s6.3 1.8 7 5.3"/></svg>'}name.textContent=fullName;trigger.setAttribute("aria-label",logged?"منوی حساب "+fullName:"ورود یا ساخت حساب");
  menu.querySelectorAll("#c90MenuAdmin,#c90MenuLogout").forEach(node=>node.remove());
  $("c90MenuManage").textContent=logged?"مدیریت حساب":"ورود یا ساخت حساب";
- if(logged&&profile.role==="admin"){
-  const admin=document.createElement("button");admin.type="button";admin.id="c90MenuAdmin";admin.textContent="پنل مدیریت";menu.insertBefore(admin,$("c90MenuLogout"));admin.addEventListener("click",()=>{c90CloseAccountMenu();openAdmin()});
+ if(logged&&authProfile.role==="admin"){
+  const admin=document.createElement("button");admin.type="button";admin.id="c90MenuAdmin";admin.textContent="پنل مدیریت";menu.insertBefore(admin,$("c90MenuLogout"));admin.addEventListener("click",()=>{c90CloseAccountMenu();if(typeof window.C90_OPEN_ADMIN_PANEL==="function")window.C90_OPEN_ADMIN_PANEL()});
  }
  if(logged){
   const logout=document.createElement("button");logout.type="button";logout.id="c90MenuLogout";logout.className="c90-menu-logout";logout.textContent="ترک حساب";menu.append(logout);
@@ -1127,9 +1127,9 @@ function renderC90HeaderAccount(){
  renderC90HeaderRank();
 }
 // The auth workflow is declared in a separate script/IIFE; expose only this UI refresh bridge.
-window.C90_RENDER_HEADER_ACCOUNT=()=>renderC90HeaderAccount();
+window.C90_RENDER_HEADER_ACCOUNT=(authSession,authProfile)=>renderC90HeaderAccount(authSession,authProfile);
 function c90ConfirmLogout(){
- if(!session)return;
+ if(typeof window.C90_LOGOUT_ACCOUNT!=="function")return;
  const overlay=document.createElement("div");overlay.className="c90-rank-modal open";overlay.style.zIndex="2600";
  const panel=document.createElement("section");panel.className="c90-rank-panel";panel.setAttribute("role","alertdialog");panel.setAttribute("aria-modal","true");panel.setAttribute("aria-labelledby","c90LogoutTitle");
  panel.innerHTML='<div class="c90-rank-head"><h2 id="c90LogoutTitle">ترک حساب</h2><button type="button" class="c90-rank-close" aria-label="بستن">×</button></div><p class="note">از حساب کاربری خارج می‌شوی. برای ادامه تأیید کن.</p><div style="display:flex;gap:9px;margin-top:16px"><button type="button" data-cancel style="flex:1;min-height:46px">انصراف</button><button type="button" data-confirm style="flex:1;min-height:46px;background:#8f2633;border-color:#a53c49;color:#fff">خروج از حساب</button></div>';
@@ -1137,10 +1137,7 @@ function c90ConfirmLogout(){
  const close=()=>overlay.remove();panel.querySelector(".c90-rank-close").onclick=close;panel.querySelector("[data-cancel]").onclick=close;overlay.addEventListener("click",ev=>{if(ev.target===overlay)close()});
  panel.querySelector("[data-confirm]").onclick=async ev=>{
   const button=ev.currentTarget;button.disabled=true;button.textContent="در حال خروج…";
-  try{await request("/auth/v1/logout",{method:"POST",headers:authHeaders()})}catch(e){}
-  clearTimeout(cloudTimer);clearInterval(window.C90_CLASS_RANK_TIMER);
-  if(window.C90_RT_CLIENT&&window.C90_RT_CHANNEL){try{await window.C90_RT_CLIENT.removeChannel(window.C90_RT_CHANNEL)}catch(e){}}
-  localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");sessionStorage.removeItem("c90.loaded");sessionStorage.removeItem("c90.active_uid");session=null;profile=null;window.C90_CURRENT_PROFILE=null;window.C90_CURRENT_USERNAME=null;location.reload();
+  try{await window.C90_LOGOUT_ACCOUNT()}catch(e){button.disabled=false;button.textContent="تلاش دوباره";const note=panel.querySelector(".note");if(note)note.textContent="خروج کامل نشد: "+(e.message||"خطای نامشخص");}
  };
  panel.querySelector(".c90-rank-close").focus();
 }
@@ -1816,7 +1813,7 @@ async function enter(s){
  }catch(rtError){console.warn("Realtime subscription unavailable; using refresh fallback.",rtError)}
  clearInterval(window.C90_CLASS_RANK_TIMER);
  window.C90_CLASS_RANK_TIMER=setInterval(()=>{if(session&&navigator.onLine&&document.visibilityState==='visible')window.C90_LOAD_RANKING().catch(()=>{})},15000);
- window.C90_RENDER_HEADER_ACCOUNT();
+ window.C90_RENDER_HEADER_ACCOUNT(session,profile);
  
  setLoaderStage(3,"در حال آماده‌سازی اطلاعات","بازیابی اطلاعات حساب",shownName,shownClass);
  // Load optional account modules without making them a condition for sign-in.
@@ -1839,7 +1836,7 @@ async function enter(s){
  setLoaderStage(4,"حساب آماده است","اطلاعات حساب با موفقیت بازیابی شد",shownName,finalClass);
  $("C90_AUTH_PANEL").style.display="none";
  // Header controls are rebuilt idempotently; admin-only menu entry is created only for admins.
- window.C90_RENDER_HEADER_ACCOUNT();
+ window.C90_RENDER_HEADER_ACCOUNT(session,profile);
  if(!window.C90_SAVE_SYNC_BOUND){window.addEventListener("c90save",e=>scheduleSync(e.detail));window.C90_SAVE_SYNC_BOUND=true;}
  if(navigator.onLine){const local=localStorage.getItem("challenge90.v1."+session.user.id);if(local){try{await syncCloud(JSON.parse(local))}catch(e){console.warn(e)}}}
 }
@@ -1905,6 +1902,17 @@ async function signup(){
  }
  await enter(d);
 }
+window.C90_OPEN_ADMIN_PANEL=()=>openAdmin();
+window.C90_LOGOUT_ACCOUNT=async()=>{
+ if(!session)return;
+ try{await request("/auth/v1/logout",{method:"POST",headers:authHeaders()})}catch(e){if(!navigator.onLine)throw e}
+ clearTimeout(cloudTimer);clearInterval(window.C90_CLASS_RANK_TIMER);
+ if(window.C90_RT_CLIENT&&window.C90_RT_CHANNEL){try{await window.C90_RT_CLIENT.removeChannel(window.C90_RT_CHANNEL)}catch(e){}}
+ localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");
+ sessionStorage.removeItem("c90.loaded");sessionStorage.removeItem("c90.active_uid");
+ session=null;profile=null;window.C90_CURRENT_PROFILE=null;window.C90_CURRENT_USERNAME=null;
+ location.reload();
+};
 async function openAdmin(){
  if(!(history.state&&history.state.c90Admin&&history.state.screen==="users"))history.pushState({c90Admin:true,screen:"users"},"","#admin");
  $("C90_ADMIN").style.display="block";$("c90AdminUsers").textContent="در حال دریافت فهرست…";
