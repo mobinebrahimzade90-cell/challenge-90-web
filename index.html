@@ -2339,7 +2339,7 @@ document.addEventListener("click",ev=>{
   old.user=u;await enter(old);
  }catch(e){
   const errorText=String(e&&e.message||e||"خطای نامشخص");
-  const temporary=/failed to fetch|networkerror|load failed|زمان پاسخ|HTTP 5\\d\\d|اتصال مرورگر/i.test(errorText);
+  const temporary=/failed to fetch|networkerror|load failed|زمان پاسخ|HTTP 5\d\d|اتصال مرورگر/i.test(errorText);
   if(!temporary){
    localStorage.removeItem("c90.session");localStorage.removeItem("c90.uid");
    sessionStorage.removeItem("c90.active_uid");
